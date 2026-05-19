@@ -1,0 +1,34 @@
+# Vocal Coach — Sprint 1 dependencies
+#
+# STARS itself targets Python 3.10 + PyTorch 2.4.0 + CUDA 12.4/12.8. If you're
+# running it through `vocal_coach.stars_runner.run_stars`, install STARS's own
+# requirements (third_party/stars/requirements.txt) into the same env as well.
+#
+# Our wrapper code (vocal_coach/*) is intentionally version-loose so it can run
+# under whichever PyTorch the user already has.
+
+# Core ML / audio
+torch>=2.0
+torchaudio>=2.0
+numpy>=1.24,<3
+librosa>=0.10
+soundfile>=0.12
+matplotlib>=3.7
+
+# Data + schemas
+pydantic>=2.4
+pyyaml>=6.0
+
+# CLI / progress
+tqdm>=4.66
+
+# Notebooks
+jupyter>=1.0
+ipywidgets>=8.1
+
+# Reference annotation parsing (GTSinger MIDI + TextGrid + json)
+pretty_midi>=0.2.10
+textgrid>=1.5
+
+# Dataset download (single GTSinger sample via huggingface_hub)
+huggingface_hub>=0.24

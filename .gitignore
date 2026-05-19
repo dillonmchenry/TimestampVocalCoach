@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.venv/
+venv/
+.env
+
+# Data + outputs (large, regenerable)
+data/samples/
+data/raw/
+data/cache/
+data/processed/
+
+# Model checkpoints we copy/link into third_party
+third_party/stars/checkpoints/
+rmvpe/
+stars_chinese/
+stars_chinese_english_bilingual/
+*.ckpt
+*.pt
+
+# STARS runtime artifacts
+third_party/stars/data/
+third_party/stars/infer_out/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
