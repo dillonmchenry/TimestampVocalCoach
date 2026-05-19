@@ -38,15 +38,10 @@ For the demo we run **the same wav** as both “reference” and “performance�
 | `f0_hz`              | Decoded fundamental frequency (0 = unvoiced) |
 | `voicing_confidence` | VAD probability that the frame is voiced     |
 
-
-Pipeline: resample to 16 kHz mono → log-mel (HTK, 40 bins, hop 160) → CNN+GRU → Viterbi decode → `pitch.json`.
-
 Sprint 1 uses this for:
 
 - **Pitch deviation**: median cents vs target MIDI inside each reference note window.
 - **Arrival detection**: voicing rising-edge or pitch-lock near note onset (see below).
-
-`scripts/validate_pitch.py` checks mel parity and wav→mel sanity before trusting new audio.
 
 ### STARS (offline): phonemes and vocal techniques
 
@@ -130,15 +125,6 @@ reference + pitch + stars + loudness  ──►  timeline.json
         │
         └──►  align.aggregate_note  ──►  note_card_*.json
 ```
-
-### Explicitly out of scope for Sprint 1
-
-- Full karaoke songs or user-vs-reference comparison on two different takes.
-- Highlight ranking across notes, phrases, or sections.
-- Feedback copy / LLM polish.
-- `% in tune`, aligned user windows, or release-time detection.
-- Real section labels (placeholder section `"Full"` only).
-
 ---
 
 ## Sprint 2: Goals
