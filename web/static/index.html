@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vocal Coach (Sprint 2)</title>
+  <link rel="stylesheet" href="style.css" />
+  <script
+    type="module"
+    crossorigin="anonymous"
+    src="https://unpkg.com/wavesurfer.js@7"></script>
+</head>
+<body>
+  <header>
+    <h1>Vocal Coach</h1>
+    <p class="subtitle">Sprint 2 — UltraStar + STARS-driven highlights</p>
+  </header>
+
+  <main>
+    <section class="picker">
+      <label for="songSelect">Song</label>
+      <select id="songSelect" disabled>
+        <option>Loading…</option>
+      </select>
+
+      <div id="songMeta" class="meta"></div>
+    </section>
+
+    <section class="upload">
+      <div id="dropZone" class="drop-zone">
+        <p>Drag &amp; drop your performance audio here</p>
+        <p class="hint">or</p>
+        <label class="browse">
+          Browse for a file
+          <input id="fileInput" type="file" accept="audio/*" />
+        </label>
+      </div>
+      <label class="checkbox">
+        <input id="skipStars" type="checkbox" />
+        Skip user STARS (faster, expressive highlights become limited)
+      </label>
+      <button id="analyzeButton" disabled>Analyze</button>
+      <p id="status" class="status"></p>
+    </section>
+
+    <section class="results" id="results" hidden>
+      <h2>Performance</h2>
+      <div id="waveform" class="waveform"></div>
+      <div id="timeline" class="timeline"></div>
+      <p class="caption">
+        <span id="offsetSummary"></span>
+        <button id="playPause" type="button">Play / Pause</button>
+      </p>
+
+      <h3>Coaching highlights</h3>
+      <ul id="highlightList" class="highlights"></ul>
+    </section>
+  </main>
+
+  <script src="app.js" type="module"></script>
+</body>
+</html>

@@ -32,3 +32,9 @@ textgrid>=1.5
 
 # Dataset download (single GTSinger sample via huggingface_hub)
 huggingface_hub>=0.24
+
+# Sprint 2: UltraStar / G2P / FastAPI demo
+g2p_en>=2.1
+fastapi>=0.110
+uvicorn[standard]>=0.27
+python-multipart>=0.0.9

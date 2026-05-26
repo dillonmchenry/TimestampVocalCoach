@@ -1,6 +1,6 @@
-"""Pydantic schemas for every JSON artifact in the sprint-1 pipeline.
+"""Pydantic schemas for every JSON artifact in the pipeline.
 
-The pipeline produces five JSON files per sample, plus one envelope:
+Sprint 1 produces five JSON files per sample, plus one envelope:
 
     reference_annotation.json   -> ReferenceAnnotation
     stars_metadata.json         -> StarsMetadataEntry (list of)
@@ -9,9 +9,20 @@ The pipeline produces five JSON files per sample, plus one envelope:
     loudness.json               -> LoudnessTrack
     timeline.json               -> Timeline (joins all of the above)
 
-Sprint 2 adds NoteCard via vocal_coach/align.py; the schema for it lives at the
-bottom of this file so sprint 1 already has a contract to aim at when the
-stretch goal kicks in.
+Sprint 2 adds a song-centric layout under ``data/songs/<song_id>/`` with:
+
+    manifest.json               -> SongManifest (UltraStar bundle metadata)
+    reference_annotation.json   -> ReferenceAnnotation (built from UltraStar chart)
+    reference/pitch.json        -> PitchTrack (NanoPitch on reference vocal)
+    reference/stars.json        -> StarsTrack (STARS on reference vocal)
+    reference/loudness.json     -> LoudnessTrack
+    performances/<perf_id>/
+        pitch.json              -> user PitchTrack
+        stars.json              -> user StarsTrack
+        analysis.json           -> PerformanceAnalysis (note-level + highlights)
+
+The Sprint 1 ``NoteCard`` and the new Sprint 2 ``PerformanceAnalysis`` share
+the same ``ReferenceAnnotation`` substrate and live alongside it in this file.
 """
 
 from __future__ import annotations
@@ -273,3 +284,216 @@ class NoteCard(BaseModel):
     measurements: NoteMeasurements
     phonemes: list[NotePhonemeAnnotation]
     tags: list[str] = Field(default_factory=list)
+
+
+# ---------------------------------------------------------------------------
+# Sprint 2 — UltraStar song bundle
+# ---------------------------------------------------------------------------
+
+
+class UltraStarMetadata(BaseModel):
+    """Header metadata parsed from an UltraStar ``.txt`` chart.
+
+    UltraStar timing is encoded as ``beat`` units relative to ``#GAP``:
+
+        seconds_per_beat = 60 / (BPM * 4)   # UltraStar BPM is 1/4-note divisions
+        t_seconds        = gap_ms / 1000 + beat * seconds_per_beat
+
+    Pitch is encoded as half-steps relative to C4 (UltraStar pitch ``0`` ==
+    MIDI 60). We expose ``midi_offset`` here so a per-song fix-up (e.g. when
+    the chart was authored an octave off the actual recording) can be applied
+    without reparsing.
+    """
+
+    bpm: float = Field(..., description='UltraStar #BPM (1/4-note divisions per minute)')
+    gap_ms: float = Field(..., description='UltraStar #GAP in milliseconds')
+    audio_ref: Optional[str] = Field(
+        None, description='Original #MP3 / #AUDIO field from the chart, if present'
+    )
+    cover: Optional[str] = None
+    background: Optional[str] = None
+    edition: Optional[str] = None
+    midi_offset: int = Field(
+        0,
+        description=(
+            "Constant added to UltraStar pitch when converting to MIDI; default "
+            "mapping is midi = 60 + ultrastar_pitch + midi_offset."
+        ),
+    )
+
+    @property
+    def seconds_per_beat(self) -> float:
+        # UltraStar treats "BPM" as quarter-beats per minute, so each chart
+        # beat is 1/4 of a quarter-note at the song's tempo.
+        return 60.0 / (self.bpm * 4.0)
+
+
+class SongManifest(BaseModel):
+    """Top-level manifest for one playable song under ``data/songs/<song_id>/``.
+
+    Paths are stored relative to the song directory so the bundle is portable.
+    """
+
+    song_id: str
+    title: str
+    artist: str
+    language: str = "English"
+    source_format: str = Field("ultrastar", description='Currently only "ultrastar"')
+    chart_path: str = Field(..., description='Relative path to the UltraStar .txt chart')
+    reference_vocal_path: str = Field(
+        ..., description='Relative path to the isolated reference vocal'
+    )
+    instrumental_path: Optional[str] = Field(
+        None, description='Relative path to the instrumental backing track'
+    )
+    duration_s: float
+    ultrastar: UltraStarMetadata
+    reference_pitch_path: Optional[str] = Field(
+        None, description='Relative path to precomputed reference/pitch.json'
+    )
+    reference_stars_path: Optional[str] = Field(
+        None, description='Relative path to precomputed reference/stars.json'
+    )
+    reference_loudness_path: Optional[str] = Field(
+        None, description='Relative path to precomputed reference/loudness.json'
+    )
+
+
+# ---------------------------------------------------------------------------
+# Sprint 2 — performance analysis (dual-track + highlights)
+# ---------------------------------------------------------------------------
+
+
+class NoteMeasurementV2(BaseModel):
+    """Numeric per-note measurements computed by ``align_v2``.
+
+    All quantities live in *song time* (the user vocal has already been shifted
+    by the estimated global offset before measurement).
+    """
+
+    note_index: int
+    start_s: float = Field(..., description="UltraStar note start in song time")
+    end_s: float = Field(..., description="UltraStar note end in song time")
+    midi_pitch: int
+    note_name: str
+    lyric_word: str
+
+    voiced_coverage: float = Field(
+        0.0,
+        description='Fraction of frames inside the note window with voicing >= threshold',
+    )
+    median_cents: Optional[float] = Field(
+        None, description='Median cents from target MIDI across voiced frames'
+    )
+    pct_in_tune: Optional[float] = Field(
+        None,
+        description='Fraction of voiced frames inside the core window within the in-tune cents window',
+    )
+    drift_cents_per_s: Optional[float] = Field(
+        None, description='Linear cents/s slope across the note window (drift)'
+    )
+    arrival_offset_ms: Optional[float] = Field(
+        None,
+        description='User arrival vs expected onset; positive = late, negative = early',
+    )
+    core_start_s: Optional[float] = None
+    core_end_s: Optional[float] = None
+
+    note_octave_offset: int = Field(
+        0,
+        description=(
+            'Per-note residual octave error after the global octave shift has '
+            'been applied: 0 = same octave as the (shifted) target, -1 = the '
+            'user sang this note one octave lower than the rest of their take, '
+            '+1 = one octave higher.'
+        ),
+    )
+
+    pitch_tags: list[str] = Field(default_factory=list)
+    arrival_tags: list[str] = Field(default_factory=list)
+
+
+class NoteTechniqueComparison(BaseModel):
+    """Reference vs. user STARS technique sets for one note window."""
+
+    note_index: int
+    reference_techniques: list[str] = Field(default_factory=list)
+    user_techniques: list[str] = Field(default_factory=list)
+    matched: list[str] = Field(
+        default_factory=list,
+        description='Techniques present in both reference and user',
+    )
+    missed: list[str] = Field(
+        default_factory=list,
+        description='Reference techniques the user did not produce',
+    )
+    user_added: list[str] = Field(
+        default_factory=list,
+        description='Techniques the user added that the reference does not have',
+    )
+
+
+class CoachingMoment(BaseModel):
+    """One ranked highlight surfaced to the user."""
+
+    id: str
+    type: str = Field(
+        ...,
+        description=(
+            'Category: "best_pitch_phrase", "pitch_struggle", "expressive_match", '
+            '"expressive_moment", "missed_expression", "late_entrance", ...'
+        ),
+    )
+    title: str
+    summary: str
+    start_s: float
+    end_s: float
+    score: float = Field(..., description='Higher = more salient (relative within type)')
+    note_indices: list[int] = Field(default_factory=list)
+    techniques: list[str] = Field(default_factory=list)
+    detail: dict = Field(
+        default_factory=dict,
+        description='Free-form structured data for UI tooltips (cents, pct_in_tune, etc.)',
+    )
+
+
+class HighlightsReport(BaseModel):
+    """Bundle of coaching moments emitted for one performance analysis."""
+
+    moments: list[CoachingMoment] = Field(default_factory=list)
+    cap: int = Field(5, description='Maximum number of moments selected for display')
+
+
+class PerformanceAnalysis(BaseModel):
+    """Full analysis output for one user performance against a song.
+
+    Sources are referenced by relative path so the JSON stays small; the
+    measurement summary lives in ``notes`` and the user-facing output lives
+    in ``highlights``.
+    """
+
+    song_id: str
+    perf_id: str
+    reference_sample_id: str
+    duration_s: float
+    global_offset_s: float = Field(
+        0.0,
+        description='song_time = user_time - global_offset_s',
+    )
+    octave_shift_semitones: int = Field(
+        0,
+        description=(
+            'Integer-semitone (multiple of 12) offset added to every chart '
+            'MIDI before scoring this user. Negative = user is singing in a '
+            'lower register than the chart; positive = higher. Auto-detected '
+            'by align_v2.estimate_octave_shift_semitones unless overridden.'
+        ),
+    )
+    pitch_user_path: str
+    pitch_ref_path: Optional[str] = None
+    stars_user_path: Optional[str] = None
+    stars_ref_path: Optional[str] = None
+    notes: list[NoteMeasurementV2] = Field(default_factory=list)
+    techniques: list[NoteTechniqueComparison] = Field(default_factory=list)
+    highlights: HighlightsReport = Field(default_factory=HighlightsReport)
+    analysis_version: str = Field("v2", description='Schema version tag for migrations')

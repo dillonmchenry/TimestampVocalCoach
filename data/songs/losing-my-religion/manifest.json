@@ -1,0 +1,23 @@
+{
+  "song_id": "losing-my-religion",
+  "title": "Losing My Religion",
+  "artist": "R.E.M.",
+  "language": "English",
+  "source_format": "ultrastar",
+  "chart_path": "song.txt",
+  "reference_vocal_path": "reference_vocal.mp3",
+  "instrumental_path": "instrumental.mp3",
+  "duration_s": 268.56596371882085,
+  "ultrastar": {
+    "bpm": 200.0,
+    "gap_ms": 14000.0,
+    "audio_ref": "R.E.M. - Losing My Religion.mp3",
+    "cover": "R.E.M. - Losing My Religion [CO].jpg",
+    "background": "R.E.M. - Losing My Religion [BG].jpg",
+    "edition": "[SC]-Songs",
+    "midi_offset": 0
+  },
+  "reference_pitch_path": null,
+  "reference_stars_path": null,
+  "reference_loudness_path": null
+}

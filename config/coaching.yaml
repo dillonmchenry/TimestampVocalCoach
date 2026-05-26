@@ -1,0 +1,46 @@
+# Sprint-2 coaching thresholds.
+#
+# Defaults mirror vocal_coach/coaching_config.py; edit here to tune the
+# pipeline without code changes.
+
+pitch:
+  in_tune_cents: 50.0       # frames within +/- this many cents count as "in tune"
+  flat_cents: -20.0
+  sharp_cents: 20.0
+  drift_cents_per_s: 40.0
+  voicing_threshold: 0.5
+  min_voiced_coverage: 0.20
+
+arrival:
+  late_ms: 80.0
+  early_ms: -80.0
+  search_back_s: 0.20
+  search_forward_s: 0.50
+  gap_tolerance_s: 0.030
+  unvoiced_lead_s: 0.05
+  pitch_lock_cents: 50.0
+  pitch_lock_hold_s: 0.05
+
+core_window:
+  attack_trim_s: 0.05
+  release_trim_s: 0.05
+  min_core_s: 0.05
+
+global_offset:
+  search_range_s: 1.5
+  step_s: 0.020
+  voicing_threshold: 0.5
+  min_voiced_overlap_s: 1.0
+
+highlights:
+  cap: 5
+  # Expression / STARS phrase windows (in chart notes)
+  window_min: 4
+  window_max: 8
+  # Pitch feedback windows — wider spans, multiple phrases
+  pitch_window_min: 8
+  pitch_window_max: 16
+  pitch_phrases_per_type: 2
+  max_per_type: 2
+  best_phrase_min_pct_in_tune: 0.55
+  pitch_struggle_max_pct_in_tune: 0.40
