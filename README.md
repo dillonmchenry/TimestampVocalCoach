@@ -262,35 +262,6 @@ jump the playhead.
 uvicorn web.api.main:app --reload
 # then open http://127.0.0.1:8000
 ```
-
-### Sprint 2 demo path (Losing My Religion)
-
-```powershell
-# 1. Normalize the bundle into the song layout
-python scripts/import_ultrastar.py data/songs/losing-my-religion `
-    --reference-vocal reference_vocal.mp3 `
-    --instrumental instrumental.mp3
-
-# 2. Precompute reference NanoPitch + STARS + loudness (slow; once per song)
-python scripts/build_song.py data/songs/losing-my-religion
-
-# 3. Analyze a performance from the CLI
-python scripts/analyze_performance.py data/songs/losing-my-religion `
-    "data/Losing-My-Religion/Losing My Religion_user_vocals.wav" `
-    --perf-id take-1
-
-# 4. Or run the same flow through the UI
-uvicorn web.api.main:app --reload
-```
-
-Pass `--midi-offset -12` to `import_ultrastar.py` if the chart's pitch
-column is one octave above the actual recording (UltraStar charts often
-encode pitches near `+24` to mean a melody an octave lower). In most
-cases this is no longer required — `analyze_performance.py` now
-auto-detects an integer-octave shift between the user vocal and the
-chart targets and applies it before scoring (see "Auto octave-shift"
-above).
-
 ---
 
 ## Sprint 3: Goals
@@ -382,15 +353,6 @@ feedback into two passes:
   `sections` fields) so the FastAPI app can return everything in one
   response.
 
-### Sprint 3 success criteria
-
-| Theme | Target |
-|-------|--------|
-| Songs | ≥3 imported songs selectable in the UI |
-| STARS student | ≥5× faster than `stars_bilingual` with documented agreement on technique flags |
-| Trend engine | ≥1 section-level highlight type shipped + per-section stats in `analysis.json` |
-| UI | Overview stat block + redesigned highlight cards + section ribbon in `web/static/` |
-
 ---
 
 ## Repo layout
@@ -456,29 +418,3 @@ python scripts/setup_stars_runtime.py
 ```
 
 ---
-
-## End-to-end demo
-
-```powershell
-python scripts/download_gtsinger_sample.py
-python scripts/build_reference.py data/samples/EN-Alto-1__innocence__0000
-python scripts/run_pipeline.py data/samples/EN-Alto-1__innocence__0000
-python scripts/demo_note_card.py data/samples/EN-Alto-1__innocence__0000
-# notebooks/sprint1_demo.ipynb: Run All
-```
-
-`run_pipeline.py` writes `pitch.json`, `stars.json`, `loudness.json`, and `timeline.json` under the sample directory. Re-run `build_reference.py` after changing GTSinger parsing without re-running STARS if you only need updated note/phone assignments on cards (`demo_note_card.py` reloads `reference_annotation.json` directly).
-
----
-
-## Validation
-
-```powershell
-python scripts/validate_pitch.py --device cuda
-```
-
-1. **Parity**: bit-identical F0/voicing vs NanoPitch’s `evaluate.py` on a fixed test mel.
-2. **Sanity**: reasonable log-mel stats and voiced F0 range on the sample wav.
-
----
-
