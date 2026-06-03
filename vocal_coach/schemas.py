@@ -59,9 +59,23 @@ class ReferenceNote(BaseModel):
 
 class ReferenceSection(BaseModel):
     """A high-level song section, e.g. 'Verse 1' or 'Final Chorus'."""
+
     name: str
     start_s: float
     end_s: float
+    kind: Optional[str] = Field(
+        None,
+        description=(
+            'Optional section type tag, one of: '
+            '"intro", "verse", "pre_chorus", "chorus", "bridge", "refrain", '
+            '"outro". Used by Sprint-3 trend detectors so cross-section deltas '
+            '(e.g. "verses flatter than choruses") can be computed by kind.'
+        ),
+    )
+
+    @property
+    def duration_s(self) -> float:
+        return max(0.0, self.end_s - self.start_s)
 
 
 class ReferenceAnnotation(BaseModel):
@@ -412,6 +426,33 @@ class NoteMeasurementV2(BaseModel):
     pitch_tags: list[str] = Field(default_factory=list)
     arrival_tags: list[str] = Field(default_factory=list)
 
+    # Loudness measurements (populated when LoudnessTrack is available)
+    user_rms_db: Optional[float] = Field(
+        None,
+        description='Mean RMS dBFS inside the note window (raw user level).',
+    )
+    ref_rms_db: Optional[float] = Field(
+        None,
+        description='Mean RMS dBFS inside the note window (raw reference level).',
+    )
+    rms_delta_db: Optional[float] = Field(
+        None,
+        description=(
+            'Normalised dynamic difference: '
+            '(user_rms − user_median) − (ref_rms − ref_median).  '
+            'Positive = user sang this note louder relative to their own level '
+            'than the reference did; negative = user was quieter.'
+        ),
+    )
+    rms_fade_db_per_s: Optional[float] = Field(
+        None,
+        description=(
+            'Linear RMS slope across the note window in dB/s (user voice only).  '
+            'Strongly negative values (e.g. −5 dB/s) indicate the user fades '
+            'out before the note ends.'
+        ),
+    )
+
 
 class NoteTechniqueComparison(BaseModel):
     """Reference vs. user STARS technique sets for one note window."""
@@ -441,7 +482,21 @@ class CoachingMoment(BaseModel):
         ...,
         description=(
             'Category: "best_pitch_phrase", "pitch_struggle", "expressive_match", '
-            '"expressive_moment", "missed_expression", "late_entrance", ...'
+            '"expressive_moment", "missed_expression", "late_entrance", '
+            '"sharp_flat_note", "timing_consistency", "vocal_texture", '
+            '"fade_within_notes", "dynamic_drop", "dynamic_surge", '
+            '"section_strength", "section_weakness", "section_delta", '
+            '"section_dynamic_contrast", "best_overall_section", '
+            '"weakest_overall_section", ...'
+        ),
+    )
+    scope: str = Field(
+        "local",
+        description=(
+            'Sprint 3: "local" = phrase/window-level moment (default), '
+            '"section" = whole-section observation (e.g. "verses flatter than '
+            'choruses"). Used by the UI to render section badges and by the '
+            'highlight selector to balance local vs section picks.'
         ),
     )
     title: str
@@ -450,6 +505,10 @@ class CoachingMoment(BaseModel):
     end_s: float
     score: float = Field(..., description='Higher = more salient (relative within type)')
     note_indices: list[int] = Field(default_factory=list)
+    section_names: list[str] = Field(
+        default_factory=list,
+        description='For scope="section" moments, the section(s) this moment refers to.',
+    )
     techniques: list[str] = Field(default_factory=list)
     detail: dict = Field(
         default_factory=dict,
@@ -461,7 +520,127 @@ class HighlightsReport(BaseModel):
     """Bundle of coaching moments emitted for one performance analysis."""
 
     moments: list[CoachingMoment] = Field(default_factory=list)
-    cap: int = Field(5, description='Maximum number of moments selected for display')
+    cap: int = Field(15, description='Maximum number of moments selected for display')
+
+
+# ---------------------------------------------------------------------------
+# Sprint 3: Section trends + overview
+# ---------------------------------------------------------------------------
+
+
+class SectionTrend(BaseModel):
+    """Per-section aggregate measurements computed from the user's notes.
+
+    Computed by ``vocal_coach.trends.compute_section_trends`` from a
+    ``ReferenceAnnotation.sections`` list + the analyzer's ``NoteMeasurementV2``
+    rows. Used by the section-level highlight detectors and the section
+    ribbon in the UI.
+    """
+
+    name: str = Field(..., description='Section name from ReferenceAnnotation.sections.')
+    kind: Optional[str] = Field(
+        None, description='Optional section kind tag (chorus/verse/...) when present.'
+    )
+    start_s: float
+    end_s: float
+    note_count: int = Field(0, description='Number of scoreable notes whose midpoint falls in section.')
+    voiced_coverage: float = Field(0.0, description='Mean voiced_coverage over notes in section.')
+    median_cents: Optional[float] = Field(
+        None, description='Median of NoteMeasurementV2.median_cents across the section.'
+    )
+    cents_variance: Optional[float] = Field(
+        None, description='Variance of median_cents across the section (sharpness of pitch control).'
+    )
+    pct_in_tune: Optional[float] = Field(
+        None, description='Mean pct_in_tune over notes in the section.'
+    )
+    arrival_offset_ms_mean: Optional[float] = Field(
+        None, description='Mean arrival_offset_ms across the section (positive = late).'
+    )
+    technique_density: dict[str, float] = Field(
+        default_factory=dict,
+        description=(
+            'Per-technique presence density inside the section, expressed as the '
+            'fraction of notes whose user-side STARS flagged the technique.'
+        ),
+    )
+    reference_technique_density: dict[str, float] = Field(
+        default_factory=dict,
+        description=(
+            'Per-technique presence density inside the section on the *reference* '
+            'side, used by cross-section "kept vibrato in chorus, dropped in verse" '
+            'detectors.'
+        ),
+    )
+    mean_rms_db: Optional[float] = Field(
+        None,
+        description='Mean of per-note user_rms_db across the section (raw level).',
+    )
+    ref_mean_rms_db: Optional[float] = Field(
+        None,
+        description='Mean of per-note ref_rms_db across the section (raw reference level).',
+    )
+    rms_delta_db: Optional[float] = Field(
+        None,
+        description=(
+            'Mean normalised dynamic difference across the section '
+            '(same sign convention as NoteMeasurementV2.rms_delta_db).'
+        ),
+    )
+
+
+class PerformanceOverview(BaseModel):
+    """Top-of-page summary stats for the user's performance.
+
+    Computed by ``vocal_coach.overview.compute_overview``. The ``mimic_score``
+    is a 0-100 blend of pitch accuracy + technique-match rate + arrival
+    consistency designed for the headline number in the UI tile block.
+    """
+
+    pct_in_tune: Optional[float] = Field(
+        None, description='Fraction of voiced frames within the in-tune cents window across all notes.'
+    )
+    median_cents: Optional[float] = Field(
+        None, description='Median of per-note median_cents.'
+    )
+    octave_shift_semitones: int = Field(
+        0, description='Auto-detected (or user-overridden) integer-semitone shift used for scoring.'
+    )
+    voiced_coverage: float = Field(
+        0.0, description='Mean voiced_coverage across notes.'
+    )
+    arrival_offset_ms_mean: Optional[float] = Field(
+        None, description='Mean arrival offset (positive = late).'
+    )
+    expressive_density: float = Field(
+        0.0,
+        description=(
+            'Fraction of notes where the user produced at least one expressive '
+            'technique (vibrato/breathy/falsetto/...).'
+        ),
+    )
+    technique_match_rate: Optional[float] = Field(
+        None,
+        description=(
+            'Fraction of reference techniques the user reproduced '
+            '(matched / max(1, total_reference)).'
+        ),
+    )
+    mimic_score: Optional[float] = Field(
+        None,
+        description=(
+            '0-100 blended score = w_pitch * pct_in_tune + w_tech * '
+            'technique_match_rate + w_arrival * arrival_consistency.'
+        ),
+    )
+    note_count: int = Field(0, description='Number of scoreable user notes.')
+    strongest_section: Optional[str] = Field(
+        None,
+        description=(
+            'Section name with the highest blended pitch + expressiveness + '
+            'timing score.'
+        ),
+    )
 
 
 class PerformanceAnalysis(BaseModel):
@@ -496,4 +675,18 @@ class PerformanceAnalysis(BaseModel):
     notes: list[NoteMeasurementV2] = Field(default_factory=list)
     techniques: list[NoteTechniqueComparison] = Field(default_factory=list)
     highlights: HighlightsReport = Field(default_factory=HighlightsReport)
-    analysis_version: str = Field("v2", description='Schema version tag for migrations')
+    sections: list[SectionTrend] = Field(
+        default_factory=list,
+        description=(
+            'Sprint 3: per-section trend rows aggregated from `notes` and '
+            '`techniques`. Empty when the reference annotation has no sections.'
+        ),
+    )
+    overview: Optional[PerformanceOverview] = Field(
+        None,
+        description=(
+            'Sprint 3: top-of-page summary stats including the mimic score. '
+            'None when no scoreable notes were measured.'
+        ),
+    )
+    analysis_version: str = Field("v3", description='Schema version tag for migrations')

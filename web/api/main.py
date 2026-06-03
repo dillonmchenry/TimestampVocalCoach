@@ -37,18 +37,24 @@ from vocal_coach.align_v2 import measure_song
 from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH
 from vocal_coach.highlights import select_highlights
 from vocal_coach.loudness import compute_loudness, write_loudness_track
+from vocal_coach.overview import compute_overview
 from vocal_coach.pitch import extract_f0, write_pitch_track
 from vocal_coach.reference import load_reference
 from vocal_coach.schemas import (
+    LoudnessTrack,
     PerformanceAnalysis,
     PitchTrack,
     StarsMetadataEntry,
     StarsTrack,
 )
 from vocal_coach.song import load_manifest
+from vocal_coach.trends import compute_section_trends
 from vocal_coach.stars_runner import (
     DEFAULT_STARS_DIR,
-    run_stars,
+    STARS_PROFILE_FAST,
+    STARS_PROFILE_FULL,
+    STARS_PROFILES,
+    run_stars_with_profile,
     write_stars_track,
 )
 
@@ -226,8 +232,16 @@ async def analyze(
     perf_id: Optional[str] = Form(None),
     skip_user_stars: bool = Form(False),
     device: str = Form("cuda"),
+    # Interim: default to the (correct) teacher until the student is retrained
+    # on NanoPitch F0. The UI checkbox can still request "fast".
+    stars_profile: str = Form(STARS_PROFILE_FAST),
 ):
     """Run the dual-track analysis on an uploaded performance."""
+    if stars_profile not in STARS_PROFILES:
+        raise HTTPException(
+            status_code=400,
+            detail=f"stars_profile must be one of {STARS_PROFILES}",
+        )
     song_dir = _song_dir(song_id)
     manifest = load_manifest(song_dir)
     reference = load_reference(song_dir)
@@ -258,7 +272,8 @@ async def analyze(
     if not skip_user_stars:
         try:
             meta_path = _stars_metadata_for_perf(song_dir, perf_dir, user_audio)
-            stars_user = run_stars(
+            stars_user = run_stars_with_profile(
+                profile=stars_profile,
                 metadata_path=meta_path,
                 save_dir=perf_dir / "stars_out",
                 sample_id=f"{manifest.song_id}__{perf_id}",
@@ -270,20 +285,24 @@ async def analyze(
             stars_user = None
             (perf_dir / "stars_error.txt").write_text(str(exc), encoding="utf-8")
 
-    # 3. Reference STARS + reference pitch (precomputed by build_song.py)
+    # 3. Reference STARS + reference pitch + reference loudness (precomputed by build_song.py)
     stars_ref_path = song_dir / (manifest.reference_stars_path or "reference/stars.json")
     stars_ref = _maybe_load(stars_ref_path, StarsTrack)
     pitch_ref_path = song_dir / (manifest.reference_pitch_path or "reference/pitch.json")
     pitch_ref = _maybe_load(pitch_ref_path, PitchTrack)
+    loudness_ref_path = song_dir / (manifest.reference_loudness_path or "reference/loudness.json")
+    loudness_ref = _maybe_load(loudness_ref_path, LoudnessTrack)
 
-    # 4. Loudness on the user vocal (best-effort)
+    # 4. Loudness on the user vocal (best-effort); load back for measure_song
+    loudness_user: LoudnessTrack | None = None
+    loudness_user_path = perf_dir / "loudness.json"
     try:
-        loudness = compute_loudness(user_audio, sample_id=pitch_user.sample_id)
-        write_loudness_track(loudness, perf_dir / "loudness.json")
+        loudness_user = compute_loudness(user_audio, sample_id=pitch_user.sample_id)
+        write_loudness_track(loudness_user, loudness_user_path)
     except Exception:
         pass
 
-    # 5. Align + highlights
+    # 5. Align + section trends + highlights + overview
     cfg = CoachingConfig.load(CONFIG_PATH)
     notes, techniques, offset, octave_shift = measure_song(
         reference,
@@ -291,9 +310,26 @@ async def analyze(
         pitch_ref=pitch_ref,
         stars_ref=stars_ref,
         stars_user=stars_user,
+        loudness_user=loudness_user,
+        loudness_ref=loudness_ref,
         config=cfg,
     )
-    highlights = select_highlights(reference, notes, techniques, config=cfg)
+    section_trends = compute_section_trends(reference, notes, techniques)
+    highlights = select_highlights(
+        reference,
+        notes,
+        techniques,
+        config=cfg,
+        sections=section_trends,
+    )
+    overview = compute_overview(
+        notes,
+        techniques,
+        sections=section_trends,
+        section_best_overall_min_notes=cfg.highlights.section_best_overall_min_notes,
+        octave_shift_semitones=octave_shift,
+        arrival_late_ms=cfg.arrival.late_ms,
+    )
 
     analysis = PerformanceAnalysis(
         song_id=manifest.song_id,
@@ -321,6 +357,8 @@ async def analyze(
         notes=notes,
         techniques=techniques,
         highlights=highlights,
+        sections=section_trends,
+        overview=overview,
     )
     out_path = perf_dir / "analysis.json"
     out_path.write_text(analysis.model_dump_json(indent=2), encoding="utf-8")
@@ -357,6 +395,24 @@ def get_perf_pitch(song_id: str, perf_id: str):
         raise HTTPException(status_code=404, detail="Pitch track not found")
     return JSONResponse(
         content=PitchTrack.model_validate_json(path.read_text(encoding="utf-8")).model_dump()
+    )
+
+
+@app.get("/api/songs/{song_id}/performances/{perf_id}/loudness")
+def get_perf_loudness(song_id: str, perf_id: str):
+    """Per-frame RMS (dB) track; the UI turns this into a waveform envelope.
+
+    Serving precomputed peaks keeps the waveform render independent of the
+    browser decoding the full (potentially 40 MB+) performance WAV.
+    """
+    perf_dir = _perf_dir(song_id, perf_id)
+    path = perf_dir / "loudness.json"
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Loudness track not found")
+    return JSONResponse(
+        content=LoudnessTrack.model_validate_json(
+            path.read_text(encoding="utf-8")
+        ).model_dump()
     )
 
 

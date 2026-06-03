@@ -12,8 +12,8 @@ pitch:
   min_voiced_coverage: 0.20
 
 arrival:
-  late_ms: 80.0
-  early_ms: -80.0
+  late_ms: 50.0
+  early_ms: -50.0
   search_back_s: 0.20
   search_forward_s: 0.50
   gap_tolerance_s: 0.030
@@ -33,7 +33,7 @@ global_offset:
   min_voiced_overlap_s: 1.0
 
 highlights:
-  cap: 5
+  cap: 15
   # Expression / STARS phrase windows (in chart notes)
   window_min: 4
   window_max: 8
@@ -42,5 +42,39 @@ highlights:
   pitch_window_max: 16
   pitch_phrases_per_type: 2
   max_per_type: 2
-  best_phrase_min_pct_in_tune: 0.55
-  pitch_struggle_max_pct_in_tune: 0.40
+  max_per_category: 5
+  best_phrase_min_pct_in_tune: 0.40
+  pitch_struggle_max_pct_in_tune: 0.55
+  # Sprint 3: section-level detectors
+  section_max_moments: 5
+  section_min_notes: 3
+  section_strength_min_pct_in_tune: 0.45
+  section_weakness_max_pct_in_tune: 0.55
+  section_delta_min_pct_in_tune: 0.15
+  section_delta_min_cents: 25.0
+  section_kind_pairs:
+    - [verse, chorus]
+    - [verse, refrain]
+    - [pre_chorus, chorus]
+  section_technique_min_density_gap: 0.25
+  # Single-note pitch callouts
+  sharp_flat_note_min_cents: 25.0
+  sharp_flat_note_max: 3
+  # Entrance timing
+  entrance_timing_max: 4
+  # Timing consistency
+  timing_consistency_window_min: 4
+  timing_consistency_window_max: 8
+  timing_consistency_mean_ms: 40.0
+  # Vocal texture
+  vocal_texture_min_notes: 1
+  # Loudness / dynamics
+  loudness_fade_threshold_db_per_s: -5.0
+  loudness_fade_min_voiced_coverage: 0.30
+  loudness_fade_min_window_notes: 2
+  loudness_dynamic_delta_db: 2.0
+  loudness_dynamic_window_min: 4
+  loudness_dynamic_window_max: 10
+  section_dynamic_contrast_min_db: 1.5
+  # Blended best/weakest section
+  section_best_overall_min_notes: 4

@@ -34,8 +34,8 @@ class PitchConfig:
 class ArrivalConfig:
     """Arrival/onset detection thresholds."""
 
-    late_ms: float = 80.0
-    early_ms: float = -80.0
+    late_ms: float = 50.0
+    early_ms: float = -50.0
     search_back_s: float = 0.20
     search_forward_s: float = 0.50
     gap_tolerance_s: float = 0.030
@@ -79,7 +79,7 @@ class GlobalOffsetConfig:
 class HighlightsConfig:
     """Highlight-engine thresholds."""
 
-    cap: int = 5
+    cap: int = 15
     """Maximum highlights returned per performance."""
 
     window_min: int = 4
@@ -97,8 +97,13 @@ class HighlightsConfig:
     max_per_type: int = 2
     """Maximum highlights of any single type in the final capped list."""
 
-    best_phrase_min_pct_in_tune: float = 0.55
-    pitch_struggle_max_pct_in_tune: float = 0.40
+    max_per_category: int = 5
+    """Maximum highlights from any single feedback category (pitch, technique,
+    alignment, dynamics) in the final list.  Enforced via round-robin so every
+    category with candidates gets representation."""
+
+    best_phrase_min_pct_in_tune: float = 0.40
+    pitch_struggle_max_pct_in_tune: float = 0.55
     expressive_techniques: tuple[str, ...] = (
         "vibrato",
         "glissando",
@@ -108,6 +113,120 @@ class HighlightsConfig:
         "mixed",
     )
     """STARS techniques surfaced as 'expression'."""
+
+    # ------------------------------------------------------------------
+    # Sprint 3: section-level detectors
+    # ------------------------------------------------------------------
+
+    section_max_moments: int = 5
+    """Maximum section-scope moments admitted in the final cap."""
+
+    section_min_notes: int = 3
+    """Section must contain at least this many scoreable notes to qualify."""
+
+    section_strength_min_pct_in_tune: float = 0.45
+    """Section pct_in_tune at or above this is surfaced as a strength."""
+
+    section_weakness_max_pct_in_tune: float = 0.55
+    """Section pct_in_tune at or below this is surfaced as a weakness."""
+
+    section_delta_min_pct_in_tune: float = 0.15
+    """Minimum pct_in_tune gap between two section kinds to surface a delta."""
+
+    section_delta_min_cents: float = 25.0
+    """Minimum |median_cents| gap between two section kinds to surface a delta."""
+
+    section_kind_pairs: tuple[tuple[str, str], ...] = (
+        ("verse", "chorus"),
+        ("verse", "refrain"),
+        ("pre_chorus", "chorus"),
+    )
+    """Cross-kind pairs to compare. Each is (kind_a, kind_b); ``a`` is the
+    contrast group (often the weaker side) and ``b`` is the reference group."""
+
+    section_technique_min_density_gap: float = 0.25
+    """Min user-density gap between two section kinds for a technique-drop highlight."""
+
+    # ------------------------------------------------------------------
+    # Loudness / dynamics detectors
+    # ------------------------------------------------------------------
+
+    loudness_fade_threshold_db_per_s: float = -5.0
+    """rms_fade_db_per_s at or below this flags a note as fading out.
+    -5 dB/s means the note loses ~5 dB of level per second — clearly audible."""
+
+    loudness_fade_min_voiced_coverage: float = 0.30
+    """Only flag fade-out on notes where the user actually sang (voiced_coverage
+    above this threshold), so silent notes don't generate spurious warnings."""
+
+    loudness_fade_min_window_notes: int = 2
+    """A fade-out phrase highlight requires at least this many fading notes
+    in a row before it's surfaced."""
+
+    loudness_dynamic_delta_db: float = 2.0
+    """Minimum normalised rms_delta_db (absolute value) for a dynamic_drop or
+    dynamic_surge phrase highlight.  2 dB is clearly perceptible."""
+
+    loudness_dynamic_window_min: int = 4
+    loudness_dynamic_window_max: int = 10
+    """Phrase-window sizes (in notes) for the dynamic drop/surge detectors."""
+
+    section_dynamic_contrast_min_db: float = 1.5
+    """Minimum dB gap in mean_rms_db between chorus and verse sections for a
+    section_dynamic_contrast highlight.  Values below this are considered
+    "flat" dynamics — not worth surfacing."""
+
+    # ------------------------------------------------------------------
+    # Single-note pitch callouts
+    # ------------------------------------------------------------------
+
+    sharp_flat_note_min_cents: float = 25.0
+    """Individual notes at or beyond this |median_cents| are surfaced as
+    sharp/flat callouts."""
+
+    sharp_flat_note_max: int = 3
+    """Maximum sharp/flat single-note callouts emitted."""
+
+    # ------------------------------------------------------------------
+    # Multiple entrance timing callouts
+    # ------------------------------------------------------------------
+
+    entrance_timing_max: int = 4
+    """How many individual late/early entrance notes to surface."""
+
+    # ------------------------------------------------------------------
+    # Timing-consistency window detector
+    # ------------------------------------------------------------------
+
+    timing_consistency_window_min: int = 4
+    timing_consistency_window_max: int = 8
+    timing_consistency_mean_ms: float = 40.0
+    """Mean |arrival_offset_ms| above this in a window triggers a
+    timing_consistency moment."""
+
+    # ------------------------------------------------------------------
+    # Per-technique vocal texture highlights
+    # ------------------------------------------------------------------
+
+    vocal_texture_techniques: tuple[str, ...] = (
+        "breathe",
+        "vibrato",
+        "falsetto",
+        "strong",
+    )
+    """Techniques eligible for individual vocal-texture callouts.
+    These produce short, per-technique local moments like 'Breathy colour
+    on these notes'."""
+
+    vocal_texture_min_notes: int = 1
+    """Minimum consecutive notes with a technique to surface a texture highlight."""
+
+    # ------------------------------------------------------------------
+    # Best / weakest overall section (blended)
+    # ------------------------------------------------------------------
+
+    section_best_overall_min_notes: int = 4
+    """Section needs at least this many notes for a blended best/weakest pick."""
 
 
 @dataclass

@@ -298,5 +298,90 @@ def run_stars(
     return track
 
 
+# ---------------------------------------------------------------------------
+# Sprint-3 profile dispatch (teacher vs distilled student)
+# ---------------------------------------------------------------------------
+
+
+STARS_PROFILE_FULL = "full"
+STARS_PROFILE_FAST = "fast"
+STARS_PROFILES = (STARS_PROFILE_FULL, STARS_PROFILE_FAST)
+
+
+def run_stars_with_profile(
+    *,
+    profile: str,
+    metadata_path: Path,
+    save_dir: Path,
+    sample_id: str,
+    item_name: Optional[str] = None,
+    stars_dir: Path = DEFAULT_STARS_DIR,
+    cuda_visible_devices: str = "0",
+    extra_args: Optional[list[str]] = None,
+    keep_save_dir: bool = True,
+    student_dir: Optional[Path] = None,
+    student_device: Optional[str] = None,
+    fallback_to_full: bool = True,
+) -> StarsTrack:
+    """Dispatch between the teacher subprocess and the distilled student.
+
+    ``profile="full"`` (default) runs the original ``run_stars`` subprocess.
+    ``profile="fast"`` loads ``stars_student/`` in-process and returns a
+    ``StarsTrack`` matching the same schema. When ``fallback_to_full`` is True
+    and the student checkpoint is missing we silently fall back to ``full``
+    so the demo keeps working before the student has been trained.
+    """
+    profile = (profile or STARS_PROFILE_FULL).lower()
+    if profile not in STARS_PROFILES:
+        raise ValueError(
+            f"Unknown stars_profile {profile!r}; expected one of {STARS_PROFILES}"
+        )
+
+    if profile == STARS_PROFILE_FAST:
+        # Local import keeps the heavyweight student deps optional for callers
+        # that always use the full profile.
+        try:
+            from vocal_coach.student_runner import (  # noqa: WPS433
+                DEFAULT_STUDENT_DIR,
+                run_student,
+            )
+        except Exception as exc:
+            if not fallback_to_full:
+                raise
+            print(
+                f"[stars] student_runner unavailable ({exc}); falling back to full STARS",
+            )
+            profile = STARS_PROFILE_FULL
+        else:
+            sdir = Path(student_dir) if student_dir is not None else DEFAULT_STUDENT_DIR
+            try:
+                return run_student(
+                    metadata_path=metadata_path,
+                    sample_id=sample_id,
+                    item_name=item_name,
+                    student_dir=sdir,
+                    device=student_device or ("cuda" if cuda_visible_devices else "cpu"),
+                )
+            except FileNotFoundError as exc:
+                if not fallback_to_full:
+                    raise
+                print(
+                    f"[stars] student checkpoint missing ({exc}); "
+                    "falling back to full STARS subprocess"
+                )
+                profile = STARS_PROFILE_FULL
+
+    return run_stars(
+        metadata_path=metadata_path,
+        save_dir=save_dir,
+        sample_id=sample_id,
+        item_name=item_name,
+        stars_dir=stars_dir,
+        cuda_visible_devices=cuda_visible_devices,
+        extra_args=extra_args,
+        keep_save_dir=keep_save_dir,
+    )
+
+
 def write_stars_track(track: StarsTrack, out_path: Path) -> None:
     Path(out_path).write_text(track.model_dump_json(indent=2), encoding="utf-8")

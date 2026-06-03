@@ -1,0 +1,38 @@
+# Section labels for "Million Reasons" by Lady Gaga.
+#
+# BPM=260, GAP=15125ms → sec/beat = 15/260 = 0.05769
+# Phrase-break beats converted: t = 15.125 + beat * 0.05769
+
+sections:
+  - name: Intro
+    kind: intro
+    start_s: 0.0
+    end_s: 17.1
+  - name: Verse 1
+    kind: verse
+    start_s: 17.1
+    end_s: 39.5
+  - name: Chorus 1
+    kind: chorus
+    start_s: 39.5
+    end_s: 63.9
+  - name: Verse 2
+    kind: verse
+    start_s: 63.9
+    end_s: 79.3
+  - name: Chorus 2
+    kind: chorus
+    start_s: 79.3
+    end_s: 103.8
+  - name: Bridge
+    kind: bridge
+    start_s: 103.8
+    end_s: 113.0
+  - name: Final Chorus
+    kind: chorus
+    start_s: 113.0
+    end_s: 165.0
+  - name: Outro
+    kind: outro
+    start_s: 165.0
+    end_s: 205.75

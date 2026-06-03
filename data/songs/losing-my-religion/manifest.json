@@ -17,7 +17,7 @@
     "edition": "[SC]-Songs",
     "midi_offset": 0
   },
-  "reference_pitch_path": null,
-  "reference_stars_path": null,
-  "reference_loudness_path": null
+  "reference_pitch_path": "reference/pitch.json",
+  "reference_stars_path": "reference/stars.json",
+  "reference_loudness_path": "reference/loudness.json"
 }

@@ -267,8 +267,19 @@ def write_reference_artifacts(
 
 
 def load_reference(sample_dir: Path) -> ReferenceAnnotation:
-    """Load a previously-written reference_annotation.json."""
+    """Load a previously-written reference_annotation.json.
+
+    Sprint 3: if a ``sections.yaml`` sidecar lives next to the annotation,
+    its sections override whatever was baked into the JSON (so users can
+    refine section labels without re-running ``import_ultrastar.py``).
+    """
     sample_dir = Path(sample_dir)
-    return ReferenceAnnotation.model_validate_json(
+    annotation = ReferenceAnnotation.model_validate_json(
         (sample_dir / "reference_annotation.json").read_text(encoding="utf-8")
     )
+    # Lazy import to avoid circular dependency (song.py -> reference.py).
+    try:
+        from vocal_coach.song import apply_sections_sidecar  # noqa: WPS433
+    except Exception:
+        return annotation
+    return apply_sections_sidecar(sample_dir, annotation)

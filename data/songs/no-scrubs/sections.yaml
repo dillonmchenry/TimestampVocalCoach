@@ -1,0 +1,46 @@
+# Section labels for "No Scrubs" by TLC.
+#
+# BPM=92.95, GAP=2650ms → sec/beat = 15/92.95 = 0.16138
+# Phrase-break beats converted: t = 2.65 + beat * 0.16138
+
+sections:
+  - name: Intro
+    kind: intro
+    start_s: 0.0
+    end_s: 5.1
+  - name: Verse 1
+    kind: verse
+    start_s: 5.1
+    end_s: 29.0
+  - name: Pre-Chorus 1
+    kind: pre_chorus
+    start_s: 29.0
+    end_s: 36.5
+  - name: Chorus 1
+    kind: chorus
+    start_s: 36.5
+    end_s: 59.1
+  - name: Verse 2
+    kind: verse
+    start_s: 59.1
+    end_s: 79.0
+  - name: Pre-Chorus 2
+    kind: pre_chorus
+    start_s: 79.0
+    end_s: 85.1
+  - name: Chorus 2
+    kind: chorus
+    start_s: 85.1
+    end_s: 108.0
+  - name: Bridge
+    kind: bridge
+    start_s: 108.0
+    end_s: 120.0
+  - name: Chorus 3
+    kind: chorus
+    start_s: 120.0
+    end_s: 165.0
+  - name: Outro
+    kind: outro
+    start_s: 165.0
+    end_s: 214.61

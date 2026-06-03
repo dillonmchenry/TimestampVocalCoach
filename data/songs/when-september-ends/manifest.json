@@ -1,0 +1,23 @@
+{
+  "song_id": "when-september-ends",
+  "title": "Wake me up when september ends",
+  "artist": "Green Day",
+  "language": "English",
+  "source_format": "ultrastar",
+  "chart_path": "song.txt",
+  "reference_vocal_path": "reference_vocal.wav",
+  "instrumental_path": "instrumental.wav",
+  "duration_s": 285.88943310657595,
+  "ultrastar": {
+    "bpm": 105.0,
+    "gap_ms": 9427.0,
+    "audio_ref": "Green day - Wake me up when september ends.mp3",
+    "cover": null,
+    "background": "sept4.jpg",
+    "edition": "2000's",
+    "midi_offset": 0
+  },
+  "reference_pitch_path": "reference/pitch.json",
+  "reference_stars_path": "reference/stars.json",
+  "reference_loudness_path": "reference/loudness.json"
+}

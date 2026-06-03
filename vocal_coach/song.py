@@ -46,6 +46,12 @@ from vocal_coach.ultrastar import (
 STARS_SILENCE_PH = "<SP>"
 STARS_BREATH_PH = "<AP>"
 
+# Minimum phoneme duration to avoid STARS BinarizationError.
+# STARS uses hop_size=256 @ 24000 Hz → one mel frame = 256/24000 ≈ 10.67 ms.
+# Require at least 1.5 frames so start_frame < end_frame after rounding.
+_STARS_HOP_S: float = 256.0 / 24000.0
+_MIN_PH_DUR_S: float = _STARS_HOP_S * 1.5  # ~16 ms
+
 
 # ---------------------------------------------------------------------------
 # Grapheme-to-phoneme
@@ -235,11 +241,12 @@ def reference_from_ultrastar(
         # Word duration: span from first note start to last note end.
         first_note = chart.notes[note_indices[0]]
         last_note = chart.notes[note_indices[-1]]
-        word_durs.append(max(0.0, last_note.end_s - first_note.start_s))
+        word_dur = max(_MIN_PH_DUR_S, last_note.end_s - first_note.start_s)
+        word_durs.append(word_dur)
 
         phones = _g2p_word(word_text)
-        # Even split of word duration across phonemes.
-        slice_dur = word_durs[-1] / max(1, len(phones))
+        # Even split of word duration across phonemes; clamp each to minimum.
+        slice_dur = max(_MIN_PH_DUR_S, word_dur / max(1, len(phones)))
         for ph in phones:
             flat_phones.append(ph)
             flat_ph2word.append(word_idx)
@@ -291,6 +298,112 @@ def load_manifest(song_dir: Path) -> SongManifest:
     """Load ``manifest.json`` from ``song_dir``."""
     path = Path(song_dir) / "manifest.json"
     return SongManifest.model_validate_json(path.read_text(encoding="utf-8"))
+
+
+# ---------------------------------------------------------------------------
+# Sprint-3 sidecar sections.yaml loader
+# ---------------------------------------------------------------------------
+
+
+SECTIONS_SIDECAR_FILENAME = "sections.yaml"
+
+
+def load_sections_sidecar(song_dir: Path) -> Optional[list[ReferenceSection]]:
+    """Load ``sections.yaml`` next to a song bundle (None if not present).
+
+    Schema (see data/songs/<song_id>/sections.yaml)::
+
+        sections:
+          - name: "Chorus 1"
+            kind: chorus
+            start_s: 40.3
+            end_s: 52.7
+
+    Returns ``None`` when the sidecar is absent so callers can fall back to
+    the auto ``Phrase N`` sections built from UltraStar phrase breaks.
+    """
+    song_dir = Path(song_dir)
+    sidecar = song_dir / SECTIONS_SIDECAR_FILENAME
+    if not sidecar.is_file():
+        return None
+    try:
+        import yaml  # type: ignore
+    except Exception:
+        return None
+    data = yaml.safe_load(sidecar.read_text(encoding="utf-8")) or {}
+    entries = data.get("sections") or []
+    sections: list[ReferenceSection] = []
+    for entry in entries:
+        if not isinstance(entry, dict):
+            continue
+        try:
+            sections.append(
+                ReferenceSection(
+                    name=str(entry["name"]),
+                    start_s=float(entry["start_s"]),
+                    end_s=float(entry["end_s"]),
+                    kind=entry.get("kind"),
+                )
+            )
+        except (KeyError, TypeError, ValueError):
+            continue
+    return sections or None
+
+
+def apply_sections_sidecar(
+    song_dir: Path,
+    annotation: ReferenceAnnotation,
+) -> ReferenceAnnotation:
+    """If ``song_dir/sections.yaml`` exists, replace annotation.sections with it."""
+    sections = load_sections_sidecar(song_dir)
+    if sections is None:
+        return annotation
+    return annotation.model_copy(update={"sections": sections})
+
+
+def scale_annotation_notes_to_audio(
+    annotation: ReferenceAnnotation,
+    *,
+    target_duration_s: float,
+    tolerance: float = 1.15,
+) -> ReferenceAnnotation:
+    """Compress chart note times when the UltraStar span exceeds the audio length.
+
+    Some community charts (e.g. medley editions) list beats that extend far
+    beyond the bundled reference vocal.  Misaligned note windows break global
+    offset, octave-shift detection, pitch scoring, and the section ribbon.
+    """
+    if not annotation.notes:
+        return annotation
+    chart_end = max(n.end_s for n in annotation.notes)
+    if chart_end <= 0 or chart_end <= target_duration_s * tolerance:
+        return annotation
+
+    scale = target_duration_s / chart_end
+    scaled_notes = [
+        n.model_copy(
+            update={
+                "start_s": n.start_s * scale,
+                "end_s": n.end_s * scale,
+            }
+        )
+        for n in annotation.notes
+    ]
+    word_durs = annotation.word_durs_s
+    if word_durs:
+        word_durs = [d * scale for d in word_durs]
+    ph_durs = annotation.ph_durs_s
+    if ph_durs:
+        ph_durs = [d * scale for d in ph_durs]
+
+    return annotation.model_copy(
+        update={
+            "notes": scaled_notes,
+            "duration_s": target_duration_s,
+            "word_durs_s": word_durs,
+            "ph_durs_s": ph_durs,
+        }
+    )
 
 
 def write_reference_for_song(
@@ -417,8 +530,28 @@ def import_ultrastar_song(
         duration_s=duration_s,
         language=chart.language or "English",
     )
+    # Sprint 3: if a sections.yaml sidecar exists, use it instead of the
+    # auto-derived "Phrase N" sections from the chart's phrase breaks.
+    annotation = apply_sections_sidecar(song_dir, annotation)
 
     write_reference_for_song(song_dir, annotation)
+
+    # Preserve any existing precomputed reference paths so re-importing a
+    # song that already had build_song.py run on it doesn't clear them.
+    existing_manifest_path = song_dir / "manifest.json"
+    existing_ref_pitch = None
+    existing_ref_stars = None
+    existing_ref_loudness = None
+    if existing_manifest_path.is_file():
+        try:
+            _old = SongManifest.model_validate_json(
+                existing_manifest_path.read_text(encoding="utf-8")
+            )
+            existing_ref_pitch = _old.reference_pitch_path
+            existing_ref_stars = _old.reference_stars_path
+            existing_ref_loudness = _old.reference_loudness_path
+        except Exception:
+            pass
 
     manifest = SongManifest(
         song_id=song_id,
@@ -438,6 +571,9 @@ def import_ultrastar_song(
             edition=chart.edition,
             midi_offset=midi_offset,
         ),
+        reference_pitch_path=existing_ref_pitch,
+        reference_stars_path=existing_ref_stars,
+        reference_loudness_path=existing_ref_loudness,
     )
     write_manifest(song_dir, manifest)
     return annotation, manifest

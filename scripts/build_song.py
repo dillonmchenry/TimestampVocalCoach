@@ -34,7 +34,9 @@ from vocal_coach.reference import load_reference  # noqa: E402
 from vocal_coach.song import load_manifest, write_manifest  # noqa: E402
 from vocal_coach.stars_runner import (  # noqa: E402
     DEFAULT_STARS_DIR,
-    run_stars,
+    STARS_PROFILE_FULL,
+    STARS_PROFILES,
+    run_stars_with_profile,
     write_stars_track,
 )
 
@@ -74,6 +76,22 @@ def parse_args() -> argparse.Namespace:
         "--cuda-visible-devices",
         default="0",
         help="Value for CUDA_VISIBLE_DEVICES when invoking STARS",
+    )
+    p.add_argument(
+        "--stars-profile",
+        choices=list(STARS_PROFILES),
+        default=STARS_PROFILE_FULL,
+        help=(
+            "Which STARS implementation to use for the reference vocal. "
+            "Default 'full' (teacher) preserves the rich style/mood needed "
+            "for downstream coaching. 'fast' uses the distilled student."
+        ),
+    )
+    p.add_argument(
+        "--student-dir",
+        type=Path,
+        default=None,
+        help="Override the student checkpoint directory (defaults to ./stars_student).",
     )
     return p.parse_args()
 
@@ -155,13 +173,17 @@ def main() -> int:
         )
     else:
         stars_save_dir = ref_subdir / "stars_out"
-        print(f"[build_song] stars      : running STARS subprocess -> {stars_save_dir}")
-        stars = run_stars(
+        print(
+            f"[build_song] stars      : profile={args.stars_profile} -> {stars_save_dir}"
+        )
+        stars = run_stars_with_profile(
+            profile=args.stars_profile,
             metadata_path=stars_meta_path,
             save_dir=stars_save_dir,
             sample_id=sample_id,
             stars_dir=args.stars_dir,
             cuda_visible_devices=args.cuda_visible_devices,
+            student_dir=args.student_dir,
         )
         write_stars_track(stars, stars_json)
         print(

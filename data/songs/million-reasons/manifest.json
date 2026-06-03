@@ -1,0 +1,23 @@
+{
+  "song_id": "million-reasons",
+  "title": "Million Reasons",
+  "artist": "Lady Gaga",
+  "language": "English",
+  "source_format": "ultrastar",
+  "chart_path": "song.txt",
+  "reference_vocal_path": "reference_vocal.wav",
+  "instrumental_path": "instrumental.wav",
+  "duration_s": 205.74519274376416,
+  "ultrastar": {
+    "bpm": 260.0,
+    "gap_ms": 15125.0,
+    "audio_ref": "Lady Gaga - Million Reasons.mp3",
+    "cover": null,
+    "background": null,
+    "edition": null,
+    "midi_offset": 0
+  },
+  "reference_pitch_path": "reference/pitch.json",
+  "reference_stars_path": "reference/stars.json",
+  "reference_loudness_path": "reference/loudness.json"
+}

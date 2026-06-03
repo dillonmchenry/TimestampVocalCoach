@@ -12,17 +12,26 @@ data/samples/
 data/raw/
 data/cache/
 data/processed/
+# Sprint 3 distillation corpus (teacher labels + features)
+data/student_corpus/
 
-# Model checkpoints we copy/link into third_party
-third_party/stars/checkpoints/
-rmvpe/
+# Teacher STARS weights (large; not needed for student-only demo with pre-built songs)
 stars_chinese/
 stars_chinese_english_bilingual/
+# Legacy student training output dir (use data/student_v6/ for the demo checkpoint)
+stars_student/
 *.ckpt
+# RMVPE weights (~180 MB); download separately (HF verstar/STARS or setup script)
+rmvpe/
+# PyTorch weights — ignore by default; allow student checkpoint below
 *.pt
+!data/student_v6/
+!data/student_v6/**
 
-# STARS runtime artifacts
-third_party/stars/data/
+# third_party/stars: vendored STARS source (RMVPE import). Clone without a nested
+# .git/ (see third_party/README.md) or only the parent repo will see an empty folder.
+# Runtime weights/symlinks under checkpoints/ stay out of git.
+third_party/stars/checkpoints/
 third_party/stars/infer_out/
 
 # Jupyter

@@ -1,0 +1,45 @@
+# Section labels for "Hot N Cold" by Katy Perry.
+#
+# BPM=264, GAP=4100ms → sec/beat = 15/264 = 0.05682
+# Phrase-break beats converted: t = 4.1 + beat * 0.05682
+#
+# Schema:
+#   sections:
+#     - name: str
+#       start_s: float
+#       end_s: float
+#       kind: optional[str]  # intro|verse|pre_chorus|chorus|bridge|refrain|outro
+
+sections:
+  - name: Intro
+    kind: intro
+    start_s: 0.0
+    end_s: 6.3
+  - name: Verse 1
+    kind: verse
+    start_s: 6.3
+    end_s: 26.2
+  - name: Chorus 1
+    kind: chorus
+    start_s: 26.2
+    end_s: 52.0
+  - name: Verse 2
+    kind: verse
+    start_s: 52.0
+    end_s: 71.5
+  - name: Chorus 2
+    kind: chorus
+    start_s: 71.5
+    end_s: 97.8
+  - name: Bridge
+    kind: bridge
+    start_s: 97.8
+    end_s: 112.7
+  - name: Chorus 3
+    kind: chorus
+    start_s: 112.7
+    end_s: 165.0
+  - name: Outro
+    kind: outro
+    start_s: 165.0
+    end_s: 218.82

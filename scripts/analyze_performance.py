@@ -39,6 +39,7 @@ from vocal_coach.align_v2 import measure_song  # noqa: E402
 from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH  # noqa: E402
 from vocal_coach.highlights import select_highlights  # noqa: E402
 from vocal_coach.loudness import compute_loudness, write_loudness_track  # noqa: E402
+from vocal_coach.overview import compute_overview  # noqa: E402
 from vocal_coach.pitch import extract_f0, write_pitch_track  # noqa: E402
 from vocal_coach.reference import load_reference  # noqa: E402
 from vocal_coach.schemas import (  # noqa: E402
@@ -48,9 +49,12 @@ from vocal_coach.schemas import (  # noqa: E402
     StarsTrack,
 )
 from vocal_coach.song import load_manifest  # noqa: E402
+from vocal_coach.trends import compute_section_trends  # noqa: E402
 from vocal_coach.stars_runner import (  # noqa: E402
     DEFAULT_STARS_DIR,
-    run_stars,
+    STARS_PROFILE_FULL,
+    STARS_PROFILES,
+    run_stars_with_profile,
     write_stars_track,
 )
 
@@ -95,6 +99,22 @@ def parse_args() -> argparse.Namespace:
         "--cuda-visible-devices",
         default="0",
         help="Value for CUDA_VISIBLE_DEVICES when invoking STARS",
+    )
+    p.add_argument(
+        "--stars-profile",
+        choices=list(STARS_PROFILES),
+        default=STARS_PROFILE_FULL,
+        help=(
+            "Which STARS implementation to run on the user vocal: "
+            "'full' (teacher subprocess, slow), 'fast' (distilled student, in-process). "
+            f"Default: {STARS_PROFILE_FULL}. The reference side always uses 'full'."
+        ),
+    )
+    p.add_argument(
+        "--student-dir",
+        type=Path,
+        default=None,
+        help="Override the student checkpoint directory (defaults to ./stars_student).",
     )
     p.add_argument(
         "--config",
@@ -221,13 +241,17 @@ def main() -> int:
     else:
         meta_path = _write_user_stars_metadata(perf_dir, song_dir, user_audio, manifest.song_id)
         save_dir = perf_dir / "stars_out"
-        print(f"[analyze] stars       : running STARS subprocess -> {save_dir}")
-        stars_user = run_stars(
+        print(
+            f"[analyze] stars       : profile={args.stars_profile} -> {save_dir}"
+        )
+        stars_user = run_stars_with_profile(
+            profile=args.stars_profile,
             metadata_path=meta_path,
             save_dir=save_dir,
             sample_id=f"{manifest.song_id}__{perf_id}",
             stars_dir=args.stars_dir,
             cuda_visible_devices=args.cuda_visible_devices,
+            student_dir=args.student_dir,
         )
         write_stars_track(stars_user, stars_user_path)
         print(
@@ -250,7 +274,7 @@ def main() -> int:
     coaching_cfg = CoachingConfig.load(config_path)
     print(f"[analyze] config      : {config_path}")
 
-    print("[analyze] aligning    : measure_song + select_highlights")
+    print("[analyze] aligning    : measure_song + section trends + select_highlights")
     notes, techniques, offset, octave_shift = measure_song(
         reference,
         pitch_user=pitch_user,
@@ -259,7 +283,20 @@ def main() -> int:
         stars_user=stars_user,
         config=coaching_cfg,
     )
-    highlights = select_highlights(reference, notes, techniques, config=coaching_cfg)
+    section_trends = compute_section_trends(reference, notes, techniques)
+    highlights = select_highlights(
+        reference,
+        notes,
+        techniques,
+        config=coaching_cfg,
+        sections=section_trends,
+    )
+    overview = compute_overview(
+        notes,
+        techniques,
+        octave_shift_semitones=octave_shift,
+        arrival_late_ms=coaching_cfg.arrival.late_ms,
+    )
 
     analysis = PerformanceAnalysis(
         song_id=manifest.song_id,
@@ -287,6 +324,8 @@ def main() -> int:
         notes=notes,
         techniques=techniques,
         highlights=highlights,
+        sections=section_trends,
+        overview=overview,
     )
 
     # 6. Optional: per-frame loudness on the user vocal (used by the UI)

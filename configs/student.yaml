@@ -1,0 +1,60 @@
+# Sprint-3 STARS student training configuration.
+#
+# Distillation against the bilingual teacher (third_party/stars/checkpoints/
+# stars_bilingual/model_ckpt_steps_300000.ckpt). The teacher's outputs were
+# exported by scripts/export_student_dataset.py into data/student_corpus/.
+#
+# Two-task objective (NO style classification heads, see plan A2/A3):
+#   - CTC over phoneme logits (alignment scaffolding)
+#   - BCE over per-frame boundary logits (phoneme onset signal)
+#   - BCE over per-frame 9-way technique multi-label (mean-pooled into
+#     per-phoneme labels at inference time)
+
+model:
+  n_mels: 80
+  d_model: 192
+  n_heads: 4
+  n_blocks: 2
+  conv_kernel: 15
+  ff_expansion: 4
+  dropout: 0.1
+  # phone_vocab_size is filled in from the discovered vocabulary at train time.
+  # phoneme_level_tech: pool Conformer h over GT spans at training time so the
+  # technique head sees phoneme-averaged features rather than individual frames.
+  # At inference, pool h over Viterbi spans before calling technique_head.
+  phoneme_level_tech: true
+
+data:
+  corpus_dir: data/student_corpus
+  manifest: manifest.jsonl
+  # If you want to subset by source, leave both lists empty to use every clip.
+  include_sources: []    # e.g. ["gtsinger", "nus48e", "ultrastar"]
+  max_frames: 4096       # clip-level frame cap (random crop during training)
+  augment_mel_noise_std: 0.05
+
+train:
+  batch_size: 4
+  num_workers: 2
+  learning_rate: 0.0003
+  weight_decay: 0.01
+  grad_clip: 1.0
+  max_steps: 50000
+  warmup_steps: 1000
+  log_every: 50
+  eval_every: 1000
+  save_every: 2000
+  amp: true              # mixed-precision when CUDA is available
+
+loss:
+  # Weights for the three terms; loss = phoneme + boundary + technique.
+  phoneme_ctc_weight: 1.0
+  boundary_bce_weight: 0.5
+  technique_bce_weight: 1.0
+  # Per-class positive weight cap for technique BCE. Rare technique classes
+  # (vibrato, bubble, breathe) have neg/pos ratios >100x; capping at 20x
+  # balances signal without destabilising training.
+  tech_pos_weight_cap: 20.0
+
+checkpoint:
+  out_dir: stars_student
+  keep_last: 3

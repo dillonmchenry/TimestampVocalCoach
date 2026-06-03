@@ -1,0 +1,23 @@
+{
+  "song_id": "hot-n-cold",
+  "title": "Hot N Cold",
+  "artist": "Katy Perry",
+  "language": "English",
+  "source_format": "ultrastar",
+  "chart_path": "song.txt",
+  "reference_vocal_path": "reference_vocal.wav",
+  "instrumental_path": "instrumental.wav",
+  "duration_s": 218.81730158730159,
+  "ultrastar": {
+    "bpm": 264.0,
+    "gap_ms": 4100.0,
+    "audio_ref": "Katy Perry - Hot N Cold.mp3",
+    "cover": "Katy Perry - Hot N Cold [CO].jpg",
+    "background": "Katy Perry - Hot N Cold [BG].jpg",
+    "edition": "Charts 2009",
+    "midi_offset": 0
+  },
+  "reference_pitch_path": "reference/pitch.json",
+  "reference_stars_path": "reference/stars.json",
+  "reference_loudness_path": "reference/loudness.json"
+}

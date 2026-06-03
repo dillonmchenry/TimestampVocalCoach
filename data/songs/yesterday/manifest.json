@@ -1,0 +1,23 @@
+{
+  "song_id": "yesterday",
+  "title": "Yesterday",
+  "artist": "The Beatles",
+  "language": "English",
+  "source_format": "ultrastar",
+  "chart_path": "song.txt",
+  "reference_vocal_path": "reference_vocal.wav",
+  "instrumental_path": "instrumental.wav",
+  "duration_s": 125.74038548752834,
+  "ultrastar": {
+    "bpm": 384.0,
+    "gap_ms": 5440.0,
+    "audio_ref": "The Beatles - Yesterday.mp3",
+    "cover": null,
+    "background": null,
+    "edition": "[SC]-Songs 2.0",
+    "midi_offset": 0
+  },
+  "reference_pitch_path": "reference/pitch.json",
+  "reference_stars_path": "reference/stars.json",
+  "reference_loudness_path": "reference/loudness.json"
+}

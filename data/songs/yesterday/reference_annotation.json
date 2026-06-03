@@ -1,0 +1,3607 @@
+{
+  "sample_id": "yesterday",
+  "audio_path": "reference_vocal.wav",
+  "sample_rate": 44100,
+  "duration_s": 125.74038548752834,
+  "language": "English",
+  "sections": [
+    {
+      "name": "Intro",
+      "start_s": 0.0,
+      "end_s": 5.0,
+      "kind": "intro"
+    },
+    {
+      "name": "Verse 1",
+      "start_s": 5.0,
+      "end_s": 22.0,
+      "kind": "verse"
+    },
+    {
+      "name": "Verse 2",
+      "start_s": 22.0,
+      "end_s": 40.0,
+      "kind": "verse"
+    },
+    {
+      "name": "Bridge 1",
+      "start_s": 40.0,
+      "end_s": 58.5,
+      "kind": "bridge"
+    },
+    {
+      "name": "Verse 3",
+      "start_s": 58.5,
+      "end_s": 76.0,
+      "kind": "verse"
+    },
+    {
+      "name": "Bridge 2",
+      "start_s": 76.0,
+      "end_s": 93.5,
+      "kind": "bridge"
+    },
+    {
+      "name": "Verse 4",
+      "start_s": 93.5,
+      "end_s": 115.0,
+      "kind": "verse"
+    },
+    {
+      "name": "Outro",
+      "start_s": 115.0,
+      "end_s": 125.74038548752834,
+      "kind": "outro"
+    }
+  ],
+  "words": [
+    "Yesterday",
+    "All my troubles seemed so far away",
+    "Now it looks as though they’re here to stay",
+    "Oh, I believe in yesterday",
+    "Suddenly",
+    "I’m not half the man I used to be",
+    "There’s a shadow hangin’ over me",
+    "Oh, yesterday",
+    "Came suddenly",
+    "Why she had to go?",
+    "I don’t know, she wouldn’t say",
+    "I said something wrong",
+    "Now I long",
+    "For yesterday",
+    "Yesterday",
+    "Love was such an easy game to play",
+    "Now I need a place",
+    "To hide away",
+    "Oh, I believe",
+    "In yesterday",
+    "Why she had to go?",
+    "I don’t know, she wouldn’t say",
+    "I said something wrong",
+    "Now I long for yesterday",
+    "Yesterday",
+    "Love was such an easy game to play",
+    "Now I need a place",
+    "To hide away",
+    "Oh, I believe",
+    "In yesterday",
+    "Hmm, hmm, hmm, hmm, hmm, hmm hmm"
+  ],
+  "phones": [
+    "Y",
+    "EH1",
+    "S",
+    "T",
+    "ER0",
+    "D",
+    "EY2",
+    "AE2",
+    "L",
+    "M",
+    "AY0",
+    "T",
+    "R",
+    "UW1",
+    "M",
+    "ER0",
+    "SH",
+    "AH0",
+    "L",
+    "IY0",
+    "OW2",
+    "N",
+    "IY0",
+    "T",
+    "OW0",
+    "K",
+    "L",
+    "EH2",
+    "R",
+    "T",
+    "AH0",
+    "F",
+    "ER1",
+    "S",
+    "IY0",
+    "OW0",
+    "HH",
+    "IY0",
+    "B",
+    "AH0",
+    "L",
+    "AH0",
+    "JH",
+    "EH1",
+    "S",
+    "T",
+    "AH0",
+    "V",
+    "IY0",
+    "S",
+    "AH1",
+    "D",
+    "AH0",
+    "N",
+    "L",
+    "IY0",
+    "IH2",
+    "N",
+    "D",
+    "OW0",
+    "M",
+    "TH",
+    "AO2",
+    "R",
+    "AH0",
+    "B",
+    "AH0",
+    "L",
+    "D",
+    "EY1",
+    "SH",
+    "AH0",
+    "DH",
+    "EH2",
+    "R",
+    "AH0",
+    "S",
+    "AH0",
+    "F",
+    "AH0",
+    "SH",
+    "EY1",
+    "N",
+    "D",
+    "AO2",
+    "V",
+    "OW0",
+    "HH",
+    "AY1",
+    "S",
+    "T",
+    "R",
+    "EY2",
+    "D",
+    "K",
+    "AE1",
+    "M",
+    "AH0",
+    "Z",
+    "AH0",
+    "D",
+    "EH2",
+    "N",
+    "T",
+    "L",
+    "IY0",
+    "W",
+    "AY2",
+    "S",
+    "HH",
+    "IY0",
+    "CH",
+    "EY1",
+    "D",
+    "OW0",
+    "AY2",
+    "D",
+    "AH0",
+    "NG",
+    "K",
+    "AW2",
+    "T",
+    "N",
+    "UW1",
+    "S",
+    "T",
+    "AO2",
+    "R",
+    "IY0",
+    "IH2",
+    "S",
+    "AH0",
+    "D",
+    "AH0",
+    "M",
+    "Y",
+    "UW1",
+    "SH",
+    "AH0",
+    "N",
+    "F",
+    "AO0",
+    "G",
+    "N",
+    "AW1",
+    "L",
+    "AY0",
+    "AO0",
+    "NG",
+    "F",
+    "AO2",
+    "R",
+    "Y",
+    "EH1",
+    "S",
+    "T",
+    "ER0",
+    "D",
+    "IY0",
+    "Y",
+    "EH1",
+    "S",
+    "T",
+    "ER0",
+    "D",
+    "EY2",
+    "L",
+    "OW2",
+    "V",
+    "AH0",
+    "S",
+    "F",
+    "AH0",
+    "N",
+    "T",
+    "EY1",
+    "SH",
+    "AH0",
+    "P",
+    "L",
+    "IY0",
+    "N",
+    "OW2",
+    "AH0",
+    "N",
+    "AH0",
+    "D",
+    "P",
+    "AA1",
+    "L",
+    "IH0",
+    "V",
+    "T",
+    "AH0",
+    "HH",
+    "AY1",
+    "D",
+    "OW2",
+    "EY0",
+    "OW0",
+    "HH",
+    "IY1",
+    "B",
+    "AH0",
+    "L",
+    "IY2",
+    "V",
+    "IH2",
+    "N",
+    "IH0",
+    "S",
+    "T",
+    "R",
+    "EY1",
+    "D",
+    "IY0",
+    "W",
+    "AY2",
+    "S",
+    "HH",
+    "IY0",
+    "CH",
+    "EY1",
+    "D",
+    "OW0",
+    "AY2",
+    "D",
+    "AH0",
+    "NG",
+    "K",
+    "AW2",
+    "T",
+    "N",
+    "UW1",
+    "S",
+    "T",
+    "AO2",
+    "R",
+    "IY0",
+    "IH2",
+    "S",
+    "AH0",
+    "D",
+    "AH0",
+    "M",
+    "Y",
+    "UW1",
+    "SH",
+    "AH0",
+    "N",
+    "F",
+    "AO0",
+    "G",
+    "N",
+    "OW0",
+    "D",
+    "IY0",
+    "AO2",
+    "L",
+    "F",
+    "ER0",
+    "AE1",
+    "S",
+    "T",
+    "IY0",
+    "Y",
+    "EH1",
+    "S",
+    "T",
+    "ER0",
+    "D",
+    "EY2",
+    "L",
+    "OW2",
+    "V",
+    "AH0",
+    "S",
+    "F",
+    "AH0",
+    "N",
+    "T",
+    "EY1",
+    "SH",
+    "AH0",
+    "P",
+    "L",
+    "IY0",
+    "N",
+    "OW2",
+    "AH0",
+    "N",
+    "AH0",
+    "D",
+    "P",
+    "AA1",
+    "L",
+    "IH0",
+    "V",
+    "T",
+    "AH0",
+    "HH",
+    "AY1",
+    "D",
+    "OW2",
+    "EY0",
+    "OW0",
+    "HH",
+    "IY1",
+    "B",
+    "AH0",
+    "L",
+    "IY2",
+    "V",
+    "IH2",
+    "N",
+    "IH0",
+    "S",
+    "T",
+    "R",
+    "EY1",
+    "D",
+    "IY0",
+    "M",
+    "AH1",
+    "M",
+    "HH",
+    "ER0",
+    "M",
+    "IH0",
+    "N"
+  ],
+  "ph2word": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    1,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    2,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    3,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    4,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    5,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    6,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    7,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    8,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    9,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    10,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    11,
+    12,
+    12,
+    12,
+    12,
+    12,
+    12,
+    13,
+    13,
+    13,
+    13,
+    13,
+    13,
+    13,
+    13,
+    13,
+    13,
+    14,
+    14,
+    14,
+    14,
+    14,
+    14,
+    14,
+    15,
+    15,
+    15,
+    15,
+    15,
+    15,
+    15,
+    15,
+    15,
+    15,
+    15,
+    15,
+    15,
+    15,
+    15,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    16,
+    17,
+    17,
+    17,
+    17,
+    17,
+    17,
+    17,
+    18,
+    18,
+    18,
+    18,
+    18,
+    18,
+    18,
+    18,
+    19,
+    19,
+    19,
+    19,
+    19,
+    19,
+    19,
+    19,
+    19,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    20,
+    21,
+    21,
+    21,
+    21,
+    21,
+    21,
+    21,
+    21,
+    21,
+    21,
+    21,
+    21,
+    21,
+    21,
+    22,
+    22,
+    22,
+    22,
+    22,
+    22,
+    22,
+    22,
+    22,
+    22,
+    22,
+    22,
+    22,
+    22,
+    23,
+    23,
+    23,
+    23,
+    23,
+    23,
+    23,
+    23,
+    23,
+    23,
+    23,
+    23,
+    24,
+    24,
+    24,
+    24,
+    24,
+    24,
+    24,
+    25,
+    25,
+    25,
+    25,
+    25,
+    25,
+    25,
+    25,
+    25,
+    25,
+    25,
+    25,
+    25,
+    25,
+    25,
+    26,
+    26,
+    26,
+    26,
+    26,
+    26,
+    26,
+    26,
+    26,
+    26,
+    26,
+    27,
+    27,
+    27,
+    27,
+    27,
+    27,
+    27,
+    28,
+    28,
+    28,
+    28,
+    28,
+    28,
+    28,
+    28,
+    29,
+    29,
+    29,
+    29,
+    29,
+    29,
+    29,
+    29,
+    29,
+    30,
+    30,
+    30,
+    30,
+    30,
+    30,
+    30,
+    30
+  ],
+  "word_durs_s": [
+    1.5234375,
+    4.1015625,
+    3.3203125,
+    4.765625,
+    1.2890625,
+    3.671875,
+    3.3203124999999964,
+    1.8359375,
+    2.1875,
+    4.1796875,
+    3.9453125,
+    4.1015625,
+    1.5234375,
+    3.515625,
+    1.71875,
+    4.2578125,
+    1.40625,
+    1.7578125,
+    2.3046875,
+    2.2265625,
+    4.140625,
+    4.1796875,
+    4.1015625,
+    5.46875,
+    1.5625,
+    4.21875,
+    1.3671875,
+    1.7578125,
+    2.0703125,
+    2.265625,
+    5.15625
+  ],
+  "ph_durs_s": [
+    0.21763392857142858,
+    0.21763392857142858,
+    0.21763392857142858,
+    0.21763392857142858,
+    0.21763392857142858,
+    0.21763392857142858,
+    0.21763392857142858,
+    0.3155048076923077,
+    0.3155048076923077,
+    0.3155048076923077,
+    0.3155048076923077,
+    0.3155048076923077,
+    0.3155048076923077,
+    0.3155048076923077,
+    0.3155048076923077,
+    0.3155048076923077,
+    0.3155048076923077,
+    0.3155048076923077,
+    0.3155048076923077,
+    0.3155048076923077,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.22135416666666666,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.3404017857142857,
+    0.18415178571428573,
+    0.18415178571428573,
+    0.18415178571428573,
+    0.18415178571428573,
+    0.18415178571428573,
+    0.18415178571428573,
+    0.18415178571428573,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.23716517857142833,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.2294921875,
+    0.18229166666666666,
+    0.18229166666666666,
+    0.18229166666666666,
+    0.18229166666666666,
+    0.18229166666666666,
+    0.18229166666666666,
+    0.18229166666666666,
+    0.18229166666666666,
+    0.18229166666666666,
+    0.18229166666666666,
+    0.18229166666666666,
+    0.18229166666666666,
+    0.4644097222222222,
+    0.4644097222222222,
+    0.4644097222222222,
+    0.4644097222222222,
+    0.4644097222222222,
+    0.4644097222222222,
+    0.4644097222222222,
+    0.4644097222222222,
+    0.4644097222222222,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.2818080357142857,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.25390625,
+    0.25390625,
+    0.25390625,
+    0.25390625,
+    0.25390625,
+    0.25390625,
+    0.3515625,
+    0.3515625,
+    0.3515625,
+    0.3515625,
+    0.3515625,
+    0.3515625,
+    0.3515625,
+    0.3515625,
+    0.3515625,
+    0.3515625,
+    0.24553571428571427,
+    0.24553571428571427,
+    0.24553571428571427,
+    0.24553571428571427,
+    0.24553571428571427,
+    0.24553571428571427,
+    0.24553571428571427,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.2838541666666667,
+    0.1278409090909091,
+    0.1278409090909091,
+    0.1278409090909091,
+    0.1278409090909091,
+    0.1278409090909091,
+    0.1278409090909091,
+    0.1278409090909091,
+    0.1278409090909091,
+    0.1278409090909091,
+    0.1278409090909091,
+    0.1278409090909091,
+    0.25111607142857145,
+    0.25111607142857145,
+    0.25111607142857145,
+    0.25111607142857145,
+    0.25111607142857145,
+    0.25111607142857145,
+    0.25111607142857145,
+    0.2880859375,
+    0.2880859375,
+    0.2880859375,
+    0.2880859375,
+    0.2880859375,
+    0.2880859375,
+    0.2880859375,
+    0.2880859375,
+    0.24739583333333334,
+    0.24739583333333334,
+    0.24739583333333334,
+    0.24739583333333334,
+    0.24739583333333334,
+    0.24739583333333334,
+    0.24739583333333334,
+    0.24739583333333334,
+    0.24739583333333334,
+    0.4600694444444444,
+    0.4600694444444444,
+    0.4600694444444444,
+    0.4600694444444444,
+    0.4600694444444444,
+    0.4600694444444444,
+    0.4600694444444444,
+    0.4600694444444444,
+    0.4600694444444444,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29854910714285715,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.29296875,
+    0.4557291666666667,
+    0.4557291666666667,
+    0.4557291666666667,
+    0.4557291666666667,
+    0.4557291666666667,
+    0.4557291666666667,
+    0.4557291666666667,
+    0.4557291666666667,
+    0.4557291666666667,
+    0.4557291666666667,
+    0.4557291666666667,
+    0.4557291666666667,
+    0.22321428571428573,
+    0.22321428571428573,
+    0.22321428571428573,
+    0.22321428571428573,
+    0.22321428571428573,
+    0.22321428571428573,
+    0.22321428571428573,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.28125,
+    0.12428977272727272,
+    0.12428977272727272,
+    0.12428977272727272,
+    0.12428977272727272,
+    0.12428977272727272,
+    0.12428977272727272,
+    0.12428977272727272,
+    0.12428977272727272,
+    0.12428977272727272,
+    0.12428977272727272,
+    0.12428977272727272,
+    0.25111607142857145,
+    0.25111607142857145,
+    0.25111607142857145,
+    0.25111607142857145,
+    0.25111607142857145,
+    0.25111607142857145,
+    0.25111607142857145,
+    0.2587890625,
+    0.2587890625,
+    0.2587890625,
+    0.2587890625,
+    0.2587890625,
+    0.2587890625,
+    0.2587890625,
+    0.2587890625,
+    0.2517361111111111,
+    0.2517361111111111,
+    0.2517361111111111,
+    0.2517361111111111,
+    0.2517361111111111,
+    0.2517361111111111,
+    0.2517361111111111,
+    0.2517361111111111,
+    0.2517361111111111,
+    0.64453125,
+    0.64453125,
+    0.64453125,
+    0.64453125,
+    0.64453125,
+    0.64453125,
+    0.64453125,
+    0.64453125
+  ],
+  "notes": [
+    {
+      "index": 0,
+      "start_s": 5.44,
+      "end_s": 5.59625,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Yesterday",
+      "word_index": 0,
+      "phonemes": [
+        "Y",
+        "EH1"
+      ]
+    },
+    {
+      "index": 1,
+      "start_s": 5.7134375,
+      "end_s": 5.7915625,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Yesterday",
+      "word_index": 0,
+      "phonemes": [
+        "S",
+        "T"
+      ]
+    },
+    {
+      "index": 2,
+      "start_s": 5.830625,
+      "end_s": 6.9634375,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Yesterday",
+      "word_index": 0,
+      "phonemes": [
+        "ER0",
+        "D",
+        "EY2"
+      ]
+    },
+    {
+      "index": 3,
+      "start_s": 8.486875000000001,
+      "end_s": 8.721250000000001,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "phonemes": [
+        "AE2"
+      ]
+    },
+    {
+      "index": 4,
+      "start_s": 8.799375000000001,
+      "end_s": 9.033750000000001,
+      "midi_pitch": 71,
+      "note_name": "B4",
+      "lyric_word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "phonemes": [
+        "L"
+      ]
+    },
+    {
+      "index": 5,
+      "start_s": 9.150937500000001,
+      "end_s": 9.307187500000001,
+      "midi_pitch": 73,
+      "note_name": "C#5",
+      "lyric_word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "phonemes": [
+        "M"
+      ]
+    },
+    {
+      "index": 6,
+      "start_s": 9.346250000000001,
+      "end_s": 9.658750000000001,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "phonemes": [
+        "AY0"
+      ]
+    },
+    {
+      "index": 7,
+      "start_s": 9.775937500000001,
+      "end_s": 10.049375000000001,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "phonemes": [
+        "T"
+      ]
+    },
+    {
+      "index": 8,
+      "start_s": 10.127500000000001,
+      "end_s": 10.361875000000001,
+      "midi_pitch": 77,
+      "note_name": "F5",
+      "lyric_word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "phonemes": [
+        "R"
+      ]
+    },
+    {
+      "index": 9,
+      "start_s": 10.557187500000001,
+      "end_s": 11.104062500000001,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "phonemes": [
+        "UW1"
+      ]
+    },
+    {
+      "index": 10,
+      "start_s": 11.182187500000001,
+      "end_s": 11.416562500000001,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "phonemes": [
+        "M"
+      ]
+    },
+    {
+      "index": 11,
+      "start_s": 11.455625000000001,
+      "end_s": 12.588437500000001,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "phonemes": [
+        "ER0",
+        "SH",
+        "AH0",
+        "L",
+        "IY0"
+      ]
+    },
+    {
+      "index": 12,
+      "start_s": 13.408750000000001,
+      "end_s": 13.525937500000001,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "Now it looks as though they’re here to stay",
+      "word_index": 2,
+      "phonemes": [
+        "OW2"
+      ]
+    },
+    {
+      "index": 13,
+      "start_s": 13.565000000000001,
+      "end_s": 13.760312500000001,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Now it looks as though they’re here to stay",
+      "word_index": 2,
+      "phonemes": [
+        "N"
+      ]
+    },
+    {
+      "index": 14,
+      "start_s": 13.877500000000001,
+      "end_s": 14.111875000000001,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "Now it looks as though they’re here to stay",
+      "word_index": 2,
+      "phonemes": [
+        "IY0"
+      ]
+    },
+    {
+      "index": 15,
+      "start_s": 14.229062500000001,
+      "end_s": 14.385312500000001,
+      "midi_pitch": 70,
+      "note_name": "A#4",
+      "lyric_word": "Now it looks as though they’re here to stay",
+      "word_index": 2,
+      "phonemes": [
+        "T"
+      ]
+    },
+    {
+      "index": 16,
+      "start_s": 14.463437500000001,
+      "end_s": 14.619687500000001,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Now it looks as though they’re here to stay",
+      "word_index": 2,
+      "phonemes": [
+        "OW0"
+      ]
+    },
+    {
+      "index": 17,
+      "start_s": 14.658750000000001,
+      "end_s": 14.854062500000001,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Now it looks as though they’re here to stay",
+      "word_index": 2,
+      "phonemes": [
+        "K"
+      ]
+    },
+    {
+      "index": 18,
+      "start_s": 14.971250000000001,
+      "end_s": 15.244687500000001,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Now it looks as though they’re here to stay",
+      "word_index": 2,
+      "phonemes": [
+        "L"
+      ]
+    },
+    {
+      "index": 19,
+      "start_s": 15.283750000000001,
+      "end_s": 15.752500000000001,
+      "midi_pitch": 70,
+      "note_name": "A#4",
+      "lyric_word": "Now it looks as though they’re here to stay",
+      "word_index": 2,
+      "phonemes": [
+        "EH2"
+      ]
+    },
+    {
+      "index": 20,
+      "start_s": 15.908750000000001,
+      "end_s": 16.065,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Now it looks as though they’re here to stay",
+      "word_index": 2,
+      "phonemes": [
+        "R"
+      ]
+    },
+    {
+      "index": 21,
+      "start_s": 16.1821875,
+      "end_s": 16.611875,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Now it looks as though they’re here to stay",
+      "word_index": 2,
+      "phonemes": [
+        "T"
+      ]
+    },
+    {
+      "index": 22,
+      "start_s": 16.6509375,
+      "end_s": 16.7290625,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Now it looks as though they’re here to stay",
+      "word_index": 2,
+      "phonemes": [
+        "AH0",
+        "F",
+        "ER1",
+        "S",
+        "IY0"
+      ]
+    },
+    {
+      "index": 23,
+      "start_s": 17.315,
+      "end_s": 17.6665625,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "phonemes": [
+        "OW0"
+      ]
+    },
+    {
+      "index": 24,
+      "start_s": 17.7446875,
+      "end_s": 18.2134375,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "phonemes": [
+        "HH"
+      ]
+    },
+    {
+      "index": 25,
+      "start_s": 18.2915625,
+      "end_s": 18.565,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "phonemes": [
+        "IY0"
+      ]
+    },
+    {
+      "index": 26,
+      "start_s": 18.643125,
+      "end_s": 19.34625,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "phonemes": [
+        "B"
+      ]
+    },
+    {
+      "index": 27,
+      "start_s": 19.815,
+      "end_s": 20.049375,
+      "midi_pitch": 62,
+      "note_name": "D4",
+      "lyric_word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 28,
+      "start_s": 20.1275,
+      "end_s": 20.5571875,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "phonemes": [
+        "L"
+      ]
+    },
+    {
+      "index": 29,
+      "start_s": 20.7525,
+      "end_s": 20.830625,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 30,
+      "start_s": 20.8696875,
+      "end_s": 20.986875,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "phonemes": [
+        "JH"
+      ]
+    },
+    {
+      "index": 31,
+      "start_s": 21.065,
+      "end_s": 22.080625,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "phonemes": [
+        "EH1",
+        "S",
+        "T",
+        "AH0",
+        "V",
+        "IY0"
+      ]
+    },
+    {
+      "index": 32,
+      "start_s": 22.6665625,
+      "end_s": 22.78375,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Suddenly",
+      "word_index": 4,
+      "phonemes": [
+        "S",
+        "AH1"
+      ]
+    },
+    {
+      "index": 33,
+      "start_s": 22.8228125,
+      "end_s": 23.018125,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Suddenly",
+      "word_index": 4,
+      "phonemes": [
+        "D",
+        "AH0"
+      ]
+    },
+    {
+      "index": 34,
+      "start_s": 23.09625,
+      "end_s": 23.955625,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Suddenly",
+      "word_index": 4,
+      "phonemes": [
+        "N",
+        "L",
+        "IY0"
+      ]
+    },
+    {
+      "index": 35,
+      "start_s": 25.7134375,
+      "end_s": 25.9478125,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "I’m not half the man I used to be",
+      "word_index": 5,
+      "phonemes": [
+        "IH2"
+      ]
+    },
+    {
+      "index": 36,
+      "start_s": 26.0259375,
+      "end_s": 26.2603125,
+      "midi_pitch": 71,
+      "note_name": "B4",
+      "lyric_word": "I’m not half the man I used to be",
+      "word_index": 5,
+      "phonemes": [
+        "N"
+      ]
+    },
+    {
+      "index": 37,
+      "start_s": 26.3775,
+      "end_s": 26.5728125,
+      "midi_pitch": 73,
+      "note_name": "C#5",
+      "lyric_word": "I’m not half the man I used to be",
+      "word_index": 5,
+      "phonemes": [
+        "D"
+      ]
+    },
+    {
+      "index": 38,
+      "start_s": 26.69,
+      "end_s": 26.8071875,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "I’m not half the man I used to be",
+      "word_index": 5,
+      "phonemes": [
+        "OW0"
+      ]
+    },
+    {
+      "index": 39,
+      "start_s": 26.84625,
+      "end_s": 27.236875,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "I’m not half the man I used to be",
+      "word_index": 5,
+      "phonemes": [
+        "M"
+      ]
+    },
+    {
+      "index": 40,
+      "start_s": 27.2759375,
+      "end_s": 27.5884375,
+      "midi_pitch": 77,
+      "note_name": "F5",
+      "lyric_word": "I’m not half the man I used to be",
+      "word_index": 5,
+      "phonemes": [
+        "TH"
+      ]
+    },
+    {
+      "index": 41,
+      "start_s": 27.6275,
+      "end_s": 27.8228125,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "I’m not half the man I used to be",
+      "word_index": 5,
+      "phonemes": [
+        "AO2"
+      ]
+    },
+    {
+      "index": 42,
+      "start_s": 27.9790625,
+      "end_s": 28.1353125,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "I’m not half the man I used to be",
+      "word_index": 5,
+      "phonemes": [
+        "R"
+      ]
+    },
+    {
+      "index": 43,
+      "start_s": 28.2134375,
+      "end_s": 29.3853125,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "I’m not half the man I used to be",
+      "word_index": 5,
+      "phonemes": [
+        "AH0",
+        "B",
+        "AH0",
+        "L",
+        "D",
+        "EY1",
+        "SH",
+        "AH0"
+      ]
+    },
+    {
+      "index": 44,
+      "start_s": 30.6353125,
+      "end_s": 30.7915625,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "There’s a shadow hangin’ over me",
+      "word_index": 6,
+      "phonemes": [
+        "DH"
+      ]
+    },
+    {
+      "index": 45,
+      "start_s": 30.830625,
+      "end_s": 30.986875,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "There’s a shadow hangin’ over me",
+      "word_index": 6,
+      "phonemes": [
+        "EH2"
+      ]
+    },
+    {
+      "index": 46,
+      "start_s": 31.065,
+      "end_s": 31.299375,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "There’s a shadow hangin’ over me",
+      "word_index": 6,
+      "phonemes": [
+        "R"
+      ]
+    },
+    {
+      "index": 47,
+      "start_s": 31.3384375,
+      "end_s": 31.7290625,
+      "midi_pitch": 70,
+      "note_name": "A#4",
+      "lyric_word": "There’s a shadow hangin’ over me",
+      "word_index": 6,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 48,
+      "start_s": 31.8071875,
+      "end_s": 32.0025,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "There’s a shadow hangin’ over me",
+      "word_index": 6,
+      "phonemes": [
+        "S"
+      ]
+    },
+    {
+      "index": 49,
+      "start_s": 32.080625,
+      "end_s": 32.236875,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "There’s a shadow hangin’ over me",
+      "word_index": 6,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 50,
+      "start_s": 32.2759375,
+      "end_s": 32.94,
+      "midi_pitch": 70,
+      "note_name": "A#4",
+      "lyric_word": "There’s a shadow hangin’ over me",
+      "word_index": 6,
+      "phonemes": [
+        "F"
+      ]
+    },
+    {
+      "index": 51,
+      "start_s": 33.018125,
+      "end_s": 33.2525,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "There’s a shadow hangin’ over me",
+      "word_index": 6,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 52,
+      "start_s": 33.330625,
+      "end_s": 33.955625,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "There’s a shadow hangin’ over me",
+      "word_index": 6,
+      "phonemes": [
+        "SH",
+        "EY1",
+        "N",
+        "D",
+        "AO2",
+        "V"
+      ]
+    },
+    {
+      "index": 53,
+      "start_s": 34.6196875,
+      "end_s": 34.97125,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Oh, yesterday",
+      "word_index": 7,
+      "phonemes": [
+        "OW0"
+      ]
+    },
+    {
+      "index": 54,
+      "start_s": 35.049375,
+      "end_s": 35.2446875,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Oh, yesterday",
+      "word_index": 7,
+      "phonemes": [
+        "HH"
+      ]
+    },
+    {
+      "index": 55,
+      "start_s": 35.4790625,
+      "end_s": 35.5571875,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Oh, yesterday",
+      "word_index": 7,
+      "phonemes": [
+        "AY1"
+      ]
+    },
+    {
+      "index": 56,
+      "start_s": 35.59625,
+      "end_s": 35.7525,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Oh, yesterday",
+      "word_index": 7,
+      "phonemes": [
+        "S"
+      ]
+    },
+    {
+      "index": 57,
+      "start_s": 35.830625,
+      "end_s": 36.455625,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Oh, yesterday",
+      "word_index": 7,
+      "phonemes": [
+        "T",
+        "R",
+        "EY2",
+        "D"
+      ]
+    },
+    {
+      "index": 58,
+      "start_s": 37.0025,
+      "end_s": 37.236875,
+      "midi_pitch": 62,
+      "note_name": "D4",
+      "lyric_word": "Came suddenly",
+      "word_index": 8,
+      "phonemes": [
+        "K",
+        "AE1"
+      ]
+    },
+    {
+      "index": 59,
+      "start_s": 37.393125,
+      "end_s": 37.94,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Came suddenly",
+      "word_index": 8,
+      "phonemes": [
+        "M",
+        "AH0"
+      ]
+    },
+    {
+      "index": 60,
+      "start_s": 37.9790625,
+      "end_s": 38.09625,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Came suddenly",
+      "word_index": 8,
+      "phonemes": [
+        "Z",
+        "AH0"
+      ]
+    },
+    {
+      "index": 61,
+      "start_s": 38.1353125,
+      "end_s": 38.2915625,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Came suddenly",
+      "word_index": 8,
+      "phonemes": [
+        "D",
+        "EH2"
+      ]
+    },
+    {
+      "index": 62,
+      "start_s": 38.330625,
+      "end_s": 39.19,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Came suddenly",
+      "word_index": 8,
+      "phonemes": [
+        "N",
+        "T",
+        "L",
+        "IY0"
+      ]
+    },
+    {
+      "index": 63,
+      "start_s": 39.893125,
+      "end_s": 41.0259375,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Why she had to go?",
+      "word_index": 9,
+      "phonemes": [
+        "W"
+      ]
+    },
+    {
+      "index": 64,
+      "start_s": 41.143125,
+      "end_s": 42.0025,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Why she had to go?",
+      "word_index": 9,
+      "phonemes": [
+        "AY2"
+      ]
+    },
+    {
+      "index": 65,
+      "start_s": 42.3540625,
+      "end_s": 42.8228125,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Why she had to go?",
+      "word_index": 9,
+      "phonemes": [
+        "S"
+      ]
+    },
+    {
+      "index": 66,
+      "start_s": 43.018125,
+      "end_s": 43.5259375,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "Why she had to go?",
+      "word_index": 9,
+      "phonemes": [
+        "HH"
+      ]
+    },
+    {
+      "index": 67,
+      "start_s": 43.6040625,
+      "end_s": 44.0728125,
+      "midi_pitch": 77,
+      "note_name": "F5",
+      "lyric_word": "Why she had to go?",
+      "word_index": 9,
+      "phonemes": [
+        "IY0",
+        "CH",
+        "EY1",
+        "D",
+        "OW0"
+      ]
+    },
+    {
+      "index": 68,
+      "start_s": 44.268125,
+      "end_s": 44.5025,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 10,
+      "phonemes": [
+        "AY2"
+      ]
+    },
+    {
+      "index": 69,
+      "start_s": 44.580625,
+      "end_s": 45.049375,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 10,
+      "phonemes": [
+        "D"
+      ]
+    },
+    {
+      "index": 70,
+      "start_s": 45.1275,
+      "end_s": 45.6353125,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 10,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 71,
+      "start_s": 45.7525,
+      "end_s": 45.8696875,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 10,
+      "phonemes": [
+        "NG"
+      ]
+    },
+    {
+      "index": 72,
+      "start_s": 45.90875,
+      "end_s": 46.065,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 10,
+      "phonemes": [
+        "K"
+      ]
+    },
+    {
+      "index": 73,
+      "start_s": 46.143125,
+      "end_s": 46.5728125,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 10,
+      "phonemes": [
+        "AW2"
+      ]
+    },
+    {
+      "index": 74,
+      "start_s": 46.69,
+      "end_s": 46.84625,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 10,
+      "phonemes": [
+        "T"
+      ]
+    },
+    {
+      "index": 75,
+      "start_s": 47.0025,
+      "end_s": 48.2134375,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 10,
+      "phonemes": [
+        "N",
+        "UW1",
+        "S",
+        "T",
+        "AO2",
+        "R",
+        "IY0"
+      ]
+    },
+    {
+      "index": 76,
+      "start_s": 49.815,
+      "end_s": 50.9478125,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "I said something wrong",
+      "word_index": 11,
+      "phonemes": [
+        "IH2",
+        "S"
+      ]
+    },
+    {
+      "index": 77,
+      "start_s": 51.0259375,
+      "end_s": 51.7290625,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "I said something wrong",
+      "word_index": 11,
+      "phonemes": [
+        "AH0",
+        "D"
+      ]
+    },
+    {
+      "index": 78,
+      "start_s": 52.236875,
+      "end_s": 52.78375,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "I said something wrong",
+      "word_index": 11,
+      "phonemes": [
+        "AH0",
+        "M"
+      ]
+    },
+    {
+      "index": 79,
+      "start_s": 52.861875,
+      "end_s": 53.3696875,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "I said something wrong",
+      "word_index": 11,
+      "phonemes": [
+        "Y",
+        "UW1"
+      ]
+    },
+    {
+      "index": 80,
+      "start_s": 53.4478125,
+      "end_s": 53.9165625,
+      "midi_pitch": 77,
+      "note_name": "F5",
+      "lyric_word": "I said something wrong",
+      "word_index": 11,
+      "phonemes": [
+        "SH",
+        "AH0",
+        "N",
+        "F",
+        "AO0",
+        "G"
+      ]
+    },
+    {
+      "index": 81,
+      "start_s": 54.03375,
+      "end_s": 54.3853125,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "Now I long",
+      "word_index": 12,
+      "phonemes": [
+        "N"
+      ]
+    },
+    {
+      "index": 82,
+      "start_s": 54.4634375,
+      "end_s": 54.6978125,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Now I long",
+      "word_index": 12,
+      "phonemes": [
+        "AW1"
+      ]
+    },
+    {
+      "index": 83,
+      "start_s": 54.815,
+      "end_s": 55.3228125,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "Now I long",
+      "word_index": 12,
+      "phonemes": [
+        "L"
+      ]
+    },
+    {
+      "index": 84,
+      "start_s": 55.361875,
+      "end_s": 55.5571875,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Now I long",
+      "word_index": 12,
+      "phonemes": [
+        "AY0",
+        "AO0",
+        "NG"
+      ]
+    },
+    {
+      "index": 85,
+      "start_s": 55.674375,
+      "end_s": 55.830625,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "For yesterday",
+      "word_index": 13,
+      "phonemes": [
+        "F",
+        "AO2"
+      ]
+    },
+    {
+      "index": 86,
+      "start_s": 55.90875,
+      "end_s": 56.3775,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "For yesterday",
+      "word_index": 13,
+      "phonemes": [
+        "R",
+        "Y"
+      ]
+    },
+    {
+      "index": 87,
+      "start_s": 56.611875,
+      "end_s": 56.7290625,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "For yesterday",
+      "word_index": 13,
+      "phonemes": [
+        "EH1",
+        "S"
+      ]
+    },
+    {
+      "index": 88,
+      "start_s": 56.768125,
+      "end_s": 57.080625,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "For yesterday",
+      "word_index": 13,
+      "phonemes": [
+        "T",
+        "ER0"
+      ]
+    },
+    {
+      "index": 89,
+      "start_s": 57.236875,
+      "end_s": 59.19,
+      "midi_pitch": 77,
+      "note_name": "F5",
+      "lyric_word": "For yesterday",
+      "word_index": 13,
+      "phonemes": [
+        "D",
+        "IY0"
+      ]
+    },
+    {
+      "index": 90,
+      "start_s": 59.65875,
+      "end_s": 59.815,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Yesterday",
+      "word_index": 14,
+      "phonemes": [
+        "Y",
+        "EH1"
+      ]
+    },
+    {
+      "index": 91,
+      "start_s": 59.97125,
+      "end_s": 60.049375,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Yesterday",
+      "word_index": 14,
+      "phonemes": [
+        "S",
+        "T"
+      ]
+    },
+    {
+      "index": 92,
+      "start_s": 60.1275,
+      "end_s": 61.3775,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Yesterday",
+      "word_index": 14,
+      "phonemes": [
+        "ER0",
+        "D",
+        "EY2"
+      ]
+    },
+    {
+      "index": 93,
+      "start_s": 62.78375,
+      "end_s": 63.018125,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 15,
+      "phonemes": [
+        "L"
+      ]
+    },
+    {
+      "index": 94,
+      "start_s": 63.09625,
+      "end_s": 63.2915625,
+      "midi_pitch": 71,
+      "note_name": "B4",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 15,
+      "phonemes": [
+        "OW2"
+      ]
+    },
+    {
+      "index": 95,
+      "start_s": 63.4478125,
+      "end_s": 63.6040625,
+      "midi_pitch": 73,
+      "note_name": "C#5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 15,
+      "phonemes": [
+        "V"
+      ]
+    },
+    {
+      "index": 96,
+      "start_s": 63.6821875,
+      "end_s": 63.8384375,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 15,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 97,
+      "start_s": 63.8775,
+      "end_s": 64.34625,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 15,
+      "phonemes": [
+        "S"
+      ]
+    },
+    {
+      "index": 98,
+      "start_s": 64.3853125,
+      "end_s": 64.65875,
+      "midi_pitch": 77,
+      "note_name": "F5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 15,
+      "phonemes": [
+        "F"
+      ]
+    },
+    {
+      "index": 99,
+      "start_s": 64.736875,
+      "end_s": 65.4009375,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 15,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 100,
+      "start_s": 65.518125,
+      "end_s": 65.6353125,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 15,
+      "phonemes": [
+        "N"
+      ]
+    },
+    {
+      "index": 101,
+      "start_s": 65.7525,
+      "end_s": 67.0415625,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 15,
+      "phonemes": [
+        "T",
+        "EY1",
+        "SH",
+        "AH0",
+        "P",
+        "L",
+        "IY0"
+      ]
+    },
+    {
+      "index": 102,
+      "start_s": 67.94,
+      "end_s": 68.0571875,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "Now I need a place",
+      "word_index": 16,
+      "phonemes": [
+        "N"
+      ]
+    },
+    {
+      "index": 103,
+      "start_s": 68.09625,
+      "end_s": 68.3696875,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Now I need a place",
+      "word_index": 16,
+      "phonemes": [
+        "OW2"
+      ]
+    },
+    {
+      "index": 104,
+      "start_s": 68.40875,
+      "end_s": 68.799375,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "Now I need a place",
+      "word_index": 16,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 105,
+      "start_s": 68.8384375,
+      "end_s": 68.955625,
+      "midi_pitch": 70,
+      "note_name": "A#4",
+      "lyric_word": "Now I need a place",
+      "word_index": 16,
+      "phonemes": [
+        "N"
+      ]
+    },
+    {
+      "index": 106,
+      "start_s": 69.0728125,
+      "end_s": 69.19,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Now I need a place",
+      "word_index": 16,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 107,
+      "start_s": 69.2290625,
+      "end_s": 69.34625,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Now I need a place",
+      "word_index": 16,
+      "phonemes": [
+        "D",
+        "P",
+        "AA1",
+        "L",
+        "IH0",
+        "V"
+      ]
+    },
+    {
+      "index": 108,
+      "start_s": 69.5415625,
+      "end_s": 69.7759375,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "To hide away",
+      "word_index": 17,
+      "phonemes": [
+        "T"
+      ]
+    },
+    {
+      "index": 109,
+      "start_s": 69.8540625,
+      "end_s": 69.97125,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "To hide away",
+      "word_index": 17,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 110,
+      "start_s": 70.0103125,
+      "end_s": 70.361875,
+      "midi_pitch": 70,
+      "note_name": "A#4",
+      "lyric_word": "To hide away",
+      "word_index": 17,
+      "phonemes": [
+        "HH"
+      ]
+    },
+    {
+      "index": 111,
+      "start_s": 70.44,
+      "end_s": 70.674375,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "To hide away",
+      "word_index": 17,
+      "phonemes": [
+        "AY1"
+      ]
+    },
+    {
+      "index": 112,
+      "start_s": 70.7525,
+      "end_s": 71.1821875,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "To hide away",
+      "word_index": 17,
+      "phonemes": [
+        "D"
+      ]
+    },
+    {
+      "index": 113,
+      "start_s": 71.22125,
+      "end_s": 71.299375,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "To hide away",
+      "word_index": 17,
+      "phonemes": [
+        "OW2",
+        "EY0"
+      ]
+    },
+    {
+      "index": 114,
+      "start_s": 71.7290625,
+      "end_s": 72.0415625,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Oh, I believe",
+      "word_index": 18,
+      "phonemes": [
+        "OW0"
+      ]
+    },
+    {
+      "index": 115,
+      "start_s": 72.080625,
+      "end_s": 72.1978125,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Oh, I believe",
+      "word_index": 18,
+      "phonemes": [
+        "HH"
+      ]
+    },
+    {
+      "index": 116,
+      "start_s": 72.236875,
+      "end_s": 72.861875,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Oh, I believe",
+      "word_index": 18,
+      "phonemes": [
+        "IY1"
+      ]
+    },
+    {
+      "index": 117,
+      "start_s": 72.94,
+      "end_s": 73.330625,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Oh, I believe",
+      "word_index": 18,
+      "phonemes": [
+        "B"
+      ]
+    },
+    {
+      "index": 118,
+      "start_s": 73.3696875,
+      "end_s": 74.03375,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Oh, I believe",
+      "word_index": 18,
+      "phonemes": [
+        "AH0",
+        "L",
+        "IY2",
+        "V"
+      ]
+    },
+    {
+      "index": 119,
+      "start_s": 74.5415625,
+      "end_s": 74.815,
+      "midi_pitch": 62,
+      "note_name": "D4",
+      "lyric_word": "In yesterday",
+      "word_index": 19,
+      "phonemes": [
+        "IH2",
+        "N"
+      ]
+    },
+    {
+      "index": 120,
+      "start_s": 74.893125,
+      "end_s": 75.3228125,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "In yesterday",
+      "word_index": 19,
+      "phonemes": [
+        "IH0",
+        "S"
+      ]
+    },
+    {
+      "index": 121,
+      "start_s": 75.4790625,
+      "end_s": 75.7525,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "In yesterday",
+      "word_index": 19,
+      "phonemes": [
+        "T",
+        "R"
+      ]
+    },
+    {
+      "index": 122,
+      "start_s": 75.830625,
+      "end_s": 76.768125,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "In yesterday",
+      "word_index": 19,
+      "phonemes": [
+        "EY1",
+        "D",
+        "IY0"
+      ]
+    },
+    {
+      "index": 123,
+      "start_s": 77.3540625,
+      "end_s": 78.2915625,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Why she had to go?",
+      "word_index": 20,
+      "phonemes": [
+        "W"
+      ]
+    },
+    {
+      "index": 124,
+      "start_s": 78.72125,
+      "end_s": 79.5415625,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Why she had to go?",
+      "word_index": 20,
+      "phonemes": [
+        "AY2"
+      ]
+    },
+    {
+      "index": 125,
+      "start_s": 79.893125,
+      "end_s": 80.361875,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Why she had to go?",
+      "word_index": 20,
+      "phonemes": [
+        "S"
+      ]
+    },
+    {
+      "index": 126,
+      "start_s": 80.518125,
+      "end_s": 81.065,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "Why she had to go?",
+      "word_index": 20,
+      "phonemes": [
+        "HH"
+      ]
+    },
+    {
+      "index": 127,
+      "start_s": 81.143125,
+      "end_s": 81.4946875,
+      "midi_pitch": 77,
+      "note_name": "F5",
+      "lyric_word": "Why she had to go?",
+      "word_index": 20,
+      "phonemes": [
+        "IY0",
+        "CH",
+        "EY1",
+        "D",
+        "OW0"
+      ]
+    },
+    {
+      "index": 128,
+      "start_s": 81.7290625,
+      "end_s": 82.0025,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 21,
+      "phonemes": [
+        "AY2"
+      ]
+    },
+    {
+      "index": 129,
+      "start_s": 82.080625,
+      "end_s": 82.47125,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 21,
+      "phonemes": [
+        "D"
+      ]
+    },
+    {
+      "index": 130,
+      "start_s": 82.549375,
+      "end_s": 83.0571875,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 21,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 131,
+      "start_s": 83.40875,
+      "end_s": 83.5259375,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 21,
+      "phonemes": [
+        "NG"
+      ]
+    },
+    {
+      "index": 132,
+      "start_s": 83.565,
+      "end_s": 83.7603125,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 21,
+      "phonemes": [
+        "K"
+      ]
+    },
+    {
+      "index": 133,
+      "start_s": 83.799375,
+      "end_s": 84.2290625,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 21,
+      "phonemes": [
+        "AW2"
+      ]
+    },
+    {
+      "index": 134,
+      "start_s": 84.3071875,
+      "end_s": 84.5025,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 21,
+      "phonemes": [
+        "T"
+      ]
+    },
+    {
+      "index": 135,
+      "start_s": 84.65875,
+      "end_s": 85.90875,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "I don’t know, she wouldn’t say",
+      "word_index": 21,
+      "phonemes": [
+        "N",
+        "UW1",
+        "S",
+        "T",
+        "AO2",
+        "R",
+        "IY0"
+      ]
+    },
+    {
+      "index": 136,
+      "start_s": 87.315,
+      "end_s": 88.3696875,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "I said something wrong",
+      "word_index": 22,
+      "phonemes": [
+        "IH2",
+        "S"
+      ]
+    },
+    {
+      "index": 137,
+      "start_s": 88.5259375,
+      "end_s": 89.34625,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "I said something wrong",
+      "word_index": 22,
+      "phonemes": [
+        "AH0",
+        "D"
+      ]
+    },
+    {
+      "index": 138,
+      "start_s": 89.6978125,
+      "end_s": 90.28375,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "I said something wrong",
+      "word_index": 22,
+      "phonemes": [
+        "AH0",
+        "M"
+      ]
+    },
+    {
+      "index": 139,
+      "start_s": 90.361875,
+      "end_s": 90.90875,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "I said something wrong",
+      "word_index": 22,
+      "phonemes": [
+        "Y",
+        "UW1"
+      ]
+    },
+    {
+      "index": 140,
+      "start_s": 90.9478125,
+      "end_s": 91.4165625,
+      "midi_pitch": 77,
+      "note_name": "F5",
+      "lyric_word": "I said something wrong",
+      "word_index": 22,
+      "phonemes": [
+        "SH",
+        "AH0",
+        "N",
+        "F",
+        "AO0",
+        "G"
+      ]
+    },
+    {
+      "index": 141,
+      "start_s": 91.611875,
+      "end_s": 91.84625,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "Now I long for yesterday",
+      "word_index": 23,
+      "phonemes": [
+        "N"
+      ]
+    },
+    {
+      "index": 142,
+      "start_s": 91.924375,
+      "end_s": 92.1978125,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Now I long for yesterday",
+      "word_index": 23,
+      "phonemes": [
+        "OW0"
+      ]
+    },
+    {
+      "index": 143,
+      "start_s": 92.315,
+      "end_s": 92.6275,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "Now I long for yesterday",
+      "word_index": 23,
+      "phonemes": [
+        "D"
+      ]
+    },
+    {
+      "index": 144,
+      "start_s": 92.6665625,
+      "end_s": 92.861875,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Now I long for yesterday",
+      "word_index": 23,
+      "phonemes": [
+        "IY0"
+      ]
+    },
+    {
+      "index": 145,
+      "start_s": 93.174375,
+      "end_s": 93.2915625,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Now I long for yesterday",
+      "word_index": 23,
+      "phonemes": [
+        "AO2"
+      ]
+    },
+    {
+      "index": 146,
+      "start_s": 93.330625,
+      "end_s": 93.4478125,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "Now I long for yesterday",
+      "word_index": 23,
+      "phonemes": [
+        "L"
+      ]
+    },
+    {
+      "index": 147,
+      "start_s": 93.486875,
+      "end_s": 93.955625,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "Now I long for yesterday",
+      "word_index": 23,
+      "phonemes": [
+        "F"
+      ]
+    },
+    {
+      "index": 148,
+      "start_s": 94.111875,
+      "end_s": 94.6196875,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "Now I long for yesterday",
+      "word_index": 23,
+      "phonemes": [
+        "ER0"
+      ]
+    },
+    {
+      "index": 149,
+      "start_s": 94.736875,
+      "end_s": 95.361875,
+      "midi_pitch": 77,
+      "note_name": "F5",
+      "lyric_word": "Now I long for yesterday",
+      "word_index": 23,
+      "phonemes": [
+        "AE1"
+      ]
+    },
+    {
+      "index": 150,
+      "start_s": 95.44,
+      "end_s": 95.90875,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "Now I long for yesterday",
+      "word_index": 23,
+      "phonemes": [
+        "S"
+      ]
+    },
+    {
+      "index": 151,
+      "start_s": 96.065,
+      "end_s": 96.53375,
+      "midi_pitch": 70,
+      "note_name": "A#4",
+      "lyric_word": "Now I long for yesterday",
+      "word_index": 23,
+      "phonemes": [
+        "T"
+      ]
+    },
+    {
+      "index": 152,
+      "start_s": 96.69,
+      "end_s": 97.080625,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Now I long for yesterday",
+      "word_index": 23,
+      "phonemes": [
+        "IY0"
+      ]
+    },
+    {
+      "index": 153,
+      "start_s": 97.315,
+      "end_s": 97.47125,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Yesterday",
+      "word_index": 24,
+      "phonemes": [
+        "Y",
+        "EH1"
+      ]
+    },
+    {
+      "index": 154,
+      "start_s": 97.6275,
+      "end_s": 97.705625,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Yesterday",
+      "word_index": 24,
+      "phonemes": [
+        "S",
+        "T"
+      ]
+    },
+    {
+      "index": 155,
+      "start_s": 97.78375,
+      "end_s": 98.8775,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Yesterday",
+      "word_index": 24,
+      "phonemes": [
+        "ER0",
+        "D",
+        "EY2"
+      ]
+    },
+    {
+      "index": 156,
+      "start_s": 100.44,
+      "end_s": 100.7525,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 25,
+      "phonemes": [
+        "L"
+      ]
+    },
+    {
+      "index": 157,
+      "start_s": 100.830625,
+      "end_s": 100.986875,
+      "midi_pitch": 71,
+      "note_name": "B4",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 25,
+      "phonemes": [
+        "OW2"
+      ]
+    },
+    {
+      "index": 158,
+      "start_s": 101.143125,
+      "end_s": 101.299375,
+      "midi_pitch": 73,
+      "note_name": "C#5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 25,
+      "phonemes": [
+        "V"
+      ]
+    },
+    {
+      "index": 159,
+      "start_s": 101.3775,
+      "end_s": 101.53375,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 25,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 160,
+      "start_s": 101.5728125,
+      "end_s": 102.0025,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 25,
+      "phonemes": [
+        "S"
+      ]
+    },
+    {
+      "index": 161,
+      "start_s": 102.080625,
+      "end_s": 102.315,
+      "midi_pitch": 77,
+      "note_name": "F5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 25,
+      "phonemes": [
+        "F"
+      ]
+    },
+    {
+      "index": 162,
+      "start_s": 102.4321875,
+      "end_s": 102.549375,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 25,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 163,
+      "start_s": 102.5884375,
+      "end_s": 103.018125,
+      "midi_pitch": 76,
+      "note_name": "E5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 25,
+      "phonemes": [
+        "N"
+      ]
+    },
+    {
+      "index": 164,
+      "start_s": 103.1353125,
+      "end_s": 103.2525,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 25,
+      "phonemes": [
+        "T"
+      ]
+    },
+    {
+      "index": 165,
+      "start_s": 103.3696875,
+      "end_s": 104.65875,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Love was such an easy game to play",
+      "word_index": 25,
+      "phonemes": [
+        "EY1",
+        "SH",
+        "AH0",
+        "P",
+        "L",
+        "IY0"
+      ]
+    },
+    {
+      "index": 166,
+      "start_s": 105.518125,
+      "end_s": 105.59625,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "Now I need a place",
+      "word_index": 26,
+      "phonemes": [
+        "N"
+      ]
+    },
+    {
+      "index": 167,
+      "start_s": 105.6353125,
+      "end_s": 105.7134375,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Now I need a place",
+      "word_index": 26,
+      "phonemes": [
+        "OW2"
+      ]
+    },
+    {
+      "index": 168,
+      "start_s": 105.7525,
+      "end_s": 105.90875,
+      "midi_pitch": 74,
+      "note_name": "D5",
+      "lyric_word": "Now I need a place",
+      "word_index": 26,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 169,
+      "start_s": 105.986875,
+      "end_s": 106.3384375,
+      "midi_pitch": 72,
+      "note_name": "C5",
+      "lyric_word": "Now I need a place",
+      "word_index": 26,
+      "phonemes": [
+        "N"
+      ]
+    },
+    {
+      "index": 170,
+      "start_s": 106.3775,
+      "end_s": 106.4946875,
+      "midi_pitch": 70,
+      "note_name": "A#4",
+      "lyric_word": "Now I need a place",
+      "word_index": 26,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 171,
+      "start_s": 106.611875,
+      "end_s": 106.7290625,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Now I need a place",
+      "word_index": 26,
+      "phonemes": [
+        "D"
+      ]
+    },
+    {
+      "index": 172,
+      "start_s": 106.768125,
+      "end_s": 106.8853125,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Now I need a place",
+      "word_index": 26,
+      "phonemes": [
+        "P",
+        "AA1",
+        "L",
+        "IH0",
+        "V"
+      ]
+    },
+    {
+      "index": 173,
+      "start_s": 107.080625,
+      "end_s": 107.3540625,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "To hide away",
+      "word_index": 27,
+      "phonemes": [
+        "T"
+      ]
+    },
+    {
+      "index": 174,
+      "start_s": 107.393125,
+      "end_s": 107.5103125,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "To hide away",
+      "word_index": 27,
+      "phonemes": [
+        "AH0"
+      ]
+    },
+    {
+      "index": 175,
+      "start_s": 107.549375,
+      "end_s": 107.9790625,
+      "midi_pitch": 70,
+      "note_name": "A#4",
+      "lyric_word": "To hide away",
+      "word_index": 27,
+      "phonemes": [
+        "HH"
+      ]
+    },
+    {
+      "index": 176,
+      "start_s": 108.018125,
+      "end_s": 108.2525,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "To hide away",
+      "word_index": 27,
+      "phonemes": [
+        "AY1"
+      ]
+    },
+    {
+      "index": 177,
+      "start_s": 108.330625,
+      "end_s": 108.643125,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "To hide away",
+      "word_index": 27,
+      "phonemes": [
+        "D"
+      ]
+    },
+    {
+      "index": 178,
+      "start_s": 108.6821875,
+      "end_s": 108.8384375,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "To hide away",
+      "word_index": 27,
+      "phonemes": [
+        "OW2",
+        "EY0"
+      ]
+    },
+    {
+      "index": 179,
+      "start_s": 109.5025,
+      "end_s": 109.815,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Oh, I believe",
+      "word_index": 28,
+      "phonemes": [
+        "OW0",
+        "HH"
+      ]
+    },
+    {
+      "index": 180,
+      "start_s": 109.893125,
+      "end_s": 110.44,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Oh, I believe",
+      "word_index": 28,
+      "phonemes": [
+        "IY1",
+        "B"
+      ]
+    },
+    {
+      "index": 181,
+      "start_s": 110.518125,
+      "end_s": 110.7915625,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Oh, I believe",
+      "word_index": 28,
+      "phonemes": [
+        "AH0",
+        "L"
+      ]
+    },
+    {
+      "index": 182,
+      "start_s": 110.8696875,
+      "end_s": 111.5728125,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Oh, I believe",
+      "word_index": 28,
+      "phonemes": [
+        "IY2",
+        "V"
+      ]
+    },
+    {
+      "index": 183,
+      "start_s": 112.0415625,
+      "end_s": 112.3540625,
+      "midi_pitch": 62,
+      "note_name": "D4",
+      "lyric_word": "In yesterday",
+      "word_index": 29,
+      "phonemes": [
+        "IH2"
+      ]
+    },
+    {
+      "index": 184,
+      "start_s": 112.393125,
+      "end_s": 112.8228125,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "In yesterday",
+      "word_index": 29,
+      "phonemes": [
+        "N"
+      ]
+    },
+    {
+      "index": 185,
+      "start_s": 113.018125,
+      "end_s": 113.09625,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "In yesterday",
+      "word_index": 29,
+      "phonemes": [
+        "IH0"
+      ]
+    },
+    {
+      "index": 186,
+      "start_s": 113.1353125,
+      "end_s": 113.2525,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "In yesterday",
+      "word_index": 29,
+      "phonemes": [
+        "S"
+      ]
+    },
+    {
+      "index": 187,
+      "start_s": 113.3696875,
+      "end_s": 114.3071875,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "In yesterday",
+      "word_index": 29,
+      "phonemes": [
+        "T",
+        "R",
+        "EY1",
+        "D",
+        "IY0"
+      ]
+    },
+    {
+      "index": 188,
+      "start_s": 114.97125,
+      "end_s": 115.59625,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Hmm, hmm, hmm, hmm, hmm, hmm hmm",
+      "word_index": 30,
+      "phonemes": [
+        "M"
+      ]
+    },
+    {
+      "index": 189,
+      "start_s": 115.674375,
+      "end_s": 116.3384375,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Hmm, hmm, hmm, hmm, hmm, hmm hmm",
+      "word_index": 30,
+      "phonemes": [
+        "AH1"
+      ]
+    },
+    {
+      "index": 190,
+      "start_s": 116.3775,
+      "end_s": 117.0415625,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Hmm, hmm, hmm, hmm, hmm, hmm hmm",
+      "word_index": 30,
+      "phonemes": [
+        "M"
+      ]
+    },
+    {
+      "index": 191,
+      "start_s": 117.080625,
+      "end_s": 117.78375,
+      "midi_pitch": 62,
+      "note_name": "D4",
+      "lyric_word": "Hmm, hmm, hmm, hmm, hmm, hmm hmm",
+      "word_index": 30,
+      "phonemes": [
+        "HH"
+      ]
+    },
+    {
+      "index": 192,
+      "start_s": 117.861875,
+      "end_s": 118.565,
+      "midi_pitch": 65,
+      "note_name": "F4",
+      "lyric_word": "Hmm, hmm, hmm, hmm, hmm, hmm hmm",
+      "word_index": 30,
+      "phonemes": [
+        "ER0"
+      ]
+    },
+    {
+      "index": 193,
+      "start_s": 118.643125,
+      "end_s": 118.799375,
+      "midi_pitch": 67,
+      "note_name": "G4",
+      "lyric_word": "Hmm, hmm, hmm, hmm, hmm, hmm hmm",
+      "word_index": 30,
+      "phonemes": [
+        "M"
+      ]
+    },
+    {
+      "index": 194,
+      "start_s": 118.8384375,
+      "end_s": 119.111875,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Hmm, hmm, hmm, hmm, hmm, hmm hmm",
+      "word_index": 30,
+      "phonemes": [
+        "IH0"
+      ]
+    },
+    {
+      "index": 195,
+      "start_s": 119.19,
+      "end_s": 120.1275,
+      "midi_pitch": 69,
+      "note_name": "A4",
+      "lyric_word": "Hmm, hmm, hmm, hmm, hmm, hmm hmm",
+      "word_index": 30,
+      "phonemes": [
+        "N"
+      ]
+    }
+  ]
+}

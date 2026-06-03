@@ -1,0 +1,94 @@
+# Section labels for "Losing My Religion" by R.E.M.
+#
+# Used by Sprint-3 trend detection (vocal_coach/trends.py and the
+# section-level highlight detectors in vocal_coach/highlights.py). Times are
+# in song-time seconds and were estimated from the UltraStar chart beat
+# positions (BPM=200, GAP=14000ms, sec/beat=0.075).
+#
+# Schema:
+#   sections:
+#     - name: str            # human-readable label (Verse 1, Chorus 1, Bridge, ...)
+#       start_s: float
+#       end_s: float
+#       kind: optional[str]  # one of: intro, verse, pre_chorus, chorus, bridge, refrain, outro
+#
+# When this file is present it OVERRIDES the auto-derived "Phrase N" sections
+# built from UltraStar phrase breaks in vocal_coach/song.py.
+
+sections:
+  - name: Intro
+    kind: intro
+    start_s: 0.0
+    end_s: 14.7
+  - name: Verse 1
+    kind: verse
+    start_s: 14.7
+    end_s: 32.8
+  - name: Pre-Chorus 1
+    kind: pre_chorus
+    start_s: 32.8
+    end_s: 40.3
+  - name: Chorus 1
+    kind: chorus
+    start_s: 40.3
+    end_s: 52.7
+  - name: Verse 2
+    kind: verse
+    start_s: 52.7
+    end_s: 65.1
+  - name: Pre-Chorus 2
+    kind: pre_chorus
+    start_s: 65.1
+    end_s: 74.7
+  - name: Refrain 1
+    kind: refrain
+    start_s: 74.7
+    end_s: 82.3
+  - name: Bridge 1
+    kind: bridge
+    start_s: 82.3
+    end_s: 97.6
+  - name: Verse 3
+    kind: verse
+    start_s: 97.6
+    end_s: 107.0
+  - name: Pre-Chorus 3
+    kind: pre_chorus
+    start_s: 107.0
+    end_s: 116.8
+  - name: Bridge 2
+    kind: bridge
+    start_s: 116.8
+    end_s: 138.8
+  - name: Bridge 3
+    kind: bridge
+    start_s: 138.8
+    end_s: 152.0
+  - name: Refrain 2
+    kind: refrain
+    start_s: 152.0
+    end_s: 166.8
+  - name: Outro Intro
+    kind: outro
+    start_s: 166.8
+    end_s: 183.5
+  - name: Chorus 2
+    kind: chorus
+    start_s: 183.5
+    end_s: 193.6
+  - name: Verse 4
+    kind: verse
+    start_s: 193.6
+    end_s: 202.9
+  - name: Pre-Chorus 4
+    kind: pre_chorus
+    start_s: 202.9
+    end_s: 212.5
+  - name: Refrain 3
+    kind: refrain
+    start_s: 212.5
+    end_s: 227.9
+  - name: Outro
+    kind: outro
+    start_s: 227.9
+    end_s: 268.57

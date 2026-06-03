@@ -3,17 +3,16 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Vocal Coach (Sprint 2)</title>
+  <title>SecondPass</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
-  <script
-    type="module"
-    crossorigin="anonymous"
-    src="https://unpkg.com/wavesurfer.js@7"></script>
 </head>
 <body>
   <header>
-    <h1>Vocal Coach</h1>
-    <p class="subtitle">Sprint 2 — UltraStar + STARS-driven highlights</p>
+    <h1>SecondPass</h1>
+    <p class="subtitle">An interpretable vocal coach with timestamped coaching cards</p>
   </header>
 
   <main>
@@ -22,38 +21,96 @@
       <select id="songSelect" disabled>
         <option>Loading…</option>
       </select>
-
-      <div id="songMeta" class="meta"></div>
+      <div id="songBadges" class="badges"></div>
     </section>
 
     <section class="upload">
-      <div id="dropZone" class="drop-zone">
-        <p>Drag &amp; drop your performance audio here</p>
-        <p class="hint">or</p>
-        <label class="browse">
-          Browse for a file
-          <input id="fileInput" type="file" accept="audio/*" />
-        </label>
+      <div class="mode-toggle">
+        <button id="modeUpload" class="mode-btn active" type="button">Upload a recording</button>
+        <button id="modeKaraoke" class="mode-btn" type="button">Sing along (karaoke)</button>
       </div>
-      <label class="checkbox">
-        <input id="skipStars" type="checkbox" />
-        Skip user STARS (faster, expressive highlights become limited)
+
+      <label class="profile-toggle">
+        <input id="fastProfile" type="checkbox" checked />
+        <span>Fast feedback (student model) — uncheck to use the slower but richer teacher model</span>
       </label>
-      <button id="analyzeButton" disabled>Analyze</button>
+
+      <div id="uploadPanel" class="mode-panel">
+        <div id="dropZone" class="drop-zone">
+          <p>Drag &amp; drop your performance audio here</p>
+          <p class="hint">or</p>
+          <label class="browse">
+            Browse for a file
+            <input id="fileInput" type="file" accept="audio/*" />
+          </label>
+        </div>
+        <button id="analyzeButton" type="button" disabled>
+          <span class="analyze-btn-inner">
+            <span class="analyze-spinner" aria-hidden="true"></span>
+            <span class="analyze-label">Analyze</span>
+          </span>
+        </button>
+      </div>
+
+      <div id="karaokePanel" class="mode-panel" hidden>
+        <div class="karaoke-controls">
+          <button id="karaokeRecord" class="browse" type="button">Start recording</button>
+          <button id="karaokeStop" class="browse" type="button" disabled>Stop &amp; analyze</button>
+          <button id="karaokeCancel" class="browse browse-secondary" type="button" disabled>Cancel</button>
+          <span id="karaokeTime" class="karaoke-time">0:00</span>
+        </div>
+        <p class="hint">
+          Plays the instrumental. Sing along — your mic is recorded and sent through the
+          same analysis pipeline as an upload.
+        </p>
+        <canvas id="karaokeViz" class="karaoke-viz" hidden></canvas>
+        <div id="karaokeLyrics" class="karaoke-lyrics"></div>
+        <audio id="karaokeAudio" controls hidden></audio>
+      </div>
+
       <p id="status" class="status"></p>
     </section>
 
     <section class="results" id="results" hidden>
       <h2>Performance</h2>
+
+      <div id="overviewTiles" class="overview-tiles" hidden></div>
+
       <div id="waveform" class="waveform"></div>
+      <div id="sectionRibbon" class="section-ribbon"></div>
       <div id="timeline" class="timeline"></div>
-      <p class="caption">
-        <span id="offsetSummary"></span>
-        <button id="playPause" type="button">Play / Pause</button>
-      </p>
+      <div class="caption playback-bar">
+        <div class="playback-controls">
+          <button id="playPause" type="button">Play / Pause</button>
+          <div class="mix-toggles" role="group" aria-label="Playback mix">
+            <button
+              id="mixRefVocal"
+              type="button"
+              class="mix-toggle"
+              aria-pressed="false"
+            >
+              Add original vocal
+            </button>
+            <button
+              id="mixInstrumental"
+              type="button"
+              class="mix-toggle"
+              aria-pressed="false"
+            >
+              Add instrumental
+            </button>
+          </div>
+        </div>
+      </div>
 
       <h3>Coaching highlights</h3>
-      <ul id="highlightList" class="highlights"></ul>
+      <div id="highlightFilters" class="highlight-filters" hidden>
+        <button type="button" class="badge highlight-filter-badge filter-pitch" data-filter="pitch">Pitch</button>
+        <button type="button" class="badge highlight-filter-badge filter-expression" data-filter="expression">Expression</button>
+        <button type="button" class="badge highlight-filter-badge filter-timing" data-filter="timing">Timing</button>
+        <button type="button" class="badge highlight-filter-badge filter-volume" data-filter="volume">Volume</button>
+      </div>
+      <div id="highlightList" class="highlights"></div>
     </section>
   </main>
 

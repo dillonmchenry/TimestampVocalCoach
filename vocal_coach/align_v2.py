@@ -34,6 +34,7 @@ import numpy as np
 
 from vocal_coach.coaching_config import CoachingConfig
 from vocal_coach.schemas import (
+    LoudnessTrack,
     NoteMeasurementV2,
     NoteTechniqueComparison,
     PitchTrack,
@@ -79,6 +80,74 @@ class PitchArrays:
             count=len(track.frames),
         )
         return cls(times=times, f0_hz=f0, voicing=v, hop_seconds=track.hop_seconds)
+
+
+@dataclass
+class LoudnessArrays:
+    """NumPy view of a ``LoudnessTrack`` for per-note windowed measurements.
+
+    ``median_db`` is the track-level loudness reference (median of frames above
+    the silence floor).  Subtracting it from any per-note mean gives a
+    *relative* loudness value that is comparable across recordings made at
+    different mic gains.
+    """
+
+    times: np.ndarray   # (T,) seconds
+    rms_db: np.ndarray  # (T,) dBFS
+    median_db: float    # track-level normalization anchor
+
+    # Threshold below which a frame is considered silence (not included in
+    # the median calculation so pockets of silence don't drag the anchor down).
+    _SILENCE_FLOOR_DB: float = -60.0
+
+    @classmethod
+    def from_track(cls, track: LoudnessTrack) -> "LoudnessArrays":
+        if not track.frames:
+            return cls(
+                times=np.zeros(0, dtype=np.float64),
+                rms_db=np.zeros(0, dtype=np.float32),
+                median_db=-60.0,
+            )
+        times = np.fromiter(
+            (f.time for f in track.frames), dtype=np.float64, count=len(track.frames)
+        )
+        rms_db = np.fromiter(
+            (f.rms_db for f in track.frames), dtype=np.float32, count=len(track.frames)
+        )
+        voiced_mask = rms_db > cls._SILENCE_FLOOR_DB
+        if voiced_mask.any():
+            median_db = float(np.median(rms_db[voiced_mask]))
+        else:
+            median_db = float(np.median(rms_db))
+        return cls(times=times, rms_db=rms_db, median_db=median_db)
+
+    def shift_to_song_time(self, offset_s: float) -> "LoudnessArrays":
+        """Return a copy with times shifted by ``-offset_s``."""
+        return LoudnessArrays(
+            times=self.times - offset_s,
+            rms_db=self.rms_db,
+            median_db=self.median_db,
+        )
+
+    def _window(self, start_s: float, end_s: float) -> np.ndarray:
+        mask = (self.times >= start_s) & (self.times < end_s)
+        return self.rms_db[mask]
+
+    def mean_rms_db(self, start_s: float, end_s: float) -> Optional[float]:
+        frames = self._window(start_s, end_s)
+        return float(np.mean(frames)) if frames.size > 0 else None
+
+    def fade_db_per_s(self, start_s: float, end_s: float) -> Optional[float]:
+        """Linear RMS slope across the window in dB/s (negative = fading out)."""
+        duration = end_s - start_s
+        if duration < 0.08:
+            return None
+        mask = (self.times >= start_s) & (self.times < end_s)
+        t = self.times[mask]
+        db = self.rms_db[mask].astype(np.float64)
+        if t.size < 3:
+            return None
+        return _slope(t - t[0], db)
 
 
 def _hz_to_midi(hz: np.ndarray) -> np.ndarray:
@@ -594,6 +663,29 @@ def compare_note_techniques(
 # ---------------------------------------------------------------------------
 
 
+def _measure_loudness(
+    note: ReferenceNote,
+    loudness_user: "LoudnessArrays",
+    loudness_ref: Optional["LoudnessArrays"],
+) -> dict:
+    """Return per-note loudness scalars for ``NoteMeasurementV2``."""
+    user_rms = loudness_user.mean_rms_db(note.start_s, note.end_s)
+    fade = loudness_user.fade_db_per_s(note.start_s, note.end_s)
+    ref_rms = loudness_ref.mean_rms_db(note.start_s, note.end_s) if loudness_ref else None
+
+    # Normalised delta: relative user level vs. relative reference level.
+    rms_delta: Optional[float] = None
+    if user_rms is not None and ref_rms is not None and loudness_ref is not None:
+        rms_delta = (user_rms - loudness_user.median_db) - (ref_rms - loudness_ref.median_db)
+
+    return {
+        "user_rms_db": user_rms,
+        "ref_rms_db": ref_rms,
+        "rms_delta_db": rms_delta,
+        "rms_fade_db_per_s": fade,
+    }
+
+
 def measure_note(
     note: ReferenceNote,
     *,
@@ -602,6 +694,8 @@ def measure_note(
     stars_ref: Optional[StarsTrack],
     config: CoachingConfig,
     octave_shift_semitones: int = 0,
+    loudness_user: Optional["LoudnessArrays"] = None,
+    loudness_ref: Optional["LoudnessArrays"] = None,
 ) -> NoteMeasurementV2:
     """Run all per-note measurements in song time.
 
@@ -617,6 +711,12 @@ def measure_note(
     pitch_stats = _measure_pitch(
         note, pitch_user, cs, ce, config=config,
         octave_shift_semitones=octave_shift_semitones,
+    )
+
+    loud = (
+        _measure_loudness(note, loudness_user, loudness_ref)
+        if loudness_user is not None
+        else {}
     )
 
     return NoteMeasurementV2(
@@ -636,6 +736,10 @@ def measure_note(
         note_octave_offset=pitch_stats["note_octave_offset"],
         pitch_tags=pitch_stats["pitch_tags"],
         arrival_tags=arrival_tags,
+        user_rms_db=loud.get("user_rms_db"),
+        ref_rms_db=loud.get("ref_rms_db"),
+        rms_delta_db=loud.get("rms_delta_db"),
+        rms_fade_db_per_s=loud.get("rms_fade_db_per_s"),
     )
 
 
@@ -646,6 +750,8 @@ def measure_song(
     pitch_ref: Optional[PitchTrack] = None,
     stars_ref: Optional[StarsTrack] = None,
     stars_user: Optional[StarsTrack] = None,
+    loudness_user: Optional[LoudnessTrack] = None,
+    loudness_ref: Optional[LoudnessTrack] = None,
     config: Optional[CoachingConfig] = None,
     global_offset_s: Optional[float] = None,
     octave_shift_semitones: Optional[int] = None,
@@ -705,6 +811,17 @@ def measure_song(
     user_arrays = shift_pitch_to_song_time(PitchArrays.from_track(pitch_user), offset)
     user_stars_song = map_user_stars_to_song_time(stars_user, offset)
 
+    # Loudness arrays — user track is shifted to song time; reference is already
+    # in song time (it was recorded against the chart directly).
+    loud_user: Optional[LoudnessArrays] = (
+        LoudnessArrays.from_track(loudness_user).shift_to_song_time(offset)
+        if loudness_user is not None
+        else None
+    )
+    loud_ref: Optional[LoudnessArrays] = (
+        LoudnessArrays.from_track(loudness_ref) if loudness_ref is not None else None
+    )
+
     ref_per_note = map_stars_phones_to_notes(reference, stars_ref)
     user_per_note = map_stars_phones_to_notes(reference, user_stars_song)
 
@@ -720,6 +837,8 @@ def measure_song(
                 stars_ref=stars_ref,
                 config=cfg,
                 octave_shift_semitones=shift,
+                loudness_user=loud_user,
+                loudness_ref=loud_ref,
             )
         )
         techniques.append(
@@ -733,6 +852,7 @@ def measure_song(
 
 
 __all__ = [
+    "LoudnessArrays",
     "PitchArrays",
     "compare_note_techniques",
     "core_window_s",
