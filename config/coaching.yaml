@@ -78,3 +78,8 @@ highlights:
   section_dynamic_contrast_min_db: 1.5
   # Blended best/weakest section
   section_best_overall_min_notes: 4
+
+confidence:
+  low_threshold: 0.35
+  medium_threshold: 0.65
+  suppress_low: true

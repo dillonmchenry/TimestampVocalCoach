@@ -192,6 +192,13 @@ class StarsPhoneme(BaseModel):
         default_factory=dict,
         description="Map of technique name -> 0/1 (see STARS_TECH_NAMES for keys)",
     )
+    technique_scores: Optional[dict[str, float]] = Field(
+        None,
+        description=(
+            "Continuous sigmoid probability per technique from the student model. "
+            "None when the full STARS teacher was used (teacher thresholds before serialisation)."
+        ),
+    )
 
 
 class StarsNote(BaseModel):
@@ -426,6 +433,18 @@ class NoteMeasurementV2(BaseModel):
     pitch_tags: list[str] = Field(default_factory=list)
     arrival_tags: list[str] = Field(default_factory=list)
 
+    mean_voicing_confidence: Optional[float] = Field(
+        None,
+        description="Mean NanoPitch VAD confidence across all frames in the note window.",
+    )
+    ref_voiced_coverage: Optional[float] = Field(
+        None,
+        description=(
+            "Fraction of reference pitch frames inside the note window with voicing >= threshold. "
+            "None when reference pitch track is unavailable."
+        ),
+    )
+
     # Loudness measurements (populated when LoudnessTrack is available)
     user_rms_db: Optional[float] = Field(
         None,
@@ -472,6 +491,13 @@ class NoteTechniqueComparison(BaseModel):
         default_factory=list,
         description='Techniques the user added that the reference does not have',
     )
+    user_technique_scores: Optional[dict[str, float]] = Field(
+        None,
+        description=(
+            "Max continuous sigmoid probability per technique across user phonemes in this note window. "
+            "Student model only; None when the full STARS teacher was used."
+        ),
+    )
 
 
 class CoachingMoment(BaseModel):
@@ -513,6 +539,17 @@ class CoachingMoment(BaseModel):
     detail: dict = Field(
         default_factory=dict,
         description='Free-form structured data for UI tooltips (cents, pct_in_tune, etc.)',
+    )
+    confidence: str = Field(
+        "high",
+        description='Evidence tier: "low", "medium", or "high".',
+    )
+    feedback_basis: str = Field(
+        "absolute",
+        description=(
+            '"absolute" = universal technique quality (pitch, timing, dynamics); '
+            '"comparative" = comparison with the specific reference recording.'
+        ),
     )
 
 
@@ -689,4 +726,4 @@ class PerformanceAnalysis(BaseModel):
             'None when no scoreable notes were measured.'
         ),
     )
-    analysis_version: str = Field("v3", description='Schema version tag for migrations')
+    analysis_version: str = Field("v4", description='Schema version tag for migrations')

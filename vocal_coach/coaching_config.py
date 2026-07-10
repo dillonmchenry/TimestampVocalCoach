@@ -230,12 +230,27 @@ class HighlightsConfig:
 
 
 @dataclass
+class ConfidenceConfig:
+    """Evidence-tier thresholds for coaching moment confidence."""
+
+    low_threshold: float = 0.35
+    """Moments with evidence_strength below this are classified 'low' confidence."""
+
+    medium_threshold: float = 0.65
+    """Moments with evidence_strength below this (but >= low_threshold) are 'medium'."""
+
+    suppress_low: bool = True
+    """When True, low-confidence moments are dropped before card selection."""
+
+
+@dataclass
 class CoachingConfig:
     pitch: PitchConfig = field(default_factory=PitchConfig)
     arrival: ArrivalConfig = field(default_factory=ArrivalConfig)
     core_window: CoreWindowConfig = field(default_factory=CoreWindowConfig)
     global_offset: GlobalOffsetConfig = field(default_factory=GlobalOffsetConfig)
     highlights: HighlightsConfig = field(default_factory=HighlightsConfig)
+    confidence: ConfidenceConfig = field(default_factory=ConfidenceConfig)
 
     @classmethod
     def load(cls, config_path: Optional[Path] = None) -> "CoachingConfig":

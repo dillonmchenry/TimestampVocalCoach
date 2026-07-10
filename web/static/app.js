@@ -16,6 +16,7 @@ const mixRefVocalBtn = document.getElementById("mixRefVocal");
 const mixInstrumentalBtn = document.getElementById("mixInstrumental");
 const highlightList = document.getElementById("highlightList");
 const highlightFilters = document.getElementById("highlightFilters");
+const basisFilters = document.getElementById("basisFilters");
 const overviewTiles = document.getElementById("overviewTiles");
 const fastProfile = document.getElementById("fastProfile");
 
@@ -55,6 +56,33 @@ const TYPE_LABEL = {
   section_dynamic_contrast: "Dynamic contrast",
   best_overall_section: "Best section",
   weakest_overall_section: "Focus area",
+};
+
+/** Maps backend moment.type -> feedback_basis (mirrors MOMENT_FEEDBACK_BASIS in highlights.py). */
+const MOMENT_FEEDBACK_BASIS = {
+  best_pitch_phrase: "absolute",
+  pitch_struggle: "absolute",
+  sharp_flat_note: "absolute",
+  late_entrance: "absolute",
+  timing_consistency: "absolute",
+  section_delta: "comparative",
+  fade_within_notes: "absolute",
+  dynamic_drop: "absolute",
+  dynamic_surge: "absolute",
+  section_strength: "absolute",
+  section_weakness: "absolute",
+  best_overall_section: "absolute",
+  weakest_overall_section: "absolute",
+  section_dynamic_contrast: "absolute",
+  expressive_match: "comparative",
+  expressive_moment: "comparative",
+  missed_expression: "comparative",
+  vocal_texture: "comparative",
+};
+
+const BASIS_DISPLAY = {
+  absolute: "Technique",
+  comparative: "Style",
 };
 
 /** Maps backend moment.type -> feedback category (matches highlight engine). */
@@ -111,25 +139,28 @@ function momentCategoryKey(moment) {
 
 /** Active highlight filter: null = show all categories. */
 let activeHighlightFilter = null;
+/** Active basis filter: "all" | "absolute" | "comparative". */
+let activeBasisFilter = "all";
 
 function applyHighlightFilter() {
   const cards = highlightList.querySelectorAll("article.card");
   let visible = 0;
   for (const card of cards) {
-    const match =
+    const catMatch =
       !activeHighlightFilter || card.dataset.category === activeHighlightFilter;
-    card.classList.toggle("hidden", !match);
-    if (match) visible += 1;
+    const basisMatch =
+      activeBasisFilter === "all" || card.dataset.basis === activeBasisFilter;
+    card.classList.toggle("hidden", !(catMatch && basisMatch));
+    if (catMatch && basisMatch) visible += 1;
   }
   let empty = highlightList.querySelector(".filter-empty");
-  if (activeHighlightFilter && visible === 0 && cards.length > 0) {
+  if ((activeHighlightFilter || activeBasisFilter !== "all") && visible === 0 && cards.length > 0) {
     if (!empty) {
       empty = document.createElement("div");
       empty.className = "empty-cards filter-empty";
       highlightList.appendChild(empty);
     }
-    const label = CATEGORY_DISPLAY[activeHighlightFilter] || activeHighlightFilter;
-    empty.textContent = `No ${label.toLowerCase()} highlights in this take.`;
+    empty.textContent = "No highlights match the current filters.";
     empty.classList.remove("hidden");
   } else if (empty) {
     empty.remove();
@@ -144,12 +175,30 @@ function setHighlightFilter(category) {
   applyHighlightFilter();
 }
 
+function setBasisFilter(basis) {
+  activeBasisFilter = basis;
+  for (const btn of basisFilters.querySelectorAll(".basis-filter-badge")) {
+    btn.classList.toggle("active", btn.dataset.basis === activeBasisFilter);
+  }
+  applyHighlightFilter();
+}
+
 function initHighlightFilterBadges() {
   if (!highlightFilters || highlightFilters.dataset.bound) return;
   highlightFilters.dataset.bound = "1";
   for (const btn of highlightFilters.querySelectorAll(".highlight-filter-badge")) {
     btn.addEventListener("click", () => {
       setHighlightFilter(btn.dataset.filter);
+    });
+  }
+}
+
+function initBasisFilterBadges() {
+  if (!basisFilters || basisFilters.dataset.bound) return;
+  basisFilters.dataset.bound = "1";
+  for (const btn of basisFilters.querySelectorAll(".basis-filter-badge")) {
+    btn.addEventListener("click", () => {
+      setBasisFilter(btn.dataset.basis);
     });
   }
 }
@@ -610,10 +659,17 @@ function scrollToHighlightCard(momentId) {
 function renderCoachingCards(reference, analysis) {
   highlightList.innerHTML = "";
   activeHighlightFilter = null;
+  activeBasisFilter = "all";
   if (highlightFilters) {
     highlightFilters.hidden = true;
     for (const btn of highlightFilters.querySelectorAll(".highlight-filter-badge")) {
       btn.classList.remove("active");
+    }
+  }
+  if (basisFilters) {
+    basisFilters.hidden = true;
+    for (const btn of basisFilters.querySelectorAll(".basis-filter-badge")) {
+      btn.classList.toggle("active", btn.dataset.basis === "all");
     }
   }
   if (!analysis.highlights?.moments?.length) {
@@ -624,14 +680,22 @@ function renderCoachingCards(reference, analysis) {
     return;
   }
   initHighlightFilterBadges();
+  initBasisFilterBadges();
   if (highlightFilters) highlightFilters.hidden = false;
+  if (basisFilters) basisFilters.hidden = false;
 
   for (const moment of analysis.highlights.moments) {
+    // Skip low-confidence cards defensively (should already be filtered server-side).
+    if (moment.confidence === "low") continue;
+
     const card = document.createElement("article");
     const scopeClass = moment.scope === "section" ? "scope-section" : "scope-local";
     const category = momentCategoryKey(moment);
-    card.className = `card ${moment.type} ${cardCategoryClass(moment)} ${scopeClass}`;
+    const basis = moment.feedback_basis || MOMENT_FEEDBACK_BASIS[moment.type] || "absolute";
+    const confidenceClass = moment.confidence === "medium" ? " confidence-medium" : "";
+    card.className = `card ${moment.type} ${cardCategoryClass(moment)} ${scopeClass}${confidenceClass}`;
     card.dataset.category = category;
+    card.dataset.basis = basis;
     card.dataset.momentId = momentDomId(moment);
 
     const userStart = moment.start_s + analysis.global_offset_s;
@@ -641,15 +705,21 @@ function renderCoachingCards(reference, analysis) {
       ? `<p class="card-section">${moment.section_names.join(" · ")}</p>`
       : "";
     const lyricEl = lyric ? `<blockquote class="card-lyric">“${lyric}”</blockquote>` : "";
+    const basisLabel = `<span class="card-basis-label basis-${basis}">${BASIS_DISPLAY[basis] || basis}</span>`;
+    const evidenceBadge =
+      moment.confidence === "medium"
+        ? `<span class="evidence-badge">Limited evidence</span>`
+        : "";
 
     card.innerHTML = `
       <header class="card-header">
-        <h5>${cardHeadingText(moment)}</h5>
+        <h5>${cardHeadingText(moment)}${basisLabel}</h5>
       </header>
       <p class="card-title">${moment.title}</p>
       <p class="card-summary">${moment.summary}</p>
       ${sectionTag}
       ${lyricEl}
+      ${evidenceBadge}
       <div class="card-footer">
         <div class="card-stat">
           <span class="card-stat-value">${keyStatFor(moment)}</span>

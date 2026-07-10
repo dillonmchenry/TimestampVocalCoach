@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from vocal_coach.coaching_config import CoachingConfig
 from vocal_coach.highlights import (
+    MOMENT_FEEDBACK_BASIS,
     TECH_LABELS,
     detect_best_pitch_phrase,
     detect_best_pitch_phrases,
@@ -116,8 +117,9 @@ def test_expressive_match_for_shared_vibrato() -> None:
         )
         for i in range(len(ref.notes))
     ]
-    moment = detect_expressive_match(ref, notes, techs, config=cfg)
-    assert moment is not None
+    moments = detect_expressive_match(ref, notes, techs, config=cfg)
+    assert moments
+    moment = moments[0]
     assert moment.techniques == ["vibrato"]
     assert set(moment.note_indices) >= {2, 3, 4, 5}
 
@@ -137,8 +139,9 @@ def test_missed_expression_when_user_skips_reference_technique() -> None:
         )
         for i in range(len(ref.notes))
     ]
-    moment = detect_missed_expression(ref, notes, techs, config=cfg)
-    assert moment is not None
+    moments = detect_missed_expression(ref, notes, techs, config=cfg)
+    assert moments
+    moment = moments[0]
     assert moment.type == "missed_expression"
     assert moment.techniques == ["vibrato"]
 
@@ -181,8 +184,9 @@ def test_pharyngeal_uses_friendly_copy() -> None:
         )
         for i in range(len(ref.notes))
     ]
-    moment = detect_expressive_match(ref, notes, techs, config=cfg)
-    assert moment is not None
+    moments = detect_expressive_match(ref, notes, techs, config=cfg)
+    assert moments
+    moment = moments[0]
     assert "pharyngeal" not in moment.title.lower()
     assert "pharyngeal" not in moment.summary.lower()
     assert TECH_LABELS["pharyngeal"] in moment.title or TECH_LABELS["pharyngeal"] in moment.summary
@@ -215,3 +219,148 @@ def test_select_highlights_caps_total_count() -> None:
     report = select_highlights(ref, notes, techs, config=cfg)
     assert len(report.moments) <= 3
     assert report.moments == sorted(report.moments, key=lambda m: m.start_s)
+
+
+# ---------------------------------------------------------------------------
+# Sprint 1: confidence and feedback_basis tests
+# ---------------------------------------------------------------------------
+
+
+def _measurement_with_voicing(
+    note: ReferenceNote,
+    *,
+    pct_in_tune: float | None,
+    voiced_coverage: float = 1.0,
+    mean_voicing_confidence: float | None = None,
+    ref_voiced_coverage: float | None = None,
+) -> NoteMeasurementV2:
+    return NoteMeasurementV2(
+        note_index=note.index,
+        start_s=note.start_s,
+        end_s=note.end_s,
+        midi_pitch=note.midi_pitch,
+        note_name=note.note_name,
+        lyric_word=note.lyric_word,
+        voiced_coverage=voiced_coverage,
+        median_cents=0.0,
+        pct_in_tune=pct_in_tune,
+        drift_cents_per_s=0.0,
+        arrival_offset_ms=0.0,
+        core_start_s=note.start_s,
+        core_end_s=note.end_s,
+        mean_voicing_confidence=mean_voicing_confidence,
+        ref_voiced_coverage=ref_voiced_coverage,
+    )
+
+
+def test_feedback_basis_absolute_for_pitch_types() -> None:
+    """Pitch-type moments should be classified as absolute."""
+    assert MOMENT_FEEDBACK_BASIS["best_pitch_phrase"] == "absolute"
+    assert MOMENT_FEEDBACK_BASIS["pitch_struggle"] == "absolute"
+    assert MOMENT_FEEDBACK_BASIS["sharp_flat_note"] == "absolute"
+    assert MOMENT_FEEDBACK_BASIS["timing_consistency"] == "absolute"
+    assert MOMENT_FEEDBACK_BASIS["late_entrance"] == "absolute"
+    assert MOMENT_FEEDBACK_BASIS["fade_within_notes"] == "absolute"
+
+
+def test_feedback_basis_comparative_for_technique_types() -> None:
+    """Technique-matching moment types should be classified as comparative."""
+    assert MOMENT_FEEDBACK_BASIS["expressive_match"] == "comparative"
+    assert MOMENT_FEEDBACK_BASIS["missed_expression"] == "comparative"
+    assert MOMENT_FEEDBACK_BASIS["expressive_moment"] == "comparative"
+    assert MOMENT_FEEDBACK_BASIS["vocal_texture"] == "comparative"
+
+
+def test_select_highlights_stamps_feedback_basis() -> None:
+    """select_highlights should set feedback_basis on every returned moment."""
+    ref = _ref_with_n_notes(20)
+    cfg = CoachingConfig()
+    notes = [_measurement(n, pct_in_tune=1.0 if 4 <= i < 12 else 0.1)
+             for i, n in enumerate(ref.notes)]
+    techs = [
+        NoteTechniqueComparison(
+            note_index=i,
+            reference_techniques=["vibrato"] if 2 <= i < 6 else [],
+            user_techniques=["vibrato"] if 2 <= i < 6 else [],
+            matched=["vibrato"] if 2 <= i < 6 else [],
+            missed=[],
+            user_added=[],
+        )
+        for i in range(len(ref.notes))
+    ]
+    report = select_highlights(ref, notes, techs, config=cfg)
+    for m in report.moments:
+        assert m.feedback_basis in ("absolute", "comparative"), (
+            f"moment {m.type!r} has invalid feedback_basis {m.feedback_basis!r}"
+        )
+
+
+def test_select_highlights_stamps_confidence() -> None:
+    """All returned moments should carry a valid confidence tier."""
+    ref = _ref_with_n_notes(20)
+    cfg = CoachingConfig()
+    notes = [_measurement(n, pct_in_tune=0.6) for n in ref.notes]
+    techs = [
+        NoteTechniqueComparison(
+            note_index=i, reference_techniques=[], user_techniques=[],
+            matched=[], missed=[], user_added=[],
+        )
+        for i in range(len(ref.notes))
+    ]
+    report = select_highlights(ref, notes, techs, config=cfg)
+    for m in report.moments:
+        assert m.confidence in ("low", "medium", "high"), (
+            f"moment {m.type!r} has invalid confidence {m.confidence!r}"
+        )
+
+
+def test_low_confidence_moments_suppressed_by_default() -> None:
+    """Moments with very sparse voiced coverage should be suppressed."""
+    ref = _ref_with_n_notes(20)
+    cfg = CoachingConfig()
+    cfg.confidence.suppress_low = True
+    # Notes with near-zero voiced coverage → very low evidence strength.
+    notes = [
+        _measurement_with_voicing(
+            n,
+            pct_in_tune=0.05 if i < 10 else 1.0,
+            voiced_coverage=0.02,  # essentially silent
+            mean_voicing_confidence=0.02,
+        )
+        for i, n in enumerate(ref.notes)
+    ]
+    techs = [
+        NoteTechniqueComparison(
+            note_index=i, reference_techniques=[], user_techniques=[],
+            matched=[], missed=[], user_added=[],
+        )
+        for i in range(len(ref.notes))
+    ]
+    report = select_highlights(ref, notes, techs, config=cfg)
+    # No "low" confidence moments should appear in the output.
+    for m in report.moments:
+        assert m.confidence != "low", f"Low-confidence moment {m.type!r} was not suppressed"
+
+
+def test_missed_expression_uses_softer_title() -> None:
+    """missed_expression title should NOT say 'Try more' (softer copy)."""
+    ref = _ref_with_n_notes(8)
+    cfg = CoachingConfig()
+    notes = [_measurement(n, pct_in_tune=0.7) for n in ref.notes]
+    techs = [
+        NoteTechniqueComparison(
+            note_index=i,
+            reference_techniques=["vibrato"] if 1 <= i < 5 else [],
+            user_techniques=[],
+            matched=[],
+            missed=["vibrato"] if 1 <= i < 5 else [],
+            user_added=[],
+        )
+        for i in range(len(ref.notes))
+    ]
+    from vocal_coach.highlights import detect_missed_expression
+    moments = detect_missed_expression(ref, notes, techs, config=cfg)
+    assert moments, "Expected at least one missed_expression moment"
+    m = moments[0]
+    assert "Try more" not in m.title, f"Title should not say 'Try more': {m.title!r}"
+    assert "reference" in m.summary.lower(), f"Summary should mention reference: {m.summary!r}"

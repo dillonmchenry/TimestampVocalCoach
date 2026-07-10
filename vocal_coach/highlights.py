@@ -698,10 +698,10 @@ def detect_missed_expression(
             CoachingMoment(
                 id=f"missed_expression:{tech}:{idxs[0]}-{idxs[-1]}",
                 type="missed_expression",
-                title=f"Try more {_label(tech)}",
+                title=f"Reference style: {_label(tech)}",
                 summary=(
-                    f"The reference leans on {_hint(tech)} on {count} notes here; "
-                    "your take stays a bit straighter in tone."
+                    f"The reference uses {_hint(tech)} on {count} notes here — "
+                    "your take takes a different stylistic approach."
                 ),
                 start_s=start_s,
                 end_s=end_s,
@@ -1112,8 +1112,8 @@ def detect_section_technique_drops(
                     summary=(
                         f"You used {_hint(tech)} on {dens_b * 100:.0f}% of "
                         f"{kind_b} notes but only {dens_a * 100:.0f}% of "
-                        f"{kind_a} notes — bringing it across helps the "
-                        "performance feel cohesive."
+                        f"{kind_a} notes — try carrying it across if you want "
+                        "a more consistent style."
                     ),
                     start_s=span_start,
                     end_s=span_end,
@@ -1458,7 +1458,111 @@ MOMENT_CATEGORY: dict[str, str] = {
     "section_dynamic_contrast": "dynamics",
 }
 
+# "absolute"  = universal technique quality (pitch, timing, dynamics — any vocal coach would flag)
+# "comparative" = reference style matching (expressive choices compared against this specific recording)
+MOMENT_FEEDBACK_BASIS: dict[str, str] = {
+    "best_pitch_phrase":        "absolute",
+    "pitch_struggle":           "absolute",
+    "sharp_flat_note":          "absolute",
+    "late_entrance":            "absolute",
+    "timing_consistency":       "absolute",
+    "section_delta":            "comparative",  # both pitch deltas and technique drops
+    "fade_within_notes":        "absolute",
+    "dynamic_drop":             "absolute",
+    "dynamic_surge":            "absolute",
+    "section_strength":         "absolute",
+    "section_weakness":         "absolute",
+    "best_overall_section":     "absolute",
+    "weakest_overall_section":  "absolute",
+    "section_dynamic_contrast": "absolute",
+    "expressive_match":         "comparative",
+    "expressive_moment":        "comparative",
+    "missed_expression":        "comparative",
+    "vocal_texture":            "comparative",
+}
+
 _CATEGORY_ORDER = ["pitch", "technique", "alignment", "dynamics"]
+
+
+# ---------------------------------------------------------------------------
+# Confidence evidence scoring
+# ---------------------------------------------------------------------------
+
+
+def _compute_evidence_strength(
+    moment: CoachingMoment,
+    notes_by_idx: dict[int, NoteMeasurementV2],
+    techs_by_idx: dict[int, NoteTechniqueComparison],
+) -> float:
+    """Return a 0–1 evidence strength score for ``moment``.
+
+    Absolute moments weight user voiced coverage and NanoPitch confidence.
+    Comparative moments additionally penalise weak reference voiced coverage
+    and incorporate the student's technique certainty.
+    """
+    note_rows = [notes_by_idx[i] for i in moment.note_indices if i in notes_by_idx]
+    if not note_rows:
+        # Section-scope moment without resolvable note rows → treat as high confidence.
+        return 1.0
+
+    mean_vc = _mean([n.voiced_coverage for n in note_rows]) or 0.0
+    mean_mvc = _mean(
+        [n.mean_voicing_confidence for n in note_rows if n.mean_voicing_confidence is not None]
+    )
+    duration_s = sum(n.end_s - n.start_s for n in note_rows)
+    duration_factor = min(1.0, duration_s / 4.0)
+
+    if moment.feedback_basis == "comparative":
+        # Comparative: confidence is bounded by the weakest side (user or ref).
+        mean_ref_vc = _mean(
+            [n.ref_voiced_coverage for n in note_rows if n.ref_voiced_coverage is not None]
+        )
+        dual_voicing = min(mean_vc, mean_ref_vc) if mean_ref_vc is not None else mean_vc
+
+        # Technique certainty from student scores for the primary technique.
+        tech_certainty = dual_voicing  # fallback
+        if moment.techniques:
+            primary_tech = moment.techniques[0]
+            scores: list[float] = []
+            for i in moment.note_indices:
+                tc = techs_by_idx.get(i)
+                if tc and tc.user_technique_scores:
+                    raw = tc.user_technique_scores.get(primary_tech)
+                    if raw is not None:
+                        # For missed_expression the user should NOT have the technique;
+                        # high student score → less certain the note was truly absent.
+                        scores.append(1.0 - raw if moment.type == "missed_expression" else raw)
+            if scores:
+                tech_certainty = _mean(scores) or dual_voicing
+
+        return min(1.0, 0.5 * dual_voicing + 0.3 * tech_certainty + 0.2 * duration_factor)
+    else:
+        # Absolute: user-only voicing + NanoPitch confidence + duration.
+        voicing_conf = mean_mvc if mean_mvc is not None else mean_vc
+
+        tech_certainty = mean_vc  # fallback
+        if moment.techniques:
+            primary_tech = moment.techniques[0]
+            scores = []
+            for i in moment.note_indices:
+                tc = techs_by_idx.get(i)
+                if tc and tc.user_technique_scores:
+                    raw = tc.user_technique_scores.get(primary_tech)
+                    if raw is not None:
+                        scores.append(raw)
+            if scores:
+                tech_certainty = _mean(scores) or mean_vc
+
+        return min(1.0, 0.4 * mean_vc + 0.3 * voicing_conf + 0.2 * duration_factor + 0.1 * tech_certainty)
+
+
+def _tier_from_strength(strength: float, low: float, medium: float) -> str:
+    """Map a 0–1 evidence strength value to a confidence tier string."""
+    if strength >= medium:
+        return "high"
+    if strength >= low:
+        return "medium"
+    return "low"
 
 
 def _select_diverse(
@@ -1467,6 +1571,7 @@ def _select_diverse(
     cap: int,
     max_per_type: int,
     max_per_category: int,
+    suppress_low: bool = True,
 ) -> list[CoachingMoment]:
     """Pick moments round-robin across categories for maximum variety.
 
@@ -1474,7 +1579,13 @@ def _select_diverse(
     algorithm cycles through *all* categories before returning to any one,
     guaranteeing that every category with candidates gets representation
     before any category gets a second slot.
+
+    Low-confidence moments are dropped before the round-robin when
+    ``suppress_low`` is True (default).
     """
+    if suppress_low:
+        moments = [m for m in moments if m.confidence != "low"]
+
     queues: dict[str, list[CoachingMoment]] = {}
     for m in moments:
         cat = MOMENT_CATEGORY.get(m.type, "other")
@@ -1581,11 +1692,23 @@ def select_highlights(
             reference, sections, notes, techniques, config=cfg,
         ))
 
+    # Stamp feedback_basis then compute evidence strength + confidence tier.
+    notes_by_idx = {n.note_index: n for n in notes}
+    techs_by_idx = {t.note_index: t for t in techniques}
+    low_t = cfg.confidence.low_threshold
+    med_t = cfg.confidence.medium_threshold
+    for m in candidates:
+        m.feedback_basis = MOMENT_FEEDBACK_BASIS.get(m.type, "absolute")
+        strength = _compute_evidence_strength(m, notes_by_idx, techs_by_idx)
+        m.confidence = _tier_from_strength(strength, low_t, med_t)
+        m.detail["evidence_strength"] = round(strength, 3)
+
     chosen = _select_diverse(
         candidates,
         cap=cfg.highlights.cap,
         max_per_type=cfg.highlights.max_per_type,
         max_per_category=cfg.highlights.max_per_category,
+        suppress_low=cfg.confidence.suppress_low,
     )
     chosen.sort(key=lambda m: m.start_s)
     return HighlightsReport(moments=chosen, cap=cfg.highlights.cap)
@@ -1593,6 +1716,7 @@ def select_highlights(
 
 __all__ = [
     "MOMENT_CATEGORY",
+    "MOMENT_FEEDBACK_BASIS",
     "TECH_HINTS",
     "TECH_LABELS",
     "detect_best_overall_section",

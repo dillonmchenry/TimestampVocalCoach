@@ -373,11 +373,13 @@ def _measure_pitch(
             "pct_in_tune": None,
             "drift_cents_per_s": None,
             "voiced_coverage": 0.0,
+            "mean_voicing_confidence": None,
             "pitch_tags": ["no signal"],
             "note_octave_offset": 0,
         }
     voiced_inside = inside & (pitch.voicing >= cfg.voicing_threshold) & (pitch.f0_hz > 0)
     voiced_coverage = float(voiced_inside.sum() / max(1, inside.sum()))
+    mean_voicing_confidence = float(pitch.voicing[inside].mean())
 
     if voiced_inside.sum() < 2:
         return {
@@ -385,6 +387,7 @@ def _measure_pitch(
             "pct_in_tune": None,
             "drift_cents_per_s": None,
             "voiced_coverage": voiced_coverage,
+            "mean_voicing_confidence": mean_voicing_confidence,
             "pitch_tags": ["unsung"] if voiced_coverage < cfg.min_voiced_coverage else [],
             "note_octave_offset": 0,
         }
@@ -431,6 +434,7 @@ def _measure_pitch(
         "pct_in_tune": pct_in_tune,
         "drift_cents_per_s": float(drift),
         "voiced_coverage": voiced_coverage,
+        "mean_voicing_confidence": mean_voicing_confidence,
         "pitch_tags": tags,
         "note_octave_offset": note_octave,
     }
@@ -636,6 +640,20 @@ def map_user_stars_to_song_time(
     return shift_stars_to_song_time(stars_user, global_offset_s)
 
 
+def _ref_voiced_coverage(
+    pitch: PitchArrays,
+    start_s: float,
+    end_s: float,
+    voicing_threshold: float,
+) -> float:
+    """Fraction of reference pitch frames in ``[start_s, end_s)`` that are voiced."""
+    inside = (pitch.times >= start_s) & (pitch.times < end_s)
+    if not inside.any():
+        return 0.0
+    voiced = inside & (pitch.voicing >= voicing_threshold) & (pitch.f0_hz > 0)
+    return float(voiced.sum() / inside.sum())
+
+
 def compare_note_techniques(
     note: ReferenceNote,
     *,
@@ -648,6 +666,18 @@ def compare_note_techniques(
     matched = sorted(ref & usr)
     missed = sorted(ref - usr)
     added = sorted(usr - ref)
+
+    # Aggregate per-technique max sigmoid scores across user phonemes (student only).
+    user_scores: Optional[dict[str, float]] = None
+    if any(ph.technique_scores is not None for ph in user_phones):
+        user_scores = {}
+        for ph in user_phones:
+            if ph.technique_scores is None:
+                continue
+            for name, score in ph.technique_scores.items():
+                if score > user_scores.get(name, 0.0):
+                    user_scores[name] = score
+
     return NoteTechniqueComparison(
         note_index=note.index,
         reference_techniques=sorted(ref),
@@ -655,6 +685,7 @@ def compare_note_techniques(
         matched=matched,
         missed=missed,
         user_added=added,
+        user_technique_scores=user_scores,
     )
 
 
@@ -696,6 +727,7 @@ def measure_note(
     octave_shift_semitones: int = 0,
     loudness_user: Optional["LoudnessArrays"] = None,
     loudness_ref: Optional["LoudnessArrays"] = None,
+    pitch_ref_arrays: Optional[PitchArrays] = None,
 ) -> NoteMeasurementV2:
     """Run all per-note measurements in song time.
 
@@ -719,6 +751,15 @@ def measure_note(
         else {}
     )
 
+    ref_vc: Optional[float] = None
+    if pitch_ref_arrays is not None:
+        ref_vc = _ref_voiced_coverage(
+            pitch_ref_arrays,
+            note.start_s,
+            note.end_s,
+            config.pitch.voicing_threshold,
+        )
+
     return NoteMeasurementV2(
         note_index=note.index,
         start_s=note.start_s,
@@ -740,6 +781,8 @@ def measure_note(
         ref_rms_db=loud.get("ref_rms_db"),
         rms_delta_db=loud.get("rms_delta_db"),
         rms_fade_db_per_s=loud.get("rms_fade_db_per_s"),
+        mean_voicing_confidence=pitch_stats["mean_voicing_confidence"],
+        ref_voiced_coverage=ref_vc,
     )
 
 
@@ -791,7 +834,6 @@ def measure_song(
     (notes, techniques, global_offset_s, octave_shift_semitones)
     """
     cfg = config or CoachingConfig()
-    del pitch_ref  # reserved; see docstring
     offset = (
         global_offset_s
         if global_offset_s is not None
@@ -809,6 +851,9 @@ def measure_song(
     )
 
     user_arrays = shift_pitch_to_song_time(PitchArrays.from_track(pitch_user), offset)
+    ref_arrays: Optional[PitchArrays] = (
+        PitchArrays.from_track(pitch_ref) if pitch_ref is not None else None
+    )
     user_stars_song = map_user_stars_to_song_time(stars_user, offset)
 
     # Loudness arrays — user track is shifted to song time; reference is already
@@ -839,6 +884,7 @@ def measure_song(
                 octave_shift_semitones=shift,
                 loudness_user=loud_user,
                 loudness_ref=loud_ref,
+                pitch_ref_arrays=ref_arrays,
             )
         )
         techniques.append(
