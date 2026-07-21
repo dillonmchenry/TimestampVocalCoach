@@ -690,6 +690,227 @@ def compare_note_techniques(
 
 
 # ---------------------------------------------------------------------------
+# ADSR-phase continuous feature extraction (Sprint 2)
+# ---------------------------------------------------------------------------
+
+
+def _hz_to_cents(f0_hz: np.ndarray, target_midi: float) -> np.ndarray:
+    """Convert F0 array (Hz) to cents relative to ``target_midi``, octave-folded."""
+    midi = _hz_to_midi(f0_hz)
+    raw = 100.0 * (midi - target_midi)
+    return ((raw + 600.0) % 1200.0) - 600.0
+
+
+def _max_vibrato_score(phones: list) -> Optional[float]:
+    """Return the max vibrato sigmoid score across phonemes, or None."""
+    best: Optional[float] = None
+    for ph in phones:
+        scores = getattr(ph, "technique_scores", None)
+        if scores is None:
+            continue
+        v = scores.get("vibrato")
+        if v is not None and (best is None or v > best):
+            best = v
+    return best
+
+
+def _measure_pitch_shape(
+    note: ReferenceNote,
+    pitch: PitchArrays,
+    core_start: float,
+    core_end: float,
+    *,
+    config: CoachingConfig,
+    stars_vibrato_score: Optional[float] = None,
+    octave_shift_semitones: int = 0,
+) -> dict:
+    """Compute ADSR-phase pitch scalars for ``NoteMeasurementV2``.
+
+    Returns a dict with keys: attack_median_cents, decay_pitch_slope_cents_per_s,
+    sustain_pitch_std_cents, release_pitch_slope_cents_per_s, vibrato_rate_hz,
+    vibrato_extent_cents, scoop_cents.
+    """
+    cfg = config.adsr
+    pitch_cfg = config.pitch
+    result: dict = {
+        "attack_median_cents": None,
+        "decay_pitch_slope_cents_per_s": None,
+        "sustain_pitch_std_cents": None,
+        "release_pitch_slope_cents_per_s": None,
+        "vibrato_rate_hz": None,
+        "vibrato_extent_cents": None,
+        "scoop_cents": None,
+    }
+
+    target_midi = note.midi_pitch + int(octave_shift_semitones)
+    voiced = (pitch.voicing >= pitch_cfg.voicing_threshold) & (pitch.f0_hz > 0)
+
+    # ── Attack phase ──────────────────────────────────────────────────────
+    attack_dur = float(core_start - note.start_s)
+    attack_mask = voiced & (pitch.times >= note.start_s) & (pitch.times < core_start)
+    if attack_mask.sum() >= 5 and attack_dur >= cfg.min_attack_duration_s:
+        attack_cents = _hz_to_cents(pitch.f0_hz[attack_mask], target_midi)
+        result["attack_median_cents"] = float(np.nanmedian(attack_cents))
+
+    # ── Decay phase ──────────────────────────────────────────────────────
+    # Decay: between RMS-peak inside attack window and core_start.
+    # We detect peak_time_s lazily here via the pitch voicing edge for simplicity
+    # (loudness peak is computed in _measure_loudness_shape; here we just score pitch
+    # in the full pre-core window as the "decay" slope).
+    if attack_mask.sum() >= 3:
+        a_times = pitch.times[attack_mask]
+        a_cents = _hz_to_cents(pitch.f0_hz[attack_mask], target_midi)
+        if a_times.size >= 3:
+            result["decay_pitch_slope_cents_per_s"] = _slope(a_times, a_cents)
+
+    # ── Sustain phase ────────────────────────────────────────────────────
+    sustain_dur = float(core_end - core_start)
+    sustain_mask = voiced & (pitch.times >= core_start) & (pitch.times < core_end)
+    sustain_cents: Optional[np.ndarray] = None
+    if sustain_mask.sum() >= 5 and sustain_dur >= cfg.min_sustain_duration_s:
+        sustain_cents = _hz_to_cents(pitch.f0_hz[sustain_mask], target_midi)
+        result["sustain_pitch_std_cents"] = float(np.nanstd(sustain_cents))
+
+    # ── Release phase ────────────────────────────────────────────────────
+    release_dur = float(note.end_s - core_end)
+    release_mask = voiced & (pitch.times >= core_end) & (pitch.times < note.end_s)
+    if release_mask.sum() >= 5 and release_dur >= cfg.min_release_duration_s:
+        r_times = pitch.times[release_mask]
+        r_cents = _hz_to_cents(pitch.f0_hz[release_mask], target_midi)
+        result["release_pitch_slope_cents_per_s"] = _slope(r_times, r_cents)
+
+    # ── Vibrato (sustain sub-feature) ────────────────────────────────────
+    if sustain_cents is not None and sustain_mask.sum() >= 30 and sustain_dur >= cfg.vibrato_min_duration_s:
+        if stars_vibrato_score is None or stars_vibrato_score >= 0.1:
+            n = len(sustain_cents)
+            trend = np.polyval(np.polyfit(np.arange(n), sustain_cents, 1), np.arange(n))
+            detrended = sustain_cents - trend
+            acf = np.correlate(detrended, detrended, mode="full")
+            acf = acf[len(acf) // 2:]  # positive lags only
+            acf = acf / (acf[0] + 1e-9)
+            hop = max(pitch.hop_seconds, 1e-6)
+            min_lag = max(3, int(round(1.0 / (cfg.vibrato_max_rate_hz * hop))))
+            max_lag = int(round(1.0 / (cfg.vibrato_min_rate_hz * hop)))
+            if max_lag > min_lag and max_lag <= len(acf):
+                search = acf[min_lag:max_lag]
+                if search.size > 0 and search.max() > cfg.vibrato_acf_min_correlation:
+                    peak_lag = min_lag + int(search.argmax())
+                    result["vibrato_rate_hz"] = float(1.0 / (peak_lag * hop))
+                    result["vibrato_extent_cents"] = float(2.0 * np.std(detrended))
+
+    # ── Scoop (derived) ──────────────────────────────────────────────────
+    if result["attack_median_cents"] is not None:
+        # sustain median = median_cents already computed by _measure_pitch; re-derive here
+        if sustain_cents is not None:
+            sustain_med = float(np.nanmedian(sustain_cents))
+        elif sustain_mask.sum() >= 2:
+            sustain_med = float(np.nanmedian(
+                _hz_to_cents(pitch.f0_hz[sustain_mask], target_midi)
+            ))
+        else:
+            sustain_med = None
+        if sustain_med is not None:
+            result["scoop_cents"] = sustain_med - result["attack_median_cents"]
+
+    return result
+
+
+def _measure_loudness_shape(
+    note: ReferenceNote,
+    loudness: "LoudnessArrays",
+    core_start: float,
+    core_end: float,
+    *,
+    config: CoachingConfig,
+) -> dict:
+    """Compute ADSR-phase loudness scalars for ``NoteMeasurementV2``.
+
+    Returns a dict with keys: attack_duration_s, attack_rms_slope_db_per_s,
+    decay_rms_slope_db_per_s, sustain_rms_std_db, sustain_rms_slope_db_per_s,
+    release_rms_slope_db_per_s, envelope_shape.
+    """
+    cfg = config.adsr
+    result: dict = {
+        "attack_duration_s": None,
+        "attack_rms_slope_db_per_s": None,
+        "decay_rms_slope_db_per_s": None,
+        "sustain_rms_std_db": None,
+        "sustain_rms_slope_db_per_s": None,
+        "release_rms_slope_db_per_s": None,
+        "envelope_shape": None,
+    }
+
+    # ── Detect peak_time_s within [note.start_s, core_start] ─────────────
+    pre_mask = (loudness.times >= note.start_s) & (loudness.times < core_start)
+    pre_rms = loudness.rms_db[pre_mask]
+    pre_times = loudness.times[pre_mask]
+
+    peak_time_s: float = core_start  # default: collapse Attack+Decay
+    if pre_times.size > 0 and (core_start - note.start_s) >= cfg.min_attack_duration_s:
+        peak_idx = int(np.argmax(pre_rms))
+        peak_time_s = float(pre_times[peak_idx])
+
+    # ── Attack phase [note.start_s, peak_time_s] ─────────────────────────
+    attack_dur = float(peak_time_s - note.start_s)
+    attack_mask = (loudness.times >= note.start_s) & (loudness.times < peak_time_s)
+    a_times = loudness.times[attack_mask]
+    a_rms = loudness.rms_db[attack_mask].astype(np.float64)
+    if a_times.size >= 3 and attack_dur >= cfg.min_attack_duration_s:
+        result["attack_duration_s"] = attack_dur
+        result["attack_rms_slope_db_per_s"] = _slope(a_times, a_rms)
+
+    # ── Decay phase [peak_time_s, core_start] ────────────────────────────
+    decay_mask = (loudness.times >= peak_time_s) & (loudness.times < core_start)
+    d_times = loudness.times[decay_mask]
+    d_rms = loudness.rms_db[decay_mask].astype(np.float64)
+    if d_times.size >= 3:
+        result["decay_rms_slope_db_per_s"] = _slope(d_times, d_rms)
+
+    # ── Sustain phase [core_start, core_end] ─────────────────────────────
+    sustain_dur = float(core_end - core_start)
+    s_mask = (loudness.times >= core_start) & (loudness.times < core_end)
+    s_times = loudness.times[s_mask]
+    s_rms = loudness.rms_db[s_mask].astype(np.float64)
+    if s_times.size >= 5 and sustain_dur >= cfg.min_sustain_duration_s:
+        result["sustain_rms_std_db"] = float(np.std(s_rms))
+        result["sustain_rms_slope_db_per_s"] = _slope(s_times, s_rms)
+
+    # ── Release phase [core_end, note.end_s] ─────────────────────────────
+    release_dur = float(note.end_s - core_end)
+    r_mask = (loudness.times >= core_end) & (loudness.times < note.end_s)
+    r_times = loudness.times[r_mask]
+    r_rms = loudness.rms_db[r_mask].astype(np.float64)
+    if r_times.size >= 3 and release_dur >= cfg.min_release_duration_s:
+        result["release_rms_slope_db_per_s"] = _slope(r_times, r_rms)
+
+    # ── Envelope shape (whole-note heuristic) ────────────────────────────
+    all_mask = (loudness.times >= note.start_s) & (loudness.times < note.end_s)
+    all_rms = loudness.rms_db[all_mask].astype(np.float64)
+    all_times = loudness.times[all_mask]
+    if all_rms.size >= 6:
+        THRESH = cfg.envelope_slope_threshold_db_per_s
+        half = len(all_rms) // 2
+        slope_first = _slope(all_times[:half], all_rms[:half])
+        slope_second = _slope(all_times[half:], all_rms[half:])
+        if abs(slope_first) < THRESH and abs(slope_second) < THRESH:
+            shape = "sustain"
+        elif slope_first > THRESH and slope_second > THRESH:
+            shape = "crescendo"
+        elif slope_first < -THRESH and slope_second < -THRESH:
+            shape = "decrescendo"
+        elif slope_first > THRESH and slope_second < -THRESH:
+            shape = "swell"
+        elif (all_rms[:max(1, len(all_rms) // 5)].mean()
+              - all_rms[len(all_rms) // 5:].mean()) > cfg.sforzando_peak_advantage_db:
+            shape = "sforzando"
+        else:
+            shape = "sustain"
+        result["envelope_shape"] = shape
+
+    return result
+
+
+# ---------------------------------------------------------------------------
 # Public API: per-note measurement
 # ---------------------------------------------------------------------------
 
@@ -728,11 +949,16 @@ def measure_note(
     loudness_user: Optional["LoudnessArrays"] = None,
     loudness_ref: Optional["LoudnessArrays"] = None,
     pitch_ref_arrays: Optional[PitchArrays] = None,
+    user_phones: Optional[list] = None,
+    ref_phones: Optional[list] = None,
 ) -> NoteMeasurementV2:
     """Run all per-note measurements in song time.
 
     ``octave_shift_semitones`` is the global integer-octave correction
     applied to chart MIDI before pitch and arrival are evaluated.
+
+    ``user_phones`` and ``ref_phones`` are STARS phoneme lists for the note
+    window, used to gate vibrato autocorrelation on the STARS vibrato flag.
     """
     expected_onset = _expected_onset_s(note, stars_ref)
     arrival_offset_ms, arrival_tags = _measure_arrival(
@@ -760,6 +986,40 @@ def measure_note(
             config.pitch.voicing_threshold,
         )
 
+    # ── ADSR: user track ──────────────────────────────────────────────────
+    user_vibrato_score = _max_vibrato_score(user_phones) if user_phones else None
+    user_pitch_shape = _measure_pitch_shape(
+        note, pitch_user, cs, ce,
+        config=config,
+        stars_vibrato_score=user_vibrato_score,
+        octave_shift_semitones=octave_shift_semitones,
+    )
+    user_loud_shape: dict = (
+        _measure_loudness_shape(note, loudness_user, cs, ce, config=config)
+        if loudness_user is not None
+        else {}
+    )
+
+    # ── ADSR: reference track ─────────────────────────────────────────────
+    ref_pitch_shape: dict = {}
+    ref_loud_shape: dict = {}
+    if pitch_ref_arrays is not None:
+        ref_vibrato_score = _max_vibrato_score(ref_phones) if ref_phones else None
+        ref_pitch_shape = _measure_pitch_shape(
+            note, pitch_ref_arrays, cs, ce,
+            config=config,
+            stars_vibrato_score=ref_vibrato_score,
+            octave_shift_semitones=0,  # ref is already in chart pitch, no shift
+        )
+    if loudness_ref is not None:
+        ref_loud_shape = _measure_loudness_shape(note, loudness_ref, cs, ce, config=config)
+
+    # ── user_rms_relative_db ──────────────────────────────────────────────
+    user_rms_db = loud.get("user_rms_db")
+    user_rms_relative_db: Optional[float] = None
+    if user_rms_db is not None and loudness_user is not None:
+        user_rms_relative_db = user_rms_db - loudness_user.median_db
+
     return NoteMeasurementV2(
         note_index=note.index,
         start_s=note.start_s,
@@ -777,12 +1037,35 @@ def measure_note(
         note_octave_offset=pitch_stats["note_octave_offset"],
         pitch_tags=pitch_stats["pitch_tags"],
         arrival_tags=arrival_tags,
-        user_rms_db=loud.get("user_rms_db"),
+        user_rms_db=user_rms_db,
         ref_rms_db=loud.get("ref_rms_db"),
         rms_delta_db=loud.get("rms_delta_db"),
         rms_fade_db_per_s=loud.get("rms_fade_db_per_s"),
         mean_voicing_confidence=pitch_stats["mean_voicing_confidence"],
         ref_voiced_coverage=ref_vc,
+        # User ADSR fields
+        attack_duration_s=user_loud_shape.get("attack_duration_s"),
+        attack_median_cents=user_pitch_shape.get("attack_median_cents"),
+        attack_rms_slope_db_per_s=user_loud_shape.get("attack_rms_slope_db_per_s"),
+        decay_rms_slope_db_per_s=user_loud_shape.get("decay_rms_slope_db_per_s"),
+        decay_pitch_slope_cents_per_s=user_pitch_shape.get("decay_pitch_slope_cents_per_s"),
+        sustain_pitch_std_cents=user_pitch_shape.get("sustain_pitch_std_cents"),
+        sustain_rms_std_db=user_loud_shape.get("sustain_rms_std_db"),
+        sustain_rms_slope_db_per_s=user_loud_shape.get("sustain_rms_slope_db_per_s"),
+        release_pitch_slope_cents_per_s=user_pitch_shape.get("release_pitch_slope_cents_per_s"),
+        release_rms_slope_db_per_s=user_loud_shape.get("release_rms_slope_db_per_s"),
+        vibrato_rate_hz=user_pitch_shape.get("vibrato_rate_hz"),
+        vibrato_extent_cents=user_pitch_shape.get("vibrato_extent_cents"),
+        scoop_cents=user_pitch_shape.get("scoop_cents"),
+        envelope_shape=user_loud_shape.get("envelope_shape"),
+        user_rms_relative_db=user_rms_relative_db,
+        # Reference ADSR fields
+        ref_scoop_cents=ref_pitch_shape.get("scoop_cents"),
+        ref_vibrato_rate_hz=ref_pitch_shape.get("vibrato_rate_hz"),
+        ref_vibrato_extent_cents=ref_pitch_shape.get("vibrato_extent_cents"),
+        ref_envelope_shape=ref_loud_shape.get("envelope_shape"),
+        ref_sustain_rms_slope_db_per_s=ref_loud_shape.get("sustain_rms_slope_db_per_s"),
+        ref_attack_rms_slope_db_per_s=ref_loud_shape.get("attack_rms_slope_db_per_s"),
     )
 
 
@@ -874,6 +1157,8 @@ def measure_song(
     techniques: list[NoteTechniqueComparison] = []
     for i, note in enumerate(reference.notes):
         prev = reference.notes[i - 1] if i > 0 else None
+        note_user_phones = user_per_note.get(note.index, [])
+        note_ref_phones = ref_per_note.get(note.index, [])
         notes_out.append(
             measure_note(
                 note,
@@ -885,13 +1170,15 @@ def measure_song(
                 loudness_user=loud_user,
                 loudness_ref=loud_ref,
                 pitch_ref_arrays=ref_arrays,
+                user_phones=note_user_phones,
+                ref_phones=note_ref_phones,
             )
         )
         techniques.append(
             compare_note_techniques(
                 note,
-                ref_phones=ref_per_note.get(note.index, []),
-                user_phones=user_per_note.get(note.index, []),
+                ref_phones=note_ref_phones,
+                user_phones=note_user_phones,
             )
         )
     return notes_out, techniques, float(offset), int(shift)

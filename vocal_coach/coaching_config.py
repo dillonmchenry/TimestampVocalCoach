@@ -230,6 +230,111 @@ class HighlightsConfig:
 
 
 @dataclass
+class ADSRConfig:
+    """Thresholds for ADSR-phase continuous feature extraction and detectors."""
+
+    # Minimum phase durations (seconds) required to compute a scalar
+    min_attack_duration_s: float = 0.08
+    min_sustain_duration_s: float = 0.10
+    min_release_duration_s: float = 0.05
+
+    # Scoop / approach detection
+    scoop_min_cents: float = 25.0
+    """Attack-to-sustain pitch offset (cents) above which a note is flagged as a scoop."""
+    scoop_min_notes: int = 3
+    """Minimum number of scooping notes to surface a scoop_habit or pitch_overshoot moment."""
+    clean_attack_max_cents: float = 10.0
+    """Absolute scoop_cents below which an attack is considered "clean"."""
+    clean_attack_min_notes: int = 4
+
+    # Vibrato detection
+    vibrato_acf_min_correlation: float = 0.4
+    vibrato_min_rate_hz: float = 4.0
+    vibrato_max_rate_hz: float = 7.0
+    vibrato_healthy_min_hz: float = 5.0
+    vibrato_healthy_max_hz: float = 6.5
+    vibrato_min_duration_s: float = 0.30
+    vibrato_rate_consistency_hz: float = 0.5
+    """Max std(rate) across notes for consistent_vibrato affirming moment."""
+    vibrato_wide_extent_cents: float = 120.0
+    """Mean extent above this triggers wide_vibrato."""
+
+    # Envelope shape classification
+    envelope_slope_threshold_db_per_s: float = 2.0
+    sforzando_peak_advantage_db: float = 3.0
+
+    # Release slope classification
+    release_slope_drop_threshold: float = -150.0
+    release_slope_rise_threshold: float = 150.0
+    release_min_notes: int = 2
+    """Minimum notes with falling release to surface falling_release moment."""
+
+    # Onset / attack quality
+    onset_breathy_threshold_db_per_s: float = 5.0
+    """attack_rms_slope below this → breathy/slow onset."""
+    onset_clean_threshold_db_per_s: float = 20.0
+    """attack_rms_slope above this → affirming clean_onset."""
+
+    # Sustain stability
+    sustain_steady_max_pitch_std_cents: float = 8.0
+    """sustain_pitch_std_cents below this → steady_sustain (affirming)."""
+    sustain_steady_min_duration_s: float = 0.5
+    sustain_unstable_min_pitch_std_cents: float = 30.0
+    """sustain_pitch_std_cents above this (without vibrato) → pitch_instability."""
+
+    # Support fade (sustain dynamics)
+    support_fade_slope_db_per_s: float = -3.0
+    support_fade_std_db: float = 2.0
+    dynamic_sustain_max_std_db: float = 1.0
+    dynamic_sustain_max_slope_db_per_s: float = 1.0
+
+    # Passaggio (for registration strain)
+    passaggio_midi: int = 69
+    """MIDI pitch (A4) used as the passaggio proxy for registration strain detection."""
+
+    # Cross-dimensional
+    breath_support_flat_threshold_cents: float = -20.0
+    breath_support_fade_threshold_db_per_s: float = -3.0
+    breath_support_min_notes: int = 2
+
+    registration_sharp_threshold_cents: float = 25.0
+    registration_loud_threshold_db: float = 3.0
+
+    controlled_crescendo_delta_db: float = 2.0
+    controlled_crescendo_pct_in_tune: float = 0.60
+
+    loud_instability_loud_quantile: float = 0.75
+    loud_instability_max_pct_in_tune: float = 0.40
+    soft_control_soft_quantile: float = 0.25
+    soft_control_min_pct_in_tune: float = 0.70
+
+    high_note_min_pct_in_tune: float = 0.65
+    high_note_max_abs_scoop_cents: float = 15.0
+
+    vibrato_with_support_max_rms_std: float = 1.5
+    scoop_with_fade_fade_threshold_db_per_s: float = -3.0
+
+    technique_tradeoff_min_density: float = 0.5
+    technique_tradeoff_max_pct_in_tune: float = 0.45
+    expressive_stability_min_density: float = 0.4
+    expressive_stability_min_pct_in_tune: float = 0.65
+
+    # Phrase timing
+    rushed_phrase_mean_ms: float = -30.0
+    dragged_phrase_mean_ms: float = 40.0
+    phrase_timing_bias_std_ms: float = 25.0
+    rhythmic_precision_mean_ms: float = 15.0
+
+    # Phrase pitch arc
+    phrase_arc_drop_threshold: float = 0.20
+    """pct_in_tune drop from first half to second half of phrase to fire phrase_pitch_arc."""
+
+    # Section
+    section_improvement_min_delta: float = 0.10
+    section_vibrato_min_density_gap: float = 0.25
+
+
+@dataclass
 class ConfidenceConfig:
     """Evidence-tier thresholds for coaching moment confidence."""
 
@@ -251,6 +356,7 @@ class CoachingConfig:
     global_offset: GlobalOffsetConfig = field(default_factory=GlobalOffsetConfig)
     highlights: HighlightsConfig = field(default_factory=HighlightsConfig)
     confidence: ConfidenceConfig = field(default_factory=ConfidenceConfig)
+    adsr: ADSRConfig = field(default_factory=ADSRConfig)
 
     @classmethod
     def load(cls, config_path: Optional[Path] = None) -> "CoachingConfig":

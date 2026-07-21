@@ -364,3 +364,405 @@ def test_missed_expression_uses_softer_title() -> None:
     m = moments[0]
     assert "Try more" not in m.title, f"Title should not say 'Try more': {m.title!r}"
     assert "reference" in m.summary.lower(), f"Summary should mention reference: {m.summary!r}"
+
+
+# ---------------------------------------------------------------------------
+# Sprint 2: ADSR + continuous feature tests
+# ---------------------------------------------------------------------------
+
+
+def _adsr_measurement(
+    note: ReferenceNote,
+    *,
+    pct_in_tune: float | None = 0.8,
+    median_cents: float | None = 0.0,
+    scoop_cents: float | None = None,
+    ref_scoop_cents: float | None = None,
+    sustain_pitch_std_cents: float | None = None,
+    sustain_rms_slope_db_per_s: float | None = None,
+    release_pitch_slope_cents_per_s: float | None = None,
+    vibrato_rate_hz: float | None = None,
+    vibrato_extent_cents: float | None = None,
+    ref_vibrato_rate_hz: float | None = None,
+    attack_rms_slope_db_per_s: float | None = None,
+    ref_attack_rms_slope_db_per_s: float | None = None,
+    envelope_shape: str | None = None,
+    ref_envelope_shape: str | None = None,
+    sustain_rms_std_db: float | None = None,
+    release_rms_slope_db_per_s: float | None = None,
+    user_rms_db: float | None = None,
+    user_rms_relative_db: float | None = None,
+    rms_delta_db: float | None = None,
+    arrival_offset_ms: float | None = 0.0,
+    voiced_coverage: float = 1.0,
+    attack_duration_s: float | None = None,
+    midi_pitch: int | None = None,
+) -> NoteMeasurementV2:
+    return NoteMeasurementV2(
+        note_index=note.index,
+        start_s=note.start_s,
+        end_s=note.end_s,
+        midi_pitch=midi_pitch if midi_pitch is not None else note.midi_pitch,
+        note_name=note.note_name,
+        lyric_word=note.lyric_word,
+        voiced_coverage=voiced_coverage,
+        median_cents=median_cents,
+        pct_in_tune=pct_in_tune,
+        drift_cents_per_s=0.0,
+        arrival_offset_ms=arrival_offset_ms,
+        core_start_s=note.start_s,
+        core_end_s=note.end_s,
+        scoop_cents=scoop_cents,
+        ref_scoop_cents=ref_scoop_cents,
+        sustain_pitch_std_cents=sustain_pitch_std_cents,
+        sustain_rms_slope_db_per_s=sustain_rms_slope_db_per_s,
+        release_pitch_slope_cents_per_s=release_pitch_slope_cents_per_s,
+        vibrato_rate_hz=vibrato_rate_hz,
+        vibrato_extent_cents=vibrato_extent_cents,
+        ref_vibrato_rate_hz=ref_vibrato_rate_hz,
+        attack_rms_slope_db_per_s=attack_rms_slope_db_per_s,
+        ref_attack_rms_slope_db_per_s=ref_attack_rms_slope_db_per_s,
+        envelope_shape=envelope_shape,
+        ref_envelope_shape=ref_envelope_shape,
+        sustain_rms_std_db=sustain_rms_std_db,
+        release_rms_slope_db_per_s=release_rms_slope_db_per_s,
+        user_rms_db=user_rms_db,
+        user_rms_relative_db=user_rms_relative_db,
+        rms_delta_db=rms_delta_db,
+        attack_duration_s=attack_duration_s,
+    )
+
+
+def test_detect_scoop_habit_fires_on_repeated_scoops() -> None:
+    from vocal_coach.highlights import detect_scoop_habit
+    ref = _ref_with_n_notes(10)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(n, scoop_cents=40.0 if i < 4 else 5.0)
+        for i, n in enumerate(ref.notes)
+    ]
+    moments = detect_scoop_habit(ref, notes, config=cfg)
+    assert moments, "Expected a scoop_habit moment"
+    m = moments[0]
+    assert m.type == "scoop_habit"
+    assert m.feedback_basis in ("absolute", None)  # not yet stamped by pipeline
+    assert m.detail["count"] == 4
+
+
+def test_detect_scoop_habit_comparative_when_ref_also_scoops() -> None:
+    from vocal_coach.highlights import detect_scoop_habit
+    ref = _ref_with_n_notes(10)
+    cfg = CoachingConfig()
+    # All user scoops have matching ref scoops
+    notes = [
+        _adsr_measurement(n, scoop_cents=40.0 if i < 4 else 5.0,
+                          ref_scoop_cents=40.0 if i < 4 else 5.0)
+        for i, n in enumerate(ref.notes)
+    ]
+    moments = detect_scoop_habit(ref, notes, config=cfg)
+    assert moments
+    assert moments[0].detail["feedback_basis_override"] == "comparative"
+
+
+def test_detect_pitch_overshoot_fires() -> None:
+    from vocal_coach.highlights import detect_pitch_overshoot
+    ref = _ref_with_n_notes(10)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(n, scoop_cents=-40.0 if i < 4 else 5.0)
+        for i, n in enumerate(ref.notes)
+    ]
+    moments = detect_pitch_overshoot(ref, notes, config=cfg)
+    assert moments
+    assert moments[0].type == "pitch_overshoot"
+
+
+def test_detect_clean_attack_affirming() -> None:
+    from vocal_coach.highlights import detect_clean_attack
+    ref = _ref_with_n_notes(10)
+    cfg = CoachingConfig()
+    notes = [_adsr_measurement(n, scoop_cents=5.0) for n in ref.notes]
+    moments = detect_clean_attack(ref, notes, config=cfg)
+    assert moments
+    assert moments[0].type == "clean_attack"
+
+
+def test_detect_falling_release_fires() -> None:
+    from vocal_coach.highlights import detect_falling_release
+    ref = _ref_with_n_notes(10)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(n, release_pitch_slope_cents_per_s=-200.0 if i < 3 else 0.0)
+        for i, n in enumerate(ref.notes)
+    ]
+    moments = detect_falling_release(ref, notes, config=cfg)
+    assert moments
+    assert moments[0].type == "falling_release"
+
+
+def test_detect_steady_sustain_picks_most_stable() -> None:
+    from vocal_coach.highlights import detect_steady_sustain
+    ref = _ref_with_n_notes(5)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(
+            n,
+            sustain_pitch_std_cents=2.0 if i == 2 else 25.0,
+            voiced_coverage=1.0,
+        )
+        for i, n in enumerate(ref.notes)
+    ]
+    # Make note 2 long enough
+    notes[2] = NoteMeasurementV2(
+        **{
+            **notes[2].model_dump(),
+            "start_s": 0.0,
+            "end_s": 0.7,
+        }
+    )
+    moments = detect_steady_sustain(ref, notes, config=cfg)
+    assert moments
+    assert moments[0].type == "steady_sustain"
+    assert moments[0].detail["sustain_pitch_std_cents"] == 2.0
+
+
+def test_detect_pitch_instability_ignores_vibrato_notes() -> None:
+    from vocal_coach.highlights import detect_pitch_instability
+    ref = _ref_with_n_notes(5)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(
+            n,
+            sustain_pitch_std_cents=40.0,
+            vibrato_rate_hz=5.5 if i == 0 else None,  # note 0 has vibrato → should be excluded
+        )
+        for i, n in enumerate(ref.notes)
+    ]
+    moments = detect_pitch_instability(ref, notes, config=cfg)
+    assert moments
+    # Note 0 (vibrato) must not be in note_indices
+    assert 0 not in moments[0].note_indices
+
+
+def test_detect_vibrato_quality_healthy_range() -> None:
+    from vocal_coach.highlights import detect_vibrato_quality
+    ref = _ref_with_n_notes(5)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(n, vibrato_rate_hz=5.5, vibrato_extent_cents=60.0)
+        for n in ref.notes
+    ]
+    moments = detect_vibrato_quality(ref, notes, config=cfg)
+    types = {m.type for m in moments}
+    assert "consistent_vibrato" in types
+
+
+def test_detect_vibrato_quality_wide_vibrato() -> None:
+    from vocal_coach.highlights import detect_vibrato_quality
+    ref = _ref_with_n_notes(5)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(n, vibrato_rate_hz=5.5, vibrato_extent_cents=150.0)
+        for n in ref.notes
+    ]
+    moments = detect_vibrato_quality(ref, notes, config=cfg)
+    types = {m.type for m in moments}
+    assert "wide_vibrato" in types
+
+
+def test_detect_breath_support_fires_on_flat_and_fade() -> None:
+    from vocal_coach.highlights import detect_breath_support_issues
+    ref = _ref_with_n_notes(5)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(
+            n,
+            median_cents=-30.0,
+            sustain_rms_slope_db_per_s=-5.0,
+        )
+        for n in ref.notes
+    ]
+    m = detect_breath_support_issues(ref, notes, config=cfg)
+    assert m is not None
+    assert m.type == "breath_support_issue"
+
+
+def test_detect_breath_support_does_not_fire_without_fade() -> None:
+    from vocal_coach.highlights import detect_breath_support_issues
+    ref = _ref_with_n_notes(5)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(n, median_cents=-30.0, sustain_rms_slope_db_per_s=0.0)
+        for n in ref.notes
+    ]
+    m = detect_breath_support_issues(ref, notes, config=cfg)
+    assert m is None
+
+
+def test_detect_registration_strain_fires_on_high_loud_sharp() -> None:
+    from vocal_coach.highlights import detect_registration_strain
+    ref = _ref_with_n_notes(3)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(
+            n,
+            median_cents=30.0,
+            user_rms_relative_db=5.0,
+            midi_pitch=72,  # high note above passaggio
+        )
+        for n in ref.notes
+    ]
+    m = detect_registration_strain(ref, notes, config=cfg)
+    assert m is not None
+    assert m.type == "registration_strain"
+
+
+def test_detect_registration_strain_no_fire_below_passaggio() -> None:
+    from vocal_coach.highlights import detect_registration_strain
+    ref = _ref_with_n_notes(3)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(
+            n,
+            median_cents=30.0,
+            user_rms_relative_db=5.0,
+            midi_pitch=60,  # below passaggio
+        )
+        for n in ref.notes
+    ]
+    m = detect_registration_strain(ref, notes, config=cfg)
+    assert m is None
+
+
+def test_detect_controlled_crescendo_fires() -> None:
+    from vocal_coach.highlights import detect_controlled_crescendo
+    ref = _ref_with_n_notes(12)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(n, rms_delta_db=3.0 if i < 6 else 0.0, pct_in_tune=0.75)
+        for i, n in enumerate(ref.notes)
+    ]
+    moments = detect_controlled_crescendo(ref, notes, config=cfg)
+    assert moments
+    assert moments[0].type == "controlled_crescendo"
+
+
+def test_detect_phrase_timing_bias_rushed() -> None:
+    from vocal_coach.highlights import detect_phrase_timing_bias
+    ref = _ref_with_n_notes(12)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(n, arrival_offset_ms=-40.0)
+        for n in ref.notes
+    ]
+    moments = detect_phrase_timing_bias(ref, notes, config=cfg)
+    types = {m.type for m in moments}
+    assert "rushed_phrase" in types
+
+
+def test_detect_phrase_timing_bias_dragged() -> None:
+    from vocal_coach.highlights import detect_phrase_timing_bias
+    ref = _ref_with_n_notes(12)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(n, arrival_offset_ms=50.0)
+        for n in ref.notes
+    ]
+    moments = detect_phrase_timing_bias(ref, notes, config=cfg)
+    types = {m.type for m in moments}
+    assert "dragged_phrase" in types
+
+
+def test_detect_rhythmic_precision_affirming() -> None:
+    from vocal_coach.highlights import detect_rhythmic_precision
+    ref = _ref_with_n_notes(8)
+    cfg = CoachingConfig()
+    notes = [_adsr_measurement(n, arrival_offset_ms=5.0) for n in ref.notes]
+    moments = detect_rhythmic_precision(ref, notes, config=cfg)
+    assert moments
+    assert moments[0].type == "rhythmic_precision"
+
+
+def test_detect_phrase_pitch_arc_fires_on_degrading_accuracy() -> None:
+    from vocal_coach.highlights import detect_phrase_pitch_arc
+    ref = _ref_with_n_notes(12)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(n, pct_in_tune=0.9 if i < 6 else 0.4)
+        for i, n in enumerate(ref.notes)
+    ]
+    moments = detect_phrase_pitch_arc(ref, notes, config=cfg)
+    assert moments
+    assert moments[0].type == "phrase_pitch_arc"
+    assert moments[0].detail["first_half_pct"] > moments[0].detail["second_half_pct"]
+
+
+def test_detect_support_fade_fires() -> None:
+    from vocal_coach.highlights import detect_support_fade
+    ref = _ref_with_n_notes(5)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(n, sustain_rms_slope_db_per_s=-5.0, sustain_rms_std_db=3.0)
+        for n in ref.notes
+    ]
+    moments = detect_support_fade(ref, notes, config=cfg)
+    assert moments
+    assert moments[0].type == "support_fade"
+
+
+def test_detect_scoop_with_fade_fires() -> None:
+    from vocal_coach.highlights import detect_scoop_with_fade
+    ref = _ref_with_n_notes(5)
+    cfg = CoachingConfig()
+    notes = [
+        _adsr_measurement(n, scoop_cents=40.0, sustain_rms_slope_db_per_s=-5.0)
+        for n in ref.notes
+    ]
+    moments = detect_scoop_with_fade(ref, notes, config=cfg)
+    assert moments
+    assert moments[0].type == "scoop_with_fade"
+
+
+def test_feedback_basis_override_applied_in_select_highlights() -> None:
+    """Dual-basis moments should have their override reflected after select_highlights."""
+    ref = _ref_with_n_notes(12)
+    cfg = CoachingConfig()
+    cfg.highlights.cap = 20
+    # Build notes that trigger scoop_habit and reference also scoops (comparative)
+    notes = [
+        _adsr_measurement(n, scoop_cents=40.0, ref_scoop_cents=40.0, pct_in_tune=0.7)
+        for n in ref.notes
+    ]
+    techs = [
+        NoteTechniqueComparison(
+            note_index=i,
+            reference_techniques=[],
+            user_techniques=[],
+            matched=[], missed=[], user_added=[],
+        )
+        for i in range(len(ref.notes))
+    ]
+    report = select_highlights(ref, notes, techs, config=cfg)
+    scoop_moments = [m for m in report.moments if m.type == "scoop_habit"]
+    if scoop_moments:
+        assert scoop_moments[0].feedback_basis == "comparative"
+
+
+def test_moment_category_covers_all_sprint2_types() -> None:
+    """Every Sprint 2 type must appear in MOMENT_CATEGORY."""
+    from vocal_coach.highlights import MOMENT_CATEGORY
+    sprint2_types = [
+        "scoop_habit", "pitch_overshoot", "clean_attack", "falling_release",
+        "steady_sustain", "pitch_instability", "vibrato_quality", "consistent_vibrato",
+        "wide_vibrato", "delayed_vibrato", "straight_tone_control",
+        "breathy_onset", "clean_onset", "sforzando_attack", "note_crescendo",
+        "note_swell", "support_fade", "dynamic_sustain", "release_cutoff",
+        "breath_support_issue", "registration_strain", "controlled_crescendo",
+        "loud_pitch_instability", "soft_passage_control", "vibrato_with_support",
+        "scoop_with_fade", "technique_accuracy_tradeoff", "expressive_stability",
+        "high_note_control",
+        "rushed_phrase", "dragged_phrase", "rhythmic_precision", "phrase_pitch_arc",
+        "section_improvement", "section_regression", "section_vibrato_contrast",
+    ]
+    missing = [t for t in sprint2_types if t not in MOMENT_CATEGORY]
+    assert not missing, f"Types missing from MOMENT_CATEGORY: {missing}"

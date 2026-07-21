@@ -38,6 +38,7 @@ let currentReference = null;
 let currentReferenceSongId = null;
 
 const TYPE_LABEL = {
+  // Existing
   best_pitch_phrase: "Cleanest run",
   pitch_struggle: "Tricky passage",
   sharp_flat_note: "Note callout",
@@ -56,10 +57,52 @@ const TYPE_LABEL = {
   section_dynamic_contrast: "Dynamic contrast",
   best_overall_section: "Best section",
   weakest_overall_section: "Focus area",
+  // Sprint 2: continuous pitch
+  scoop_habit: "Pitch approach",
+  pitch_overshoot: "Overshooting",
+  clean_attack: "Clean attack",
+  falling_release: "Falling release",
+  steady_sustain: "Steady sustain",
+  pitch_instability: "Pitch wobble",
+  vibrato_quality: "Vibrato quality",
+  consistent_vibrato: "Consistent vibrato",
+  wide_vibrato: "Wide vibrato",
+  delayed_vibrato: "Vibrato timing",
+  straight_tone_control: "Straight tone",
+  // Sprint 2: continuous loudness
+  breathy_onset: "Breathy onset",
+  clean_onset: "Clean onset",
+  sforzando_attack: "Strong accent",
+  note_crescendo: "Note crescendo",
+  note_swell: "Note swell",
+  support_fade: "Support fade",
+  dynamic_sustain: "Steady volume",
+  release_cutoff: "Abrupt ending",
+  // Sprint 2: cross-dimensional
+  breath_support_issue: "Breath support",
+  registration_strain: "Register push",
+  controlled_crescendo: "Dynamic control",
+  loud_pitch_instability: "Loud + off pitch",
+  soft_passage_control: "Quiet accuracy",
+  vibrato_with_support: "Supported vibrato",
+  scoop_with_fade: "Compound onset",
+  technique_accuracy_tradeoff: "Expression vs pitch",
+  expressive_stability: "Expression + pitch",
+  high_note_control: "High note control",
+  // Sprint 2: phrase / section
+  rushed_phrase: "Rushing",
+  dragged_phrase: "Dragging",
+  rhythmic_precision: "Locked timing",
+  phrase_pitch_arc: "Phrase arc",
+  section_improvement: "Getting better",
+  section_regression: "Dropping off",
+  section_vibrato_contrast: "Vibrato contrast",
 };
 
-/** Maps backend moment.type -> feedback_basis (mirrors MOMENT_FEEDBACK_BASIS in highlights.py). */
+/** Maps backend moment.type -> feedback_basis (mirrors MOMENT_FEEDBACK_BASIS in highlights.py).
+ *  The actual basis for dual-basis types is stamped by the backend on moment.feedback_basis. */
 const MOMENT_FEEDBACK_BASIS = {
+  // Existing
   best_pitch_phrase: "absolute",
   pitch_struggle: "absolute",
   sharp_flat_note: "absolute",
@@ -78,6 +121,43 @@ const MOMENT_FEEDBACK_BASIS = {
   expressive_moment: "comparative",
   missed_expression: "comparative",
   vocal_texture: "comparative",
+  // Sprint 2 (dual defaults to absolute; actual basis stamped by backend)
+  scoop_habit: "absolute",
+  pitch_overshoot: "absolute",
+  clean_attack: "absolute",
+  falling_release: "absolute",
+  steady_sustain: "absolute",
+  pitch_instability: "absolute",
+  vibrato_quality: "absolute",
+  consistent_vibrato: "absolute",
+  wide_vibrato: "absolute",
+  delayed_vibrato: "comparative",
+  straight_tone_control: "absolute",
+  breathy_onset: "absolute",
+  clean_onset: "absolute",
+  sforzando_attack: "absolute",
+  note_crescendo: "absolute",
+  note_swell: "comparative",
+  support_fade: "absolute",
+  dynamic_sustain: "absolute",
+  release_cutoff: "absolute",
+  breath_support_issue: "absolute",
+  registration_strain: "absolute",
+  controlled_crescendo: "comparative",
+  loud_pitch_instability: "absolute",
+  soft_passage_control: "absolute",
+  vibrato_with_support: "absolute",
+  scoop_with_fade: "absolute",
+  technique_accuracy_tradeoff: "comparative",
+  expressive_stability: "comparative",
+  high_note_control: "absolute",
+  rushed_phrase: "absolute",
+  dragged_phrase: "absolute",
+  rhythmic_precision: "absolute",
+  phrase_pitch_arc: "absolute",
+  section_improvement: "absolute",
+  section_regression: "absolute",
+  section_vibrato_contrast: "comparative",
 };
 
 const BASIS_DISPLAY = {
@@ -87,6 +167,7 @@ const BASIS_DISPLAY = {
 
 /** Maps backend moment.type -> feedback category (matches highlight engine). */
 const MOMENT_TYPE_CATEGORY = {
+  // Existing
   best_pitch_phrase: "pitch",
   pitch_struggle: "pitch",
   sharp_flat_note: "pitch",
@@ -105,6 +186,46 @@ const MOMENT_TYPE_CATEGORY = {
   dynamic_drop: "volume",
   dynamic_surge: "volume",
   section_dynamic_contrast: "volume",
+  // Sprint 2: continuous pitch
+  scoop_habit: "pitch",
+  pitch_overshoot: "pitch",
+  clean_attack: "pitch",
+  falling_release: "pitch",
+  steady_sustain: "pitch",
+  pitch_instability: "pitch",
+  vibrato_quality: "expression",
+  consistent_vibrato: "expression",
+  wide_vibrato: "expression",
+  delayed_vibrato: "expression",
+  straight_tone_control: "expression",
+  // Sprint 2: continuous loudness
+  breathy_onset: "volume",
+  clean_onset: "volume",
+  sforzando_attack: "volume",
+  note_crescendo: "volume",
+  note_swell: "volume",
+  support_fade: "volume",
+  dynamic_sustain: "volume",
+  release_cutoff: "volume",
+  // Sprint 2: cross-dimensional
+  breath_support_issue: "pitch",
+  registration_strain: "pitch",
+  controlled_crescendo: "volume",
+  loud_pitch_instability: "pitch",
+  soft_passage_control: "pitch",
+  vibrato_with_support: "expression",
+  scoop_with_fade: "pitch",
+  technique_accuracy_tradeoff: "expression",
+  expressive_stability: "expression",
+  high_note_control: "pitch",
+  // Sprint 2: phrase / section
+  rushed_phrase: "timing",
+  dragged_phrase: "timing",
+  rhythmic_precision: "timing",
+  phrase_pitch_arc: "pitch",
+  section_improvement: "pitch",
+  section_regression: "pitch",
+  section_vibrato_contrast: "expression",
 };
 
 const CATEGORY_DISPLAY = {
@@ -118,6 +239,20 @@ const PITCH_GOOD_TYPES = new Set([
   "best_pitch_phrase",
   "section_strength",
   "best_overall_section",
+  // Sprint 2 affirming types that should render with good styling
+  "clean_attack",
+  "steady_sustain",
+  "consistent_vibrato",
+  "straight_tone_control",
+  "clean_onset",
+  "dynamic_sustain",
+  "controlled_crescendo",
+  "soft_passage_control",
+  "vibrato_with_support",
+  "expressive_stability",
+  "high_note_control",
+  "rhythmic_precision",
+  "section_improvement",
 ]);
 
 function cardCategoryClass(moment) {

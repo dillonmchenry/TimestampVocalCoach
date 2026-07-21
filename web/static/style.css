@@ -742,6 +742,49 @@ h3 {
 .card.dynamic_surge             { border-left-color: var(--warn); }
 .card.section_dynamic_contrast  { border-left-color: var(--warn); }
 
+/* Sprint 2: continuous pitch — good */
+.card.clean_attack              { border-left-color: var(--good); }
+.card.steady_sustain            { border-left-color: var(--good); }
+.card.high_note_control         { border-left-color: var(--good); }
+/* Sprint 2: continuous pitch — coaching */
+.card.scoop_habit               { border-left-color: var(--bad); }
+.card.pitch_overshoot           { border-left-color: var(--bad); }
+.card.falling_release           { border-left-color: var(--bad); }
+.card.pitch_instability         { border-left-color: var(--bad); }
+.card.breath_support_issue      { border-left-color: var(--bad); }
+.card.registration_strain       { border-left-color: var(--bad); }
+.card.loud_pitch_instability    { border-left-color: var(--bad); }
+.card.scoop_with_fade           { border-left-color: var(--bad); }
+.card.phrase_pitch_arc          { border-left-color: var(--bad); }
+.card.section_regression        { border-left-color: var(--bad); }
+/* Sprint 2: continuous pitch — neutral/affirming section */
+.card.soft_passage_control      { border-left-color: var(--good); }
+.card.section_improvement       { border-left-color: var(--good); }
+/* Sprint 2: technique */
+.card.vibrato_quality           { border-left-color: var(--expr); }
+.card.consistent_vibrato        { border-left-color: var(--expr); }
+.card.wide_vibrato              { border-left-color: var(--expr); }
+.card.delayed_vibrato           { border-left-color: var(--expr); }
+.card.straight_tone_control     { border-left-color: var(--expr); }
+.card.vibrato_with_support      { border-left-color: var(--expr); }
+.card.technique_accuracy_tradeoff { border-left-color: var(--expr); }
+.card.expressive_stability      { border-left-color: var(--expr); }
+.card.section_vibrato_contrast  { border-left-color: var(--expr); }
+/* Sprint 2: dynamics */
+.card.breathy_onset             { border-left-color: var(--warn); }
+.card.clean_onset               { border-left-color: var(--good); }
+.card.sforzando_attack          { border-left-color: var(--warn); }
+.card.note_crescendo            { border-left-color: var(--warn); }
+.card.note_swell                { border-left-color: var(--warn); }
+.card.support_fade              { border-left-color: var(--warn); }
+.card.dynamic_sustain           { border-left-color: var(--good); }
+.card.release_cutoff            { border-left-color: var(--warn); }
+.card.controlled_crescendo      { border-left-color: var(--good); }
+/* Sprint 2: alignment */
+.card.rushed_phrase             { border-left-color: var(--accent); }
+.card.dragged_phrase            { border-left-color: var(--accent); }
+.card.rhythmic_precision        { border-left-color: var(--good); }
+
 .card-header {
   margin: 0;
   padding: 5px 0 10px;
