@@ -78,3 +78,79 @@ highlights:
   section_dynamic_contrast_min_db: 1.5
   # Blended best/weakest section
   section_best_overall_min_notes: 4
+
+confidence:
+  low_threshold: 0.35
+  medium_threshold: 0.65
+  suppress_low: true
+
+adsr:
+  # Phase duration minimums
+  min_attack_duration_s: 0.08
+  min_sustain_duration_s: 0.10
+  min_release_duration_s: 0.05
+  # Scoop / approach
+  scoop_min_cents: 25.0
+  scoop_min_notes: 3
+  clean_attack_max_cents: 10.0
+  clean_attack_min_notes: 4
+  # Vibrato
+  vibrato_acf_min_correlation: 0.4
+  vibrato_min_rate_hz: 4.0
+  vibrato_max_rate_hz: 7.0
+  vibrato_healthy_min_hz: 5.0
+  vibrato_healthy_max_hz: 6.5
+  vibrato_min_duration_s: 0.30
+  vibrato_rate_consistency_hz: 0.5
+  vibrato_wide_extent_cents: 120.0
+  # Envelope shape
+  envelope_slope_threshold_db_per_s: 2.0
+  sforzando_peak_advantage_db: 3.0
+  # Release
+  release_slope_drop_threshold: -150.0
+  release_slope_rise_threshold: 150.0
+  release_min_notes: 2
+  # Onset quality
+  onset_breathy_threshold_db_per_s: 5.0
+  onset_clean_threshold_db_per_s: 20.0
+  # Sustain stability
+  sustain_steady_max_pitch_std_cents: 8.0
+  sustain_steady_min_duration_s: 0.5
+  sustain_unstable_min_pitch_std_cents: 30.0
+  # Support fade
+  support_fade_slope_db_per_s: -3.0
+  support_fade_std_db: 2.0
+  dynamic_sustain_max_std_db: 1.0
+  dynamic_sustain_max_slope_db_per_s: 1.0
+  # Passaggio
+  passaggio_midi: 69
+  # Cross-dimensional
+  breath_support_flat_threshold_cents: -20.0
+  breath_support_fade_threshold_db_per_s: -3.0
+  breath_support_min_notes: 2
+  registration_sharp_threshold_cents: 25.0
+  registration_loud_threshold_db: 3.0
+  controlled_crescendo_delta_db: 2.0
+  controlled_crescendo_pct_in_tune: 0.60
+  loud_instability_loud_quantile: 0.75
+  loud_instability_max_pct_in_tune: 0.40
+  soft_control_soft_quantile: 0.25
+  soft_control_min_pct_in_tune: 0.70
+  high_note_min_pct_in_tune: 0.65
+  high_note_max_abs_scoop_cents: 15.0
+  vibrato_with_support_max_rms_std: 1.5
+  scoop_with_fade_fade_threshold_db_per_s: -3.0
+  technique_tradeoff_min_density: 0.5
+  technique_tradeoff_max_pct_in_tune: 0.45
+  expressive_stability_min_density: 0.4
+  expressive_stability_min_pct_in_tune: 0.65
+  # Phrase timing
+  rushed_phrase_mean_ms: -30.0
+  dragged_phrase_mean_ms: 40.0
+  phrase_timing_bias_std_ms: 25.0
+  rhythmic_precision_mean_ms: 15.0
+  # Phrase pitch arc
+  phrase_arc_drop_threshold: 0.20
+  # Section
+  section_improvement_min_delta: 0.10
+  section_vibrato_min_density_gap: 0.25

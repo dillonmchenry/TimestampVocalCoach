@@ -261,6 +261,7 @@ def run_student(
         start_s = float(start_f * hop_seconds)
         end_s = float(end_f * hop_seconds)
         techniques: dict[str, int] = {}
+        technique_scores: dict[str, float] = {}
         if end_f > start_f:
             if use_phoneme_level:
                 # Pool h, run technique head, threshold.
@@ -273,7 +274,9 @@ def run_student(
             avg_arr = np.zeros(len(STUDENT_TECH_NAMES), dtype=np.float32)
         for k, name in enumerate(STUDENT_TECH_NAMES):
             thresh = TECH_THRESHOLDS.get(name, 0.5)
-            techniques[name] = int(avg_arr[k] >= thresh) if k < len(avg_arr) else 0
+            score = float(avg_arr[k]) if k < len(avg_arr) else 0.0
+            technique_scores[name] = score
+            techniques[name] = int(score >= thresh)
 
         w_idx = ph2word[i] if i < len(ph2word) else -1
         if 0 <= w_idx < len(word_list):
@@ -291,6 +294,7 @@ def run_student(
                 start_s=start_s,
                 end_s=end_s,
                 techniques=techniques,
+                technique_scores=technique_scores,
             )
         )
 

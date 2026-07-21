@@ -192,6 +192,13 @@ class StarsPhoneme(BaseModel):
         default_factory=dict,
         description="Map of technique name -> 0/1 (see STARS_TECH_NAMES for keys)",
     )
+    technique_scores: Optional[dict[str, float]] = Field(
+        None,
+        description=(
+            "Continuous sigmoid probability per technique from the student model. "
+            "None when the full STARS teacher was used (teacher thresholds before serialisation)."
+        ),
+    )
 
 
 class StarsNote(BaseModel):
@@ -426,6 +433,18 @@ class NoteMeasurementV2(BaseModel):
     pitch_tags: list[str] = Field(default_factory=list)
     arrival_tags: list[str] = Field(default_factory=list)
 
+    mean_voicing_confidence: Optional[float] = Field(
+        None,
+        description="Mean NanoPitch VAD confidence across all frames in the note window.",
+    )
+    ref_voiced_coverage: Optional[float] = Field(
+        None,
+        description=(
+            "Fraction of reference pitch frames inside the note window with voicing >= threshold. "
+            "None when reference pitch track is unavailable."
+        ),
+    )
+
     # Loudness measurements (populated when LoudnessTrack is available)
     user_rms_db: Optional[float] = Field(
         None,
@@ -453,6 +472,139 @@ class NoteMeasurementV2(BaseModel):
         ),
     )
 
+    # ------------------------------------------------------------------
+    # Sprint 2: ADSR-phase continuous features (user track)
+    # ------------------------------------------------------------------
+
+    # Attack phase [note.start_s, peak_time_s]
+    attack_duration_s: Optional[float] = Field(
+        None,
+        description='Duration of the attack phase in seconds (note.start_s to RMS peak).',
+    )
+    attack_median_cents: Optional[float] = Field(
+        None,
+        description=(
+            'Median pitch offset (cents from target) during the attack phase. '
+            'Used with median_cents to compute scoop_cents.'
+        ),
+    )
+    attack_rms_slope_db_per_s: Optional[float] = Field(
+        None,
+        description=(
+            'Linear RMS slope during the attack phase (dB/s). '
+            'Low values (< 5 dB/s) indicate a slow or breathy onset.'
+        ),
+    )
+
+    # Decay phase [peak_time_s, core_start_s]
+    decay_rms_slope_db_per_s: Optional[float] = Field(
+        None,
+        description='RMS slope during the decay phase (peak → sustain level, dB/s).',
+    )
+    decay_pitch_slope_cents_per_s: Optional[float] = Field(
+        None,
+        description='Pitch slope during the decay phase (cents/s). Captures scoop resolution speed.',
+    )
+
+    # Sustain phase (augments existing median_cents / pct_in_tune / drift_cents_per_s)
+    sustain_pitch_std_cents: Optional[float] = Field(
+        None,
+        description=(
+            'Standard deviation of cents in the core window. '
+            'High values without vibrato indicate pitch instability.'
+        ),
+    )
+    sustain_rms_std_db: Optional[float] = Field(
+        None,
+        description='Standard deviation of RMS during the sustain window (dB). High = unsteady support.',
+    )
+    sustain_rms_slope_db_per_s: Optional[float] = Field(
+        None,
+        description=(
+            'Linear RMS slope in the core (sustain) window (dB/s). '
+            'More precise than whole-note rms_fade_db_per_s.'
+        ),
+    )
+
+    # Release phase [core_end_s, note.end_s]
+    release_pitch_slope_cents_per_s: Optional[float] = Field(
+        None,
+        description=(
+            'Linear pitch slope in the release window (cents/s). '
+            'Negative = falling release ("drop"); positive = rising.'
+        ),
+    )
+    release_rms_slope_db_per_s: Optional[float] = Field(
+        None,
+        description='RMS slope during the release phase (dB/s). Very negative = abrupt cutoff.',
+    )
+
+    # Vibrato (sustain sub-feature)
+    vibrato_rate_hz: Optional[float] = Field(
+        None,
+        description=(
+            'Dominant vibrato oscillation rate (Hz) from autocorrelation of detrended cents. '
+            'Populated when STARS vibrato score >= 0.1 and sustain >= 300ms.'
+        ),
+    )
+    vibrato_extent_cents: Optional[float] = Field(
+        None,
+        description='Peak-to-peak vibrato extent (cents) = 2 * std(detrended sustain cents).',
+    )
+
+    # Derived composites
+    scoop_cents: Optional[float] = Field(
+        None,
+        description=(
+            'median_cents − attack_median_cents. '
+            'Positive = scooped from below (attack below target); '
+            'negative = approached from above (overshoot).'
+        ),
+    )
+    envelope_shape: Optional[str] = Field(
+        None,
+        description=(
+            'Loudness envelope archetype: one of '
+            '"sustain", "crescendo", "decrescendo", "swell", "sforzando". '
+            'None when loudness track unavailable or note too short.'
+        ),
+    )
+
+    # Relative loudness (user track vs track median)
+    user_rms_relative_db: Optional[float] = Field(
+        None,
+        description='user_rms_db − track_median_db. Used for registration strain detection.',
+    )
+
+    # ------------------------------------------------------------------
+    # Sprint 2: Reference ADSR fields (key subset for comparative detectors)
+    # ------------------------------------------------------------------
+
+    ref_scoop_cents: Optional[float] = Field(
+        None,
+        description='Reference artist scoop on this note (cents). Enables dual-basis scoop detection.',
+    )
+    ref_vibrato_rate_hz: Optional[float] = Field(
+        None,
+        description='Reference vibrato rate (Hz) on this note.',
+    )
+    ref_vibrato_extent_cents: Optional[float] = Field(
+        None,
+        description='Reference vibrato extent (cents) on this note.',
+    )
+    ref_envelope_shape: Optional[str] = Field(
+        None,
+        description='Reference loudness envelope archetype for this note.',
+    )
+    ref_sustain_rms_slope_db_per_s: Optional[float] = Field(
+        None,
+        description='Reference sustain RMS slope (dB/s) for dynamic shape comparison.',
+    )
+    ref_attack_rms_slope_db_per_s: Optional[float] = Field(
+        None,
+        description='Reference onset ramp (dB/s) for onset character comparison.',
+    )
+
 
 class NoteTechniqueComparison(BaseModel):
     """Reference vs. user STARS technique sets for one note window."""
@@ -471,6 +623,13 @@ class NoteTechniqueComparison(BaseModel):
     user_added: list[str] = Field(
         default_factory=list,
         description='Techniques the user added that the reference does not have',
+    )
+    user_technique_scores: Optional[dict[str, float]] = Field(
+        None,
+        description=(
+            "Max continuous sigmoid probability per technique across user phonemes in this note window. "
+            "Student model only; None when the full STARS teacher was used."
+        ),
     )
 
 
@@ -513,6 +672,17 @@ class CoachingMoment(BaseModel):
     detail: dict = Field(
         default_factory=dict,
         description='Free-form structured data for UI tooltips (cents, pct_in_tune, etc.)',
+    )
+    confidence: str = Field(
+        "high",
+        description='Evidence tier: "low", "medium", or "high".',
+    )
+    feedback_basis: str = Field(
+        "absolute",
+        description=(
+            '"absolute" = universal technique quality (pitch, timing, dynamics); '
+            '"comparative" = comparison with the specific reference recording.'
+        ),
     )
 
 
@@ -689,4 +859,4 @@ class PerformanceAnalysis(BaseModel):
             'None when no scoreable notes were measured.'
         ),
     )
-    analysis_version: str = Field("v3", description='Schema version tag for migrations')
+    analysis_version: str = Field("v5", description='Schema version tag for migrations')
