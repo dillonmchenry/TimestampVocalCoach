@@ -50,6 +50,7 @@ from vocal_coach.schemas import (  # noqa: E402
 )
 from vocal_coach.song import load_manifest  # noqa: E402
 from vocal_coach.trends import compute_section_trends  # noqa: E402
+from vocal_coach.vocal_profile import load_vocal_profile  # noqa: E402
 from vocal_coach.stars_runner import (  # noqa: E402
     DEFAULT_STARS_DIR,
     STARS_PROFILE_FULL,
@@ -284,12 +285,20 @@ def main() -> int:
         config=coaching_cfg,
     )
     section_trends = compute_section_trends(reference, notes, techniques)
+
+    # Sprint 3: load vocal profile for emphasis weighting (optional — no-op if absent)
+    vocal_profile_path = song_dir / (manifest.vocal_profile_path or "vocal_profile.json")
+    vocal_profile = load_vocal_profile(vocal_profile_path)
+    if vocal_profile is not None:
+        print(f"[analyze] vocal profile   : loaded ({vocal_profile_path.name})")
+
     highlights = select_highlights(
         reference,
         notes,
         techniques,
         config=coaching_cfg,
         sections=section_trends,
+        vocal_profile=vocal_profile,
     )
     overview = compute_overview(
         notes,

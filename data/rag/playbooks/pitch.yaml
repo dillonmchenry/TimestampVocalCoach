@@ -1,0 +1,373 @@
+# Pitch category playbook
+# Covers: best_pitch_phrase, pitch_struggle, sharp_flat_note, scoop_habit,
+#         pitch_overshoot, clean_attack, falling_release, steady_sustain,
+#         pitch_instability, breath_support_issue, registration_strain,
+#         loud_pitch_instability, soft_passage_control, high_note_control,
+#         scoop_with_fade, phrase_pitch_arc, section_strength, section_weakness,
+#         best_overall_section, weakest_overall_section, section_improvement,
+#         section_regression
+
+entries:
+  - detector: best_pitch_phrase
+    pedagogy: >
+      Sustained pitch accuracy across a multi-note phrase requires stable subglottal pressure
+      and consistent vocal fold adduction. Phrases where a singer maintains intonation throughout
+      demonstrate coordinated breath management and muscle memory, the hallmarks of reliable technique.
+    coaching_voice: >
+      Lead with the specific phrase and the number, then reinforce what made it work.
+      Be specific about which notes or words were strongest. Avoid generic praise.
+    few_shot_summaries:
+      - "Your best pitch run was across 'yesterday all my troubles' — 87% of frames landed in tune. That kind of consistency comes from steady breath pressure; keep doing what you did there."
+      - "Notes 12–19 ('and now it looks') showed your cleanest intonation of the take at 82% in-tune. The phrase sits in your comfortable middle register, which helps — notice how much easier tuning feels there."
+    practice_tip: >
+      Repeat the best phrase five times back-to-back to reinforce the muscle memory. Then
+      try to carry that same breath support into the phrase immediately following it.
+
+  - detector: pitch_struggle
+    pedagogy: >
+      Pitch inaccuracy in a phrase typically traces to one of three causes: insufficient
+      breath support collapsing subglottal pressure, registration mismatch (chest voice
+      pushed above the passaggio), or inadequate mental pitch rehearsal before singing.
+      Research by Miller (2000) shows that singers who mentally audiate a pitch before
+      producing it have significantly better intonation outcomes.
+    coaching_voice: >
+      State the specific phrase and percentage, name the direction (flat or sharp) if consistent,
+      then offer one concrete mechanical cause. Don't pile on multiple explanations.
+    few_shot_summaries:
+      - "The phrase from 'love was such an easy game' was your toughest section — only 41% of frames were in tune. The notes are sitting right at your passaggio, which tends to pull pitch sharp when you push."
+      - "You struggled most through 'I believe in yesterday' — 38% in-tune. The line drops toward the bottom of your range there; support tends to collapse on low notes, pulling them flat."
+    practice_tip: >
+      Isolate the two most out-of-tune notes. Sing each in isolation on a sustained 'ah',
+      targeting the pitch with your inner ear before you produce sound. Then chain them back
+      into the phrase.
+
+  - detector: sharp_flat_note
+    pedagogy: >
+      Individual sharp or flat notes often indicate inconsistent vowel shaping, registration
+      instability on a specific pitch, or a carry-over intonation error from the preceding note.
+      Consistent sharpness on a single pitch often signals over-tensed cricothyroid muscles;
+      consistent flatness often signals insufficient cricothyroid engagement.
+    coaching_voice: >
+      Name the exact note (word, pitch name, direction, and magnitude in cents).
+      One sentence on likely cause, one sentence on a fix. Surgical, not broad.
+    few_shot_summaries:
+      - "The E4 on 'easy' landed 38 cents flat — that note sits just below your passaggio, where breath pressure tends to drop. Try engaging your support slightly before you arrive on that word."
+      - "Your G4 on 'game' was 31 cents sharp. That pitch is right at your bridge; you may be adding chest-voice tension to compensate. Try approaching it in a lighter mix."
+    practice_tip: >
+      Sing just that note — sustain it for four beats. Tune it to a reference pitch (piano
+      or tuner app). Once you have it, place it back into the phrase with the same vowel shape.
+
+  - detector: scoop_habit
+    pedagogy: >
+      A scoop (portamento from below the target pitch) is a delayed onset of vocal fold
+      adduction, where pitch rises during the attack phase rather than locking immediately.
+      In pop and jazz styles this is often intentional expressiveness; in classical and
+      formal singing it signals a failure of pre-phonation pitch preparation. Garcia (1847)
+      noted that disciplined attack requires mental pitch preparation before phonation begins.
+    coaching_voice: >
+      Always check the reference first: if the artist scoops on these same notes, frame this
+      as stylistic matching, not a flaw. If not, be direct: you're arriving late to the pitch.
+      State the count and average magnitude, then give one fix.
+    few_shot_summaries:
+      - "You glide up into 4 notes in the verse — 'yes-ter-day' and 'trou-bles' — by about 28 cents. The original artist attacks these cleanly from the target pitch. Try closing on the pitch before you start sound."
+      - "These same scoops appear in the original recording too — McCartney uses the same upward glide on 'yesterday' and 'games'. You're matching that stylistic choice, which is exactly right."
+    practice_tip: >
+      For each scooping note: think the pitch before you open your mouth. Start the breath,
+      then add sound. The attack should feel like stepping onto the pitch, not sliding onto it.
+
+  - detector: pitch_overshoot
+    pedagogy: >
+      Approaching a note from above (negative scoop, or 'fall-in') indicates early cricothyroid
+      over-engagement or breath pressure that overshoots the target at note onset. Less common
+      than scooping, it sometimes appears on high notes where a singer over-lifts to prepare
+      for the pitch, then settles down to it during the sustain.
+    coaching_voice: >
+      Frame it as arriving from above rather than from below. State count and magnitude.
+      Distinguish if it's stylistic (some jazz singers do this) or a control issue.
+    few_shot_summaries:
+      - "On 3 notes you're approaching from above — landing about 32 cents sharp before settling. That slight downward slide suggests you're over-preparing for the pitch. Try relaxing slightly at the onset."
+      - "The downward approach into the chorus notes is actually close to the original — she tends to drift in from above on sustained notes. You're slightly more exaggerated at 35 cents versus her 18 cents."
+    practice_tip: >
+      Sing the note on a pure 'ee' vowel, which tends to lock intonation. If the overshoot
+      disappears, your consonant preparation before the vowel may be pulling pitch upward.
+
+  - detector: clean_attack
+    pedagogy: >
+      A clean attack — launching directly onto the target pitch within ±10 cents — requires
+      both pre-phonation mental preparation (audiation) and coordination of breath onset with
+      vocal fold closure. This is a mark of technical reliability and is the baseline expectation
+      in classical and musical theatre training. It also aids rhythmic precision since pitch
+      lock happens on beat rather than after it.
+    coaching_voice: >
+      Affirming. State the run of consecutive clean attacks and the context. Brief is fine —
+      this is positive reinforcement, not a lesson.
+    few_shot_summaries:
+      - "You attacked 6 notes in a row cleanly — right on pitch from the first frame. That kind of consistent onset across 'all my troubles seemed so far away' is excellent technique."
+      - "Strong clean attacks through the bridge. You're landing right on the pitch without any approach slide, which keeps the rhythm locked too."
+    practice_tip: >
+      Keep doing this. To strengthen the habit, occasionally practice singing the melody
+      on staccato notes — this trains the pitch lock reflex that clean legato attacks rely on.
+
+  - detector: falling_release
+    pedagogy: >
+      A pitch that falls sharply at note release is called a 'fall' or 'flip off' in pop
+      terminology. In classical style it signals a loss of support at the end of the note;
+      in jazz and R&B it can be an intentional ornament. The reference track comparison
+      clarifies which applies: if the reference also falls here, it's stylistic; if not,
+      it's a support collapse.
+    coaching_voice: >
+      Check the reference; adjust framing accordingly. If it's a support issue, the release
+      slope magnitude (cents/second) is worth mentioning.
+    few_shot_summaries:
+      - "On 4 notes your pitch drops sharply at release — about 180 cents/s. The original holds pitch through the end of these notes. That's a support issue: breath pressure is collapsing before you finish the phrase."
+      - "The falling releases on the chorus notes match the original — that downward flick at the end is part of the artist's style. You're executing it at a slightly steeper angle but it's working."
+    practice_tip: >
+      For unsupported falls: practice singing the note and mentally 'holding' it for one
+      extra beat past where you'd normally release. The physical sensation of sustained
+      support is what you're training.
+
+  - detector: steady_sustain
+    pedagogy: >
+      A steady sustain — low pitch variance across the stable middle portion of a note —
+      requires consistent subglottal pressure and relaxed laryngeal musculature. Achieving
+      this on notes longer than 500ms is a sign of advanced breath management. Miller (2000)
+      describes this as the 'core' of a well-produced tone.
+    coaching_voice: >
+      Affirming. Name the note duration and pitch stability statistic. Briefly connect it
+      to what physical skill it reflects.
+    few_shot_summaries:
+      - "Your sustained notes — particularly the long hold on 'far' — were remarkably steady, less than 6 cents of wobble across a 600ms sustain. That's solid breath management."
+      - "The held notes in the chorus had excellent sustain stability. You're maintaining consistent pressure through those long vowels, which keeps the tone centred."
+    practice_tip: >
+      To develop this: sustain a note for 8 beats on a comfortable pitch, watching a tuner.
+      Try to keep the needle inside ±10 cents for the full duration. Gradually extend to 12 beats.
+
+  - detector: pitch_instability
+    pedagogy: >
+      High pitch standard deviation during sustain (without vibrato) indicates instability
+      in the cricothyroid-thyroarytenoid balance, often caused by incomplete vocal fold
+      adduction or wavering breath support. This should not be confused with vibrato, which
+      has a regular oscillation rate of 4–7 Hz. Random instability at amplitudes above 30 cents
+      significantly degrades perceived pitch accuracy.
+    coaching_voice: >
+      Name the specific notes affected and the instability magnitude. Distinguish from
+      vibrato if needed. Offer one mechanical direction.
+    few_shot_summaries:
+      - "Your sustain wobbles on 4 long notes — pitch variance of 35 cents with no consistent vibrato pattern. That's random instability, not ornament. It usually means support is uneven through the note."
+      - "The held notes in the bridge are unstable — about 40 cents of random variation. The reference uses vibrato there; you're sustaining straight but without enough evenness in the tone."
+    practice_tip: >
+      On a comfortable pitch, sustain for 6 beats while placing a hand on your abdomen.
+      Feel the steady outward pressure. If it flutters, that's where the instability is
+      coming from. Work on smoothing that pressure impulse.
+
+  - detector: breath_support_issue
+    pedagogy: >
+      The co-occurrence of flat intonation and falling RMS loudness within the same phrase
+      is a reliable marker of insufficient breath pressure. As subglottal pressure drops,
+      vocal folds operate with less tension, causing pitch to fall flat simultaneously with
+      volume. This compound pattern is distinct from either problem in isolation and indicates
+      the root cause is breath management rather than pitch inaccuracy alone.
+    coaching_voice: >
+      Name the compound pattern: pitch going flat AND volume fading simultaneously. This
+      specificity is what makes the coaching useful — it's a breath support diagnosis, not
+      just 'you were flat.'
+    few_shot_summaries:
+      - "Across this phrase your pitch dropped 25 cents flat while your volume faded 4 dB simultaneously. That combination almost always means breath pressure is collapsing. The flat notes and the fade are the same problem."
+      - "Three notes in 'now it looks as though' go flat and quiet at the same time. Support is running out mid-phrase — you need to refresh your breath before that line, or engage your support muscles sooner."
+    practice_tip: >
+      Before the phrase, take a breath that fills the lower rib cage (not just the chest).
+      Feel the 'buoyancy' of that breath through the entire phrase. The goal is steady
+      outward rib expansion even as you run out of air.
+
+  - detector: registration_strain
+    pedagogy: >
+      Notes above the passaggio (roughly A4 for most voices) sung with chest-voice tension
+      produce sharp intonation and often excess volume, as the singer compensates with
+      muscular effort for what should be a register transition. Roubeau et al. (2004)
+      demonstrated that this pattern is reliably detected by pitch sharpness combined with
+      elevated RMS relative to the performance average.
+    coaching_voice: >
+      Name the pitch, the sharpness, and the volume context. Frame it as a registration
+      choice problem, not a "you're singing wrong" judgment. Suggest mixing or lightening.
+    few_shot_summaries:
+      - "On A4 in the second chorus you're landing 28 cents sharp and about 4 dB louder than your average. That note is at your passaggio — pushing chest voice up there tends to sharpen pitch and increase effort. Try a lighter mix on that note."
+      - "The Bb4 on 'yesterday' is coming in 32 cents sharp with elevated volume. That's a flag for registration strain. The note wants to be in a light mix or head voice — the sharp pitch usually resolves when you stop pushing."
+    practice_tip: >
+      Sing the strained note on 'ng' (as in 'sing'). The ng position prevents chest pushing.
+      If pitch centres on ng, your registration is the issue. Carry that lighter sensation
+      into the full vowel.
+
+  - detector: loud_pitch_instability
+    pedagogy: >
+      Many singers maintain better intonation at moderate dynamics than at louder levels
+      because increased subglottal pressure at forte requires more precise cricothyroid
+      tension to maintain the same pitch. Singers who lack this coordination sharpen or
+      destabilise pitch as they sing louder.
+    coaching_voice: >
+      Identify the loud context and the pitch accuracy drop. Frame as a coordination
+      challenge, not a failure. It's common and fixable.
+    few_shot_summaries:
+      - "Your loudest notes — the top 25% of your dynamic range — had noticeably worse pitch accuracy: 35% in-tune versus 68% on your quieter notes. Loud singing needs more precise tension control. That's a coordination gap, not a volume problem."
+      - "When you push in the chorus your intonation suffers — pitch accuracy drops from 72% to 39% at your loudest. A lot of singers experience this; it means your breath pressure and fold tension aren't scaling together yet."
+    practice_tip: >
+      Practise the chorus lines at mezzo-forte (not full volume) with a tuner until pitch is
+      locked. Then gradually increase volume while keeping pitch centred. The goal is to
+      isolate the intonation habit from the dynamic habit.
+
+  - detector: soft_passage_control
+    pedagogy: >
+      Maintaining intonation accuracy in pianissimo passages is technically demanding because
+      it requires fine-grained cricothyroid control at low subglottal pressure. Singers who
+      can do this have developed the 'head voice float' technique, where tone is supported
+      by efficient laryngeal posture rather than breath pressure. This is a significant
+      positive indicator of technique.
+    coaching_voice: >
+      Affirming. Name the passage, the dynamic context, and the accuracy number. Brief
+      technical reinforcement.
+    few_shot_summaries:
+      - "On your quietest notes — the bottom 25% of your dynamic range — your pitch accuracy was 74%. That's excellent. Quiet singing with accurate intonation is a real skill; it means your tone is supported efficiently."
+      - "The soft ending of the final verse showed clean pitch at low volume. That controlled pianissimo is hard to do well — your breath management is solid in that passage."
+    practice_tip: >
+      Practise whole phrases at half your normal volume. Notice that you have to engage
+      support more actively, not less, to keep pitch from dropping.
+
+  - detector: high_note_control
+    pedagogy: >
+      Notes at or above the passaggio (A4+) that are both accurately pitched and cleanly
+      attacked demonstrate successful register coordination. High note control requires
+      the simultaneous management of increased subglottal pressure, lighter fold adduction,
+      and vowel modification — a complex coordination that is a key marker of technical
+      development.
+    coaching_voice: >
+      Affirming. Name the notes, their pitches, and the accuracy metric. Connect briefly
+      to what it says about register management.
+    few_shot_summaries:
+      - "You hit the A4s in the chorus cleanly — 71% in-tune and no approach slides. High notes at that accuracy and with clean attacks are a sign your upper register is well-coordinated."
+      - "Strong high note control through the bridge — G4 and A4 both came in accurately and without strain. That's your register transition working as it should."
+    practice_tip: >
+      To extend this: work the notes one semitone higher in a practice context using a
+      lighter 'oo' vowel, then bring the vowel modification back to the song's original vowel.
+
+  - detector: scoop_with_fade
+    pedagogy: >
+      The combination of a pitch scoop and simultaneous volume fade at note onset is a
+      compound onset problem indicating both late pitch preparation and insufficient breath
+      support. Either issue alone is correctable; together they amplify the perceptual
+      effect and suggest the breath onset itself is the root cause.
+    coaching_voice: >
+      Name the compound pattern: arriving late to pitch AND fading volume simultaneously
+      on attack. Connect both to a single root cause (breath onset timing or support).
+    few_shot_summaries:
+      - "On 3 notes you're both scooping into pitch and fading in volume at the same time. That double hit usually means the breath isn't fully engaged when you start the note. Start your support a half-beat earlier."
+      - "These notes are scoop-and-fade — gliding up to pitch while getting quieter at the same time. The two issues have one cause: you're initiating sound before the breath support is ready."
+    practice_tip: >
+      Try a sharp 'h' consonant before the note ('h-ah' instead of just 'ah'). The burst of
+      air trains the breath-before-sound reflex. Once the pattern is in your body, drop the 'h'.
+
+  - detector: phrase_pitch_arc
+    pedagogy: >
+      Systematic pitch accuracy degradation from the start to the end of a phrase (where
+      the second half of the phrase has notably lower intonation than the first half) often
+      indicates breath depletion or attentional fatigue. The singer uses available support
+      at the phrase start but cannot sustain it through to the final note.
+    coaching_voice: >
+      Name the phrase and the accuracy drop (first half vs second half percentage). Frame
+      as a pacing issue: the singer starts well but the phrase runs out of support.
+    few_shot_summaries:
+      - "Through 'all the troubles seemed so far away' your pitch accuracy dropped from 74% in the first half to 41% in the second. The phrase is running out of steam — plan your breath so the end gets as much support as the start."
+      - "This phrase starts in tune but degrades as it progresses: 68% in the first six notes, 38% in the last five. A mid-phrase breath top-up or larger initial breath would help keep intonation through the end."
+    practice_tip: >
+      Take a larger breath than you think you need. Sing the phrase and deliberately exaggerate
+      support on the last 3 notes. That over-correction will teach your body where the support
+      needs to be sustained.
+
+  - detector: section_strength
+    pedagogy: >
+      Consistency of strong intonation across an entire section reflects consolidated
+      technical habits rather than isolated good moments. Section-level accuracy above 65%
+      in-tune is generally considered reliable performance-grade intonation in research contexts.
+    coaching_voice: >
+      Name the section, the accuracy metric, and what made it work if identifiable. Keep brief.
+    few_shot_summaries:
+      - "Your strongest section was the second verse — 74% in-tune across all notes. That register sits comfortably in your voice, and your support was steady throughout."
+      - "Chorus 1 was your most accurate section at 69% in-tune. The melodic contour there matches your break point well, which helps."
+    practice_tip: >
+      Use this section as your benchmark. Before other sections, recall how your support
+      felt in this section and try to replicate it.
+
+  - detector: section_weakness
+    pedagogy: >
+      Section-level intonation below 50% in-tune usually indicates a structural mismatch
+      between the melody and the singer's current technique at that register or in that
+      phrase length, rather than random error. Identifying the structural cause allows
+      targeted practice.
+    coaching_voice: >
+      Name the section and the accuracy metric, identify the most likely structural cause
+      (register, phrase length, tessitura), and offer one targeted approach.
+    few_shot_summaries:
+      - "Your weakest section was the bridge — 39% in-tune. The melody sits up at the top of your chest voice range there, which requires registration management you don't have locked in yet."
+      - "The final chorus was your most challenging section at 44% in-tune. Fatigue may be a factor — these phrases come late in the song when breath support tends to get inconsistent."
+    practice_tip: >
+      Drill this section in isolation, not in context. Work it backwards — start from the
+      last phrase, add one phrase at a time working toward the beginning. This builds
+      cumulative stamina for the section.
+
+  - detector: best_overall_section
+    pedagogy: >
+      A blended assessment of pitch, timing, and technique across a section provides a
+      holistic view of performance quality. The best overall section reflects where all
+      technical skills are firing simultaneously.
+    coaching_voice: >
+      Affirming. Name the section and what the blended score reflects. Brief.
+    few_shot_summaries:
+      - "Your strongest overall section was Verse 1 — solid pitch accuracy, consistent timing, and good technique matching. That's your most reliable zone right now."
+      - "The first chorus was your best all-around — pitch, timing, and expression were all working together there."
+    practice_tip: >
+      Identify what feels physically different in this section versus your weaker ones.
+      Carry that feeling — especially the breath setup — into the harder sections.
+
+  - detector: weakest_overall_section
+    pedagogy: >
+      When pitch, timing, and technique all suffer in the same section, the cause is
+      usually structural: the section's tessitura, phrase length, or tempo demands
+      multiple skills simultaneously before any is consolidated.
+    coaching_voice: >
+      Name the section, briefly describe the compound difficulty, and suggest one priority
+      area to work on first.
+    few_shot_summaries:
+      - "Your most challenging overall section was the final bridge — pitch, timing, and expression all dropped there. The register and the phrase length are both at their extreme there; target the intonation first before worrying about expression."
+      - "The second chorus was your weakest overall — it's where pitch accuracy, timing, and technique matching all fell together. Start by drilling pitch accuracy in isolation there before adding the other elements."
+    practice_tip: >
+      Practise this section at half tempo. Remove ornamentation. Get pitch and timing
+      clean first, then gradually bring tempo back to performance speed.
+
+  - detector: section_improvement
+    pedagogy: >
+      When a repeated section (verse 2 vs verse 1, second chorus vs first) shows measurably
+      better pitch accuracy, it reflects real-time learning during performance. This is
+      evidence of a responsive learning system and is predictive of faster skill consolidation.
+    coaching_voice: >
+      Affirming, specific. Name both occurrences and the improvement in percentage points.
+    few_shot_summaries:
+      - "Your second verse was noticeably better than your first — pitch accuracy improved from 52% to 67%. You're adjusting in real time, which is a strong sign of musical awareness."
+      - "Chorus 2 outperformed Chorus 1 by 14 percentage points. You locked something in the first time through and applied it immediately. That's exactly how efficient practice works."
+    practice_tip: >
+      After your next practice run, take 30 seconds to mentally note what felt better
+      before singing the repeat. That reflection reinforces the in-performance adjustment.
+
+  - detector: section_regression
+    pedagogy: >
+      When a repeated section shows lower accuracy on its second occurrence, fatigue,
+      loss of concentration, or the added performance demands of the later song context
+      are common causes. This pattern is worth identifying because it suggests practice
+      at the back end of the song rather than isolated section drilling.
+    coaching_voice: >
+      Name both occurrences and the drop. Be direct about the regression without being
+      discouraging. Offer one cause and one fix direction.
+    few_shot_summaries:
+      - "Your second chorus was less accurate than your first — down from 68% to 51% in-tune. By that point in the song breath management tends to get tired. Work on breath pacing across the whole performance."
+      - "Verse 2 was harder than Verse 1, with pitch accuracy dropping 16 points. That's likely vocal fatigue after the chorus. Try a larger breath going into the second verse."
+    practice_tip: >
+      Practise singing the full song through to the problematic repeat without stopping.
+      Simulate performance conditions so the fatigue pattern appears, then work on
+      managing support through to the second occurrence.

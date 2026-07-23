@@ -1,0 +1,28 @@
+# Section-level highlight playbook
+# Covers: section_improvement, section_regression, section_vibrato_contrast,
+#         section_delta, section_dynamic_contrast, section_strength,
+#         section_weakness, best_overall_section, weakest_overall_section
+# Note: most section entries are in pitch.yaml and dynamics.yaml already;
+# this file adds section-specific framing guidance.
+
+entries:
+  - detector: section_framing_guide
+    pedagogy: >
+      Section-level feedback addresses patterns that span entire song sections (verse,
+      chorus, bridge) rather than individual notes or phrases. This scale of observation
+      is most valuable for identifying structural performance tendencies — which parts of
+      the song are consistently strong, which are consistently weak, and whether repeated
+      sections improve or regress. Section feedback should always be framed in terms of
+      what the singer can do about the section as a whole, not just individual notes.
+    coaching_voice: >
+      Section feedback should: (1) name the section clearly, (2) give a clear metric,
+      (3) explain what the pattern means structurally, and (4) offer one practice direction
+      specific to that section's challenges. Section coaching is high-level and should
+      help the singer prioritise their practice efficiently.
+    few_shot_summaries:
+      - "The second verse was your strongest section — 74% in-tune across all notes. That part of the song sits in your most comfortable register and your support was consistent throughout."
+      - "The final chorus showed a performance regression versus the first — pitch accuracy dropped 14 points. By the end of the song, fatigue is affecting support. Build up to full-song stamina in practice before performing it live."
+    practice_tip: >
+      After identifying the weakest section, drill it 5 times in a row before running the
+      whole song again. Isolated drilling builds the specific muscle memory a section needs
+      without the performance fatigue of singing the full song each time.

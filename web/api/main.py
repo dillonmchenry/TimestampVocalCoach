@@ -46,9 +46,11 @@ from vocal_coach.schemas import (
     PitchTrack,
     StarsMetadataEntry,
     StarsTrack,
+    VocalProfile,
 )
 from vocal_coach.song import load_manifest
 from vocal_coach.trends import compute_section_trends
+from vocal_coach.vocal_profile import load_vocal_profile
 from vocal_coach.stars_runner import (
     DEFAULT_STARS_DIR,
     STARS_PROFILE_FAST,
@@ -191,6 +193,7 @@ def list_songs():
                 "has_instrumental": manifest.instrumental_path is not None,
                 "has_reference_pitch": manifest.reference_pitch_path is not None,
                 "has_reference_stars": manifest.reference_stars_path is not None,
+                "has_vocal_profile": manifest.vocal_profile_path is not None,
             }
         )
     return {"songs": out}
@@ -207,6 +210,23 @@ def get_reference_annotation(song_id: str):
     song_dir = _song_dir(song_id)
     annotation = load_reference(song_dir)
     return JSONResponse(content=annotation.model_dump())
+
+
+@app.get("/api/songs/{song_id}/vocal_profile")
+def get_vocal_profile(song_id: str):
+    """Return the LLM-generated vocal profile for a song, or 404 if not yet generated."""
+    song_dir = _song_dir(song_id)
+    manifest = load_manifest(song_dir)
+    if not manifest.vocal_profile_path:
+        raise HTTPException(
+            status_code=404,
+            detail="Vocal profile not yet generated. Run scripts/build_song.py.",
+        )
+    profile_path = song_dir / manifest.vocal_profile_path
+    profile = load_vocal_profile(profile_path)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="Vocal profile file missing or unreadable.")
+    return JSONResponse(content=profile.model_dump())
 
 
 @app.get("/api/songs/{song_id}/audio/instrumental")
@@ -315,12 +335,18 @@ async def analyze(
         config=cfg,
     )
     section_trends = compute_section_trends(reference, notes, techniques)
+
+    # Sprint 3: load vocal profile for highlight emphasis weighting (optional)
+    _vp_path = song_dir / (manifest.vocal_profile_path or "vocal_profile.json")
+    vocal_profile = load_vocal_profile(_vp_path)
+
     highlights = select_highlights(
         reference,
         notes,
         techniques,
         config=cfg,
         sections=section_trends,
+        vocal_profile=vocal_profile,
     )
     overview = compute_overview(
         notes,

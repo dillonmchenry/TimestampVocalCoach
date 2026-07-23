@@ -378,6 +378,14 @@ class SongManifest(BaseModel):
     reference_loudness_path: Optional[str] = Field(
         None, description='Relative path to precomputed reference/loudness.json'
     )
+    vocal_profile_path: Optional[str] = Field(
+        None,
+        description=(
+            'Sprint 3: relative path to the LLM-generated vocal_profile.json. '
+            'None when the profile has not yet been generated or OPENAI_API_KEY '
+            'was not available during build_song.py.'
+        ),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -860,3 +868,62 @@ class PerformanceAnalysis(BaseModel):
         ),
     )
     analysis_version: str = Field("v5", description='Schema version tag for migrations')
+
+
+# ---------------------------------------------------------------------------
+# Sprint 3: Vocal Profile (per-song LLM-generated stylistic context)
+# ---------------------------------------------------------------------------
+
+
+class VocalProfile(BaseModel):
+    """LLM-generated stylistic profile for one song.
+
+    Generated once during ``scripts/build_song.py`` and stored as
+    ``data/songs/<song_id>/vocal_profile.json``.  Consumed by
+    ``select_highlights()`` (for detector emphasis weighting) and the
+    Phase B feedback-card and performance-summary generators.
+    """
+
+    song_id: str
+    genre_tags: list[str] = Field(
+        default_factory=list,
+        description='Genre labels for this song, e.g. ["soft-rock", "ballad"].',
+    )
+    vocal_style: str = Field(
+        "",
+        description='Free-text description of the artist\'s vocal approach for this song.',
+    )
+    key_techniques: list[str] = Field(
+        default_factory=list,
+        description='Vocal techniques the artist is known for in this song/context.',
+    )
+    emphasize_highlights: list[str] = Field(
+        default_factory=list,
+        description=(
+            'Detector type names especially relevant for this song/genre. '
+            'Matched candidates receive a score boost during highlight selection.'
+        ),
+    )
+    deemphasize_highlights: list[str] = Field(
+        default_factory=list,
+        description=(
+            'Detector type names less relevant or stylistically inappropriate to flag. '
+            'Matched candidates receive a score penalty during highlight selection.'
+        ),
+    )
+    highlight_notes: dict[str, str] = Field(
+        default_factory=dict,
+        description=(
+            'Per-detector-type rationale explaining why it is emphasised or '
+            'de-emphasised. E.g. {"scoop_habit": "Scooping is part of McCartney\'s style"}.'
+        ),
+    )
+    coaching_context: str = Field(
+        "",
+        description=(
+            '2-3 sentence framing injected into Phase B feedback prompts. '
+            'Summarises the stylistic context coaches should keep in mind.'
+        ),
+    )
+    model_used: str = Field("", description='OpenAI model identifier used to generate this profile.')
+    generated_at: Optional[str] = Field(None, description='ISO-8601 timestamp of generation.')

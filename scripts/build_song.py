@@ -28,6 +28,8 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH  # noqa: E402
+from vocal_coach.llm import LLMClient  # noqa: E402
 from vocal_coach.loudness import compute_loudness, write_loudness_track  # noqa: E402
 from vocal_coach.pitch import extract_f0, write_pitch_track  # noqa: E402
 from vocal_coach.reference import load_reference  # noqa: E402
@@ -39,6 +41,7 @@ from vocal_coach.stars_runner import (  # noqa: E402
     run_stars_with_profile,
     write_stars_track,
 )
+from vocal_coach.vocal_profile import generate_vocal_profile  # noqa: E402
 
 
 def parse_args() -> argparse.Namespace:
@@ -92,6 +95,17 @@ def parse_args() -> argparse.Namespace:
         type=Path,
         default=None,
         help="Override the student checkpoint directory (defaults to ./stars_student).",
+    )
+    p.add_argument(
+        "--skip-vocal-profile",
+        action="store_true",
+        help="Skip LLM vocal profile generation (requires OPENAI_API_KEY otherwise).",
+    )
+    p.add_argument(
+        "--config",
+        type=Path,
+        default=None,
+        help="Path to a coaching.yaml override. Defaults to config/coaching.yaml.",
     )
     return p.parse_args()
 
@@ -200,6 +214,40 @@ def main() -> int:
     manifest.reference_loudness_path = (
         f"reference/{loud_json.name}" if loud_json.is_file() else None
     )
+
+    # -----------------------------------------------------------------
+    # Sprint 3: vocal profile (LLM, once per song)
+    # -----------------------------------------------------------------
+    config_path = args.config or (ROOT / DEFAULT_CONFIG_RELPATH)
+    coaching_cfg = CoachingConfig.load(config_path)
+
+    vocal_profile_json = song_dir / "vocal_profile.json"
+    if args.skip_vocal_profile:
+        print("[build_song] vocal profile : skipped (--skip-vocal-profile)")
+    else:
+        llm_client = LLMClient.from_config(coaching_cfg.llm)
+        if llm_client is None:
+            print("[build_song] vocal profile : skipped (OPENAI_API_KEY not set or LLM disabled)")
+        else:
+            print(f"[build_song] vocal profile : generating for '{manifest.title}' by '{manifest.artist}'")
+            profile = generate_vocal_profile(manifest, llm_client)
+            if profile is not None:
+                vocal_profile_json.write_text(
+                    profile.model_dump_json(indent=2), encoding="utf-8"
+                )
+                print(f"[build_song] vocal profile : wrote {vocal_profile_json}")
+                print(
+                    f"[build_song]                 genre={profile.genre_tags}, "
+                    f"emphasize={len(profile.emphasize_highlights)}, "
+                    f"deemphasize={len(profile.deemphasize_highlights)}"
+                )
+            else:
+                print("[build_song] vocal profile : generation failed (see warnings)")
+
+    manifest.vocal_profile_path = (
+        "vocal_profile.json" if vocal_profile_json.is_file() else None
+    )
+
     write_manifest(song_dir, manifest)
     print(f"[build_song] manifest   : updated {song_dir / 'manifest.json'}")
     print()

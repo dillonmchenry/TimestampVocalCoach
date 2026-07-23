@@ -3081,12 +3081,18 @@ def select_highlights(
     *,
     config: Optional[CoachingConfig] = None,
     sections: Optional[list[SectionTrend]] = None,
+    vocal_profile=None,  # Optional[VocalProfile] — imported lazily to avoid circular dep
 ) -> HighlightsReport:
     """Run every detector, then pick a diverse set via round-robin.
 
     Categories (pitch, technique, alignment, dynamics) are cycled so that
     every category with candidates gets at least one slot before any
     category gets a second.
+
+    When *vocal_profile* is provided (a ``VocalProfile`` instance), candidate
+    scores are multiplied by ``cfg.llm.emphasis_boost`` for detectors in
+    ``emphasize_highlights`` and by ``cfg.llm.deemphasis_penalty`` for
+    detectors in ``deemphasize_highlights`` before selection.
     """
     cfg = config or CoachingConfig()
     candidates: list[CoachingMoment] = []
@@ -3192,6 +3198,25 @@ def select_highlights(
         strength = _compute_evidence_strength(m, notes_by_idx, techs_by_idx)
         m.confidence = _tier_from_strength(strength, low_t, med_t)
         m.detail["evidence_strength"] = round(strength, 3)
+
+    # ── Sprint 3: vocal profile emphasis weighting ────────────────────────
+    if vocal_profile is not None:
+        emphasize = set(getattr(vocal_profile, "emphasize_highlights", []))
+        deemphasize = set(getattr(vocal_profile, "deemphasize_highlights", []))
+        boost = getattr(cfg.llm, "emphasis_boost", 1.5)
+        penalty = getattr(cfg.llm, "deemphasis_penalty", 0.5)
+        for m in candidates:
+            if m.type in emphasize:
+                m.score *= boost
+                # Store the override rationale in detail for UI/audit.
+                notes_map = getattr(vocal_profile, "highlight_notes", {})
+                if m.type in notes_map:
+                    m.detail["profile_emphasis_note"] = notes_map[m.type]
+            elif m.type in deemphasize:
+                m.score *= penalty
+                notes_map = getattr(vocal_profile, "highlight_notes", {})
+                if m.type in notes_map:
+                    m.detail["profile_deemphasis_note"] = notes_map[m.type]
 
     chosen = _select_diverse(
         candidates,

@@ -1,0 +1,29 @@
+# Cross-dimensional category playbook
+# Covers detectors that span multiple feature dimensions (pitch + dynamics,
+# pitch + technique, etc.)
+# All entries already in pitch.yaml or dynamics.yaml above; this file covers
+# the remaining cross-dimensional types not covered elsewhere.
+# Covered here: (registration_strain, breath_support_issue, loud_pitch_instability,
+# soft_passage_control, scoop_with_fade are in pitch.yaml)
+# vibrato_with_support, technique_accuracy_tradeoff, expressive_stability
+# are in technique.yaml
+# controlled_crescendo is in dynamics.yaml
+# This file is intentionally minimal since most cross-dim types are
+# already well-represented in the category files above.
+
+entries:
+  - detector: cross_dimensional_overview
+    pedagogy: >
+      Cross-dimensional highlights identify moments where two independent signal features
+      co-occur in a way that reveals a single underlying cause. For example, flatness and
+      loudness fade in the same phrase both trace to breath support collapse. These compound
+      observations are more diagnostically valuable than single-dimension flags because they
+      point to root causes rather than symptoms.
+    coaching_voice: >
+      When describing a cross-dimensional moment, always name both dimensions and explain
+      why they share a common cause. The diagnostic value is in the connection.
+    few_shot_summaries:
+      - "Both your pitch and your volume are suffering at the same time here — that's not two separate problems but one: insufficient breath support causing both to drop simultaneously."
+    practice_tip: >
+      For any compound issue, address the root cause (usually breath management), not each
+      symptom separately. Fixing the support will resolve both pitch and volume issues at once.

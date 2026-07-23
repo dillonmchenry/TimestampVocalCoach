@@ -1,0 +1,112 @@
+# Alignment / timing category playbook
+# Covers: late_entrance, timing_consistency, section_delta,
+#         rushed_phrase, dragged_phrase, rhythmic_precision
+
+entries:
+  - detector: late_entrance
+    pedagogy: >
+      Delayed note onset — entering a note significantly later than the chart position
+      indicates — typically reflects one of three causes: a reaction-time lag (the singer
+      hears the beat and then begins to sing), a breath-timing issue (the breath is not
+      pre-loaded before the beat), or an over-cautious stylistic approach. Habitual late
+      entrances accumulate across a phrase and create a 'dragging behind the beat' feel
+      that separates the voice from the rhythm track.
+    coaching_voice: >
+      Name the note(s), the timing offset in milliseconds, and the direction (late or early).
+      Offer one mechanical cause. Be specific, not general.
+    few_shot_summaries:
+      - "Three of your entrances were more than 80ms late — on 'yes-ter-day', 'trou-bles', and 'seem'. That's a reaction-time pattern: you're waiting to hear the beat before you sing. Pre-load the breath and start sound slightly before you expect the beat."
+      - "The word 'seemed' came in 95ms late. That's nearly a tenth of a second — noticeable against the track. You're treating that word as a passive entry; attack it with intent."
+    practice_tip: >
+      Practice clapping the rhythm of the passage, then singing it while clapping. The
+      physical action of clapping syncs your onset timing to the beat impulse. Once locked,
+      carry that impulse into singing without the clap.
+
+  - detector: timing_consistency
+    pedagogy: >
+      When a phrase shows consistent timing offset (all notes systematically early or late)
+      rather than random variation, the error is structural rather than attentional. This
+      pattern often reflects a body-clock mismatch with the tempo — the singer's internal
+      pulse is running slightly fast or slow relative to the track.
+    coaching_voice: >
+      State the phrase, the mean offset, and the direction (consistently early or late).
+      Distinguish this from random timing errors: this is a systemic drift, not scattered
+      mistakes.
+    few_shot_summaries:
+      - "Across this phrase your entries averaged 55ms late consistently — every note shifted the same way. That's not scattered timing mistakes; it's your internal tempo running behind the track. Try slightly anticipating the beat."
+      - "This 6-note window is landing consistently 48ms early — not random, but all pushed ahead. You're anticipating the beat. Try relaxing slightly at the onset of each note."
+    practice_tip: >
+      Practise with a metronome at the exact tempo. For consistent lateness, practice
+      entering 50ms early — exaggerate to over-correct. For consistent early entry, practice
+      waiting until the very last moment. The over-correction recalibrates your sense of
+      'on time.'
+
+  - detector: section_delta
+    pedagogy: >
+      Systematic pitch or timing differences between section types (e.g., verses consistently
+      flatter than choruses, or the bridge consistently late) reflect that the vocal demands
+      of those sections differ in ways the singer has not yet equalised. Understanding
+      which sections are better versus worse — and why — is the foundation of efficient
+      practice targeting.
+    coaching_voice: >
+      Name the two section types being compared, the metric, and the direction of the gap.
+      Frame as a useful diagnostic, not a criticism.
+    few_shot_summaries:
+      - "Your verses are landing 28 cents flatter on average than your choruses — a consistent gap. The verse sits lower in your range where support tends to drop. Focus breath engagement specifically in verse sections."
+      - "Your chorus timing is 40ms earlier on average than the verse. The energy shift going into the chorus is causing you to rush. Consciously hold back through the pre-chorus transition."
+    practice_tip: >
+      Drill the weaker section type in isolation, aiming to bring its metrics up to the
+      stronger section's level. Once they're equal in isolation, work the transition between
+      them.
+
+  - detector: rushed_phrase
+    pedagogy: >
+      A phrase where consecutive notes arrive consistently early (negative offset mean with
+      low variance) indicates the singer is rushing — their internal tempo is faster than
+      the reference. Rushing often increases under performance pressure or when a singer
+      knows the phrase is technically difficult. It is distinct from random early entries
+      because the entire phrase shifts uniformly forward in time.
+    coaching_voice: >
+      Name the phrase, the mean early offset, and the fact that it's consistent (not random).
+      Rushing is often anxiety-related; acknowledge that without being condescending.
+    few_shot_summaries:
+      - "You rushed through 'now it looks as though' — arriving about 35ms early on every note. The phrase accelerated consistently; that's your internal tempo getting ahead of the track. Breathe and lean on the beat."
+      - "Six notes in a row came in early with very little variation between them — a clear rush pattern. This often happens when a phrase feels exposed. Try singing this phrase at 80% tempo until it feels relaxed, then bring speed back."
+    practice_tip: >
+      Practise the rushed phrase at 80% speed until it feels comfortable. Then increase
+      to 90%, then 100%. If it rushes at full speed, the phrase hasn't been learned
+      at comfort yet — you're compensating with speed.
+
+  - detector: dragged_phrase
+    pedagogy: >
+      A phrase where consecutive notes arrive consistently late (positive offset mean with
+      low variance) indicates the singer is dragging — behind the beat in a sustained way.
+      Unlike scattered lateness, a dragged phrase has uniform delay across the window,
+      suggesting either tempo uncertainty or a habitual 'lean back' posture on that phrase.
+    coaching_voice: >
+      Name the phrase, the mean late offset, and the consistency. Dragging often has a
+      different feel from rushing — it can be aesthetically motivated. Note whether it
+      matches the reference style.
+    few_shot_summaries:
+      - "This five-note phrase dragged consistently — arriving about 42ms late on every note. The delay is uniform, not scattered. If that's intentional laid-back phrasing, it's working; if not, it's you losing the beat."
+      - "You're behind the beat across this phrase by about 45ms on every note. The original sings this more on top of the beat. Try imagining the note starting slightly before you'd naturally sing it."
+    practice_tip: >
+      For dragging: practise the phrase while tapping the beat with your foot. The physical
+      connection to the pulse usually corrects latency that breathing-based practice alone
+      doesn't resolve.
+
+  - detector: rhythmic_precision
+    pedagogy: >
+      Rhythmic precision — where the mean absolute timing offset across a phrase is below
+      15ms — indicates excellent synchronisation between the singer's internal pulse and
+      the track. At this level of precision, the voice sounds rhythmically locked rather
+      than floating alongside the track. This is a positive technical indicator.
+    coaching_voice: >
+      Affirming. Name the phrase and the precision metric. Brief.
+    few_shot_summaries:
+      - "Your timing through 'all my troubles seemed so far away' was remarkably tight — mean offset under 12ms across 8 notes. The voice sits right on the beat there."
+      - "Excellent rhythmic precision in the second verse — consistent timing across the whole phrase with very little drift. The rhythm track and your voice are locked together."
+    practice_tip: >
+      Maintain this by practising other phrases with the same body awareness — the physical
+      connection to the beat that you have in this phrase. Notice what it feels like and
+      consciously replicate it elsewhere.

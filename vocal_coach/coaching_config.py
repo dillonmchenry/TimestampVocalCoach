@@ -349,6 +349,29 @@ class ConfidenceConfig:
 
 
 @dataclass
+class LLMConfig:
+    """Configuration for Sprint-3 LLM-powered coaching features."""
+
+    model: str = "gpt-4o-mini"
+    """OpenAI model identifier for all LLM calls."""
+
+    temperature: float = 0.4
+    """Sampling temperature. Lower = more deterministic; higher = more creative."""
+
+    max_tokens: int = 1024
+    """Maximum tokens in each LLM response."""
+
+    enabled: bool = True
+    """Kill-switch: set to False to disable all LLM calls without touching code."""
+
+    emphasis_boost: float = 1.5
+    """Score multiplier applied to highlights in the vocal profile's emphasize_highlights list."""
+
+    deemphasis_penalty: float = 0.5
+    """Score multiplier applied to highlights in the vocal profile's deemphasize_highlights list."""
+
+
+@dataclass
 class CoachingConfig:
     pitch: PitchConfig = field(default_factory=PitchConfig)
     arrival: ArrivalConfig = field(default_factory=ArrivalConfig)
@@ -357,6 +380,7 @@ class CoachingConfig:
     highlights: HighlightsConfig = field(default_factory=HighlightsConfig)
     confidence: ConfidenceConfig = field(default_factory=ConfidenceConfig)
     adsr: ADSRConfig = field(default_factory=ADSRConfig)
+    llm: LLMConfig = field(default_factory=LLMConfig)
 
     @classmethod
     def load(cls, config_path: Optional[Path] = None) -> "CoachingConfig":
