@@ -35,10 +35,13 @@ from fastapi.staticfiles import StaticFiles
 
 from vocal_coach.align_v2 import measure_song
 from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH
+from vocal_coach.feedback import generate_performance_summary, rewrite_card_summaries
 from vocal_coach.highlights import select_highlights
+from vocal_coach.llm import LLMClient
 from vocal_coach.loudness import compute_loudness, write_loudness_track
 from vocal_coach.overview import compute_overview
 from vocal_coach.pitch import extract_f0, write_pitch_track
+from vocal_coach.rag import RAGStore, DEFAULT_DB_PATH
 from vocal_coach.reference import load_reference
 from vocal_coach.schemas import (
     LoudnessTrack,
@@ -348,6 +351,7 @@ async def analyze(
         sections=section_trends,
         vocal_profile=vocal_profile,
     )
+
     overview = compute_overview(
         notes,
         techniques,
@@ -356,6 +360,37 @@ async def analyze(
         octave_shift_semitones=octave_shift,
         arrival_late_ms=cfg.arrival.late_ms,
     )
+
+    # Sprint 3 Phase B: LLM feedback (card rewriting + performance summary)
+    _llm_client = LLMClient.from_config(cfg.llm)
+    _rag_store: RAGStore | None = None
+    if _llm_client is not None:
+        _db_path = REPO_ROOT / DEFAULT_DB_PATH
+        if _db_path.is_dir():
+            _rag_store = RAGStore(db_path=_db_path)
+        rewrite_card_summaries(
+            highlights.moments,
+            llm=_llm_client,
+            rag=_rag_store,
+            vocal_profile=vocal_profile,
+            reference=reference,
+            song_title=manifest.title,
+            artist=manifest.artist,
+            max_tokens=cfg.llm.card_rewrite_max_tokens,
+        )
+        _perf_summary = generate_performance_summary(
+            highlights.moments,
+            overview,
+            section_trends,
+            llm=_llm_client,
+            rag=_rag_store,
+            vocal_profile=vocal_profile,
+            song_title=manifest.title,
+            artist=manifest.artist,
+            max_tokens=cfg.llm.summary_max_tokens,
+        )
+    else:
+        _perf_summary = None
 
     analysis = PerformanceAnalysis(
         song_id=manifest.song_id,
@@ -385,6 +420,7 @@ async def analyze(
         highlights=highlights,
         sections=section_trends,
         overview=overview,
+        performance_summary=_perf_summary,
     )
     out_path = perf_dir / "analysis.json"
     out_path.write_text(analysis.model_dump_json(indent=2), encoding="utf-8")

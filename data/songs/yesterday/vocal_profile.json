@@ -1,0 +1,35 @@
+{
+  "song_id": "yesterday",
+  "genre_tags": [
+    "Pop",
+    "Rock",
+    "Ballad"
+  ],
+  "vocal_style": "The Beatles' 'Yesterday' features a soft, emotive vocal delivery that emphasizes lyrical storytelling. The artist employs a gentle, breathy tone that conveys nostalgia and longing, with a focus on smooth melodic lines.",
+  "key_techniques": [
+    "soft_passage_control",
+    "steady_sustain",
+    "expressive_match",
+    "clean_attack",
+    "vocal_texture"
+  ],
+  "emphasize_highlights": [
+    "soft_passage_control",
+    "steady_sustain",
+    "expressive_match",
+    "clean_attack"
+  ],
+  "deemphasize_highlights": [
+    "pitch_struggle",
+    "section_weakness"
+  ],
+  "highlight_notes": {
+    "soft_passage_control": "Affirming the singer's ability to maintain accurate pitch in softer passages is crucial for the emotional impact of the song.",
+    "steady_sustain": "Highlighting sustained notes with stable pitch is important to capture the song's lyrical essence.",
+    "expressive_match": "Matching the expressive techniques used by The Beatles enhances the authenticity of the performance.",
+    "clean_attack": "A clean attack on notes contributes to the clarity and emotional delivery of the lyrics."
+  },
+  "coaching_context": "Focus on encouraging the singer to maintain soft dynamics while ensuring pitch accuracy, especially in vulnerable sections. Pay attention to the emotional delivery and expressive techniques to align with the original style while allowing for personal interpretation.",
+  "model_used": "gpt-4o-mini",
+  "generated_at": "2026-07-23T23:44:05.182406+00:00"
+}

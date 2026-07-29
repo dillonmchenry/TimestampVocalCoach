@@ -37,10 +37,13 @@ if str(ROOT) not in sys.path:
 
 from vocal_coach.align_v2 import measure_song  # noqa: E402
 from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH  # noqa: E402
+from vocal_coach.feedback import generate_performance_summary, rewrite_card_summaries  # noqa: E402
 from vocal_coach.highlights import select_highlights  # noqa: E402
+from vocal_coach.llm import LLMClient  # noqa: E402
 from vocal_coach.loudness import compute_loudness, write_loudness_track  # noqa: E402
 from vocal_coach.overview import compute_overview  # noqa: E402
 from vocal_coach.pitch import extract_f0, write_pitch_track  # noqa: E402
+from vocal_coach.rag import RAGStore, DEFAULT_DB_PATH  # noqa: E402
 from vocal_coach.reference import load_reference  # noqa: E402
 from vocal_coach.schemas import (  # noqa: E402
     PerformanceAnalysis,
@@ -307,6 +310,45 @@ def main() -> int:
         arrival_late_ms=coaching_cfg.arrival.late_ms,
     )
 
+    # ── Sprint 3 Phase B: LLM feedback ───────────────────────────────────────
+    llm_client = LLMClient.from_config(coaching_cfg.llm)
+    rag_store: RAGStore | None = None
+    if llm_client is not None:
+        db_path = ROOT / DEFAULT_DB_PATH
+        if db_path.is_dir():
+            rag_store = RAGStore(db_path=db_path)
+            print(f"[analyze] RAG store       : connected ({db_path})")
+        else:
+            print("[analyze] RAG store       : not found — skipping (run scripts/build_rag.py)")
+
+        print("[analyze] card rewriting  : calling LLM…")
+        rewrite_card_summaries(
+            highlights.moments,
+            llm=llm_client,
+            rag=rag_store,
+            vocal_profile=vocal_profile,
+            reference=reference,
+            song_title=manifest.title,
+            artist=manifest.artist,
+            max_tokens=coaching_cfg.llm.card_rewrite_max_tokens,
+        )
+
+        print("[analyze] perf summary    : calling LLM…")
+        perf_summary = generate_performance_summary(
+            highlights.moments,
+            overview,
+            section_trends,
+            llm=llm_client,
+            rag=rag_store,
+            vocal_profile=vocal_profile,
+            song_title=manifest.title,
+            artist=manifest.artist,
+            max_tokens=coaching_cfg.llm.summary_max_tokens,
+        )
+    else:
+        print("[analyze] LLM feedback    : skipped (OPENAI_API_KEY not set or LLM disabled)")
+        perf_summary = None
+
     analysis = PerformanceAnalysis(
         song_id=manifest.song_id,
         perf_id=perf_id,
@@ -335,6 +377,7 @@ def main() -> int:
         highlights=highlights,
         sections=section_trends,
         overview=overview,
+        performance_summary=perf_summary,
     )
 
     # 6. Optional: per-frame loudness on the user vocal (used by the UI)

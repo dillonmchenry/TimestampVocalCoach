@@ -370,6 +370,13 @@ class LLMConfig:
     deemphasis_penalty: float = 0.5
     """Score multiplier applied to highlights in the vocal profile's deemphasize_highlights list."""
 
+    card_rewrite_max_tokens: int = 2048
+    """Max tokens for the batched coaching card summary rewriting call.
+    Needs enough room for ~15 cards × ~60 words each (~900 words output)."""
+
+    summary_max_tokens: int = 1024
+    """Max tokens for the performance summary generation call."""
+
 
 @dataclass
 class CoachingConfig:

@@ -867,7 +867,14 @@ class PerformanceAnalysis(BaseModel):
             'None when no scoreable notes were measured.'
         ),
     )
-    analysis_version: str = Field("v5", description='Schema version tag for migrations')
+    performance_summary: Optional["PerformanceSummary"] = Field(
+        None,
+        description=(
+            'Sprint 3 Phase B: LLM-generated narrative + actionable takeaways + '
+            'observed cross-highlight trends. None when LLM is unavailable or disabled.'
+        ),
+    )
+    analysis_version: str = Field("v6", description='Schema version tag for migrations')
 
 
 # ---------------------------------------------------------------------------
@@ -927,3 +934,50 @@ class VocalProfile(BaseModel):
     )
     model_used: str = Field("", description='OpenAI model identifier used to generate this profile.')
     generated_at: Optional[str] = Field(None, description='ISO-8601 timestamp of generation.')
+
+
+# ---------------------------------------------------------------------------
+# Sprint 3 Phase B: LLM-generated performance summary
+# ---------------------------------------------------------------------------
+
+
+class PerformanceSummary(BaseModel):
+    """LLM-generated summary of the overall performance.
+
+    Generated once after highlight selection and card rewriting in the
+    analysis pipeline.  Stored as ``performance_summary`` on
+    ``PerformanceAnalysis`` and rendered at the top of the results page.
+
+    ``narrative``
+        3-4 sentence overall assessment: what went well, what was challenging,
+        and the performance trajectory.
+    ``takeaways``
+        2-4 directional observations ordered by impact — the most actionable
+        things to focus on next.
+    ``trends``
+        1-3 cross-highlight patterns identified by looking at all highlights
+        in aggregate (e.g. "pitch accuracy degrades progressively from verse
+        to chorus across the whole song").
+    """
+
+    narrative: str = Field(
+        ..., description='3-4 sentence overall performance assessment.'
+    )
+    takeaways: list[str] = Field(
+        default_factory=list,
+        description='2-4 actionable directional observations, ordered by impact.',
+    )
+    trends: list[str] = Field(
+        default_factory=list,
+        description='1-3 cross-highlight patterns observed across the full performance.',
+    )
+    model_used: str = Field(
+        "", description='OpenAI model ID used to generate this summary (provenance).'
+    )
+    generated_at: Optional[str] = Field(
+        None, description='ISO-8601 timestamp of generation.'
+    )
+
+
+# Resolve the forward reference on PerformanceAnalysis now that PerformanceSummary is defined.
+PerformanceAnalysis.model_rebuild()

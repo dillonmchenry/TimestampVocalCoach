@@ -429,23 +429,12 @@ h3 {
   padding: 0 6px;
 }
 
-/* Green = good pitch */
-.region.best_pitch_phrase  { background: var(--good); }
-/* Red = bad pitch */
-.region.pitch_struggle     { background: var(--bad); }
-.region.sharp_flat_note    { background: var(--bad); opacity: 0.70; }
-/* Purple = technique */
-.region.expressive_match   { background: var(--expr); }
-.region.expressive_moment  { background: var(--expr); opacity: 0.75; }
-.region.missed_expression  { background: var(--expr); opacity: 0.60; }
-.region.vocal_texture      { background: var(--expr); opacity: 0.75; }
-/* Blue = alignment */
-.region.late_entrance      { background: var(--accent); }
-.region.timing_consistency { background: var(--accent); opacity: 0.75; }
-/* Yellow = dynamics */
-.region.fade_within_notes  { background: var(--warn); }
-.region.dynamic_drop       { background: var(--warn); opacity: 0.75; }
-.region.dynamic_surge      { background: var(--warn); opacity: 0.75; }
+/* Region colours by category (4 colours matching card filter badges) */
+.region.region-pitch-good  { background: var(--good); }
+.region.region-pitch-bad   { background: var(--bad); }
+.region.region-expression  { background: var(--expr); }
+.region.region-timing      { background: var(--accent); }
+.region.region-volume      { background: var(--warn); }
 
 .caption {
   margin-top: 10px;
@@ -458,6 +447,7 @@ h3 {
   flex-wrap: wrap;
   align-items: center;
   gap: 12px 16px;
+  margin-bottom: 10px;
 }
 
 .offset-summary {
@@ -470,7 +460,6 @@ h3 {
   flex-wrap: wrap;
   align-items: center;
   gap: 10px;
-  margin-top: 10px;
 }
 
 .mix-toggles {
@@ -624,13 +613,87 @@ h3 {
 .section-band.kind-outro    { background: rgba(100, 100, 120, 0.45); }
 .section-band.kind-unknown  { background: rgba(150, 150, 150, 0.40); }
 
+/* ---------- Performance summary (Phase B LLM) ---------- */
+
+.performance-summary {
+  margin: 0 0 20px;
+}
+
+.summary-inner {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px 20px 18px;
+}
+
+.summary-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.summary-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.summary-narrative {
+  font-size: 0.92rem;
+  line-height: 1.6;
+  color: var(--fg);
+  margin: 0 0 14px;
+}
+
+.summary-section-heading {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+
+.summary-list {
+  margin: 0 0 12px;
+  padding-left: 20px;
+}
+
+.summary-list li {
+  font-size: 0.88rem;
+  line-height: 1.55;
+  color: var(--fg);
+  margin-bottom: 4px;
+}
+
+.summary-list li:last-child {
+  margin-bottom: 0;
+}
+
+.summary-trend-list {
+  list-style-type: disc;
+}
+
+.summary-trend-list li {
+  color: var(--muted);
+  font-style: italic;
+}
+
+.summary-takeaways,
+.summary-trends {
+  margin-bottom: 2px;
+}
+
 /* ---------- Highlight category filters ---------- */
 
 .highlight-filters {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 0 0 12px;
+  margin: 12px 0;
 }
 
 .highlight-filter-badge {
@@ -961,3 +1024,4 @@ h3 {
   color: var(--expr);
   border-color: rgba(124, 58, 237, 0.25);
 }
+
