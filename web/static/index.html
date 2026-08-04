@@ -32,7 +32,7 @@
 
       <label class="profile-toggle">
         <input id="fastProfile" type="checkbox" checked />
-        <span>Fast feedback (student model) — uncheck to use the slower but richer teacher model</span>
+        <span>Fast feedback (student model)</span>
       </label>
 
       <div id="uploadPanel" class="mode-panel">
@@ -72,13 +72,12 @@
     </section>
 
     <section class="results" id="results" hidden>
-      <h2>Performance</h2>
+      <h2>Performance Analysis</h2>
 
+      <div id="performanceSummary" class="performance-summary" hidden></div>
       <div id="overviewTiles" class="overview-tiles" hidden></div>
 
-      <div id="waveform" class="waveform"></div>
-      <div id="sectionRibbon" class="section-ribbon"></div>
-      <div id="timeline" class="timeline"></div>
+      <h2>Coaching highlights</h2>
       <div class="caption playback-bar">
         <div class="playback-controls">
           <button id="playPause" type="button">Play / Pause</button>
@@ -102,13 +101,10 @@
           </div>
         </div>
       </div>
-
-      <h3>Coaching highlights</h3>
-      <div id="basisFilters" class="basis-filter-row" hidden>
-        <button type="button" class="basis-filter-badge active" data-basis="all">All feedback</button>
-        <button type="button" class="basis-filter-badge" data-basis="absolute">Technique</button>
-        <button type="button" class="basis-filter-badge" data-basis="comparative">Style</button>
-      </div>
+      <div id="waveform" class="waveform"></div>
+      <div id="sectionRibbon" class="section-ribbon"></div>
+      <div id="timeline" class="timeline"></div>
+      
       <div id="highlightFilters" class="highlight-filters" hidden>
         <button type="button" class="badge highlight-filter-badge filter-pitch" data-filter="pitch">Pitch</button>
         <button type="button" class="badge highlight-filter-badge filter-expression" data-filter="expression">Expression</button>

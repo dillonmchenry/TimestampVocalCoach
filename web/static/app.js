@@ -263,6 +263,14 @@ function cardCategoryClass(moment) {
   return `cat-${cat}`;
 }
 
+function regionCategoryClass(moment) {
+  const cat = MOMENT_TYPE_CATEGORY[moment.type] || "pitch";
+  if (cat === "pitch") {
+    return PITCH_GOOD_TYPES.has(moment.type) ? "region-pitch-good" : "region-pitch-bad";
+  }
+  return `region-${cat}`;
+}
+
 function cardHeadingText(moment) {
   const cat = momentCategoryKey(moment);
   return CATEGORY_DISPLAY[cat] || "Feedback";
@@ -659,6 +667,46 @@ function renderOverviewTiles(overview, analysis) {
   }
 }
 
+function renderPerformanceSummary(summary) {
+  const el = document.getElementById("performanceSummary");
+  if (!el) return;
+  if (!summary || !summary.narrative) {
+    el.hidden = true;
+    el.innerHTML = "";
+    return;
+  }
+
+  const takeawaysHtml = summary.takeaways && summary.takeaways.length
+    ? `<div class="summary-takeaways">
+        <h4 class="summary-section-heading">Key takeaways</h4>
+        <ol class="summary-list">
+          ${summary.takeaways.map(t => `<li>${t}</li>`).join("")}
+        </ol>
+      </div>`
+    : "";
+
+  const trendsHtml = summary.trends && summary.trends.length
+    ? `<div class="summary-trends">
+        <h4 class="summary-section-heading">Patterns observed</h4>
+        <ul class="summary-list summary-trend-list">
+          ${summary.trends.map(t => `<li>${t}</li>`).join("")}
+        </ul>
+      </div>`
+    : "";
+
+  el.innerHTML = `
+    <div class="summary-inner">
+      <div class="summary-header">
+        <span class="summary-label">Summary</span>
+      </div>
+      <p class="summary-narrative">${summary.narrative}</p>
+      ${takeawaysHtml}
+      ${trendsHtml}
+    </div>
+  `;
+  el.hidden = false;
+}
+
 function renderSectionRibbon(reference, analysis) {
   sectionRibbon.innerHTML = "";
   if (!reference || !Array.isArray(reference.sections) || !reference.sections.length) {
@@ -696,20 +744,27 @@ function renderSectionRibbon(reference, analysis) {
 
 function lyricSnippet(reference, noteIndices) {
   if (!reference || !Array.isArray(reference.notes) || !noteIndices?.length) return "";
-  const seenWords = new Set();
-  const words = [];
+  const MAX_WORDS = 8;
+  const seenWordIndices = new Set();
+  const tokens = [];
   for (const idx of noteIndices) {
+    if (tokens.length >= MAX_WORDS) break;
     const note = reference.notes[idx];
     if (!note) continue;
-    const word = (note.lyric_word || "").trim();
-    if (!word) continue;
-    const key = `${note.word_index}:${word}`;
-    if (seenWords.has(key)) continue;
-    seenWords.add(key);
-    words.push(word);
-    if (words.length >= 12) break;
+    const raw = (note.lyric_word || "").trim();
+    if (!raw) continue;
+    const wi = note.word_index;
+    if (wi != null && seenWordIndices.has(wi)) continue;
+    if (wi != null) seenWordIndices.add(wi);
+    for (const w of raw.split(/\s+/)) {
+      tokens.push(w);
+      if (tokens.length >= MAX_WORDS) break;
+    }
   }
-  return words.join(" ");
+  if (!tokens.length) return "";
+  let snippet = tokens.join(" ");
+  if (tokens.length >= MAX_WORDS) snippet += "…";
+  return snippet;
 }
 
 function keyStatFor(moment) {
@@ -788,7 +843,13 @@ function scrollToHighlightCard(momentId) {
     `article.card[data-moment-id="${safe}"]`,
   );
   if (!card || card.classList.contains("hidden")) return;
-  card.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+  // Center the card in the horizontal list. Prefer scrollLeft over
+  // scrollIntoView so we don't also nudge the page vertically.
+  const listRect = highlightList.getBoundingClientRect();
+  const cardRect = card.getBoundingClientRect();
+  const delta =
+    cardRect.left + cardRect.width / 2 - (listRect.left + listRect.width / 2);
+  highlightList.scrollBy({ left: delta, behavior: "smooth" });
 }
 
 function renderCoachingCards(reference, analysis) {
@@ -822,6 +883,10 @@ function renderCoachingCards(reference, analysis) {
   for (const moment of analysis.highlights.moments) {
     // Skip low-confidence cards defensively (should already be filtered server-side).
     if (moment.confidence === "low") continue;
+    // Skip moments that span more than 25% of the song — too broad for a
+    // point-in-time card.  These are song-wide trends better suited to the
+    // performance summary.
+    if (analysis.duration_s > 0 && (moment.end_s - moment.start_s) / analysis.duration_s > 0.25) continue;
 
     const card = document.createElement("article");
     const scopeClass = moment.scope === "section" ? "scope-section" : "scope-local";
@@ -866,9 +931,11 @@ function renderCoachingCards(reference, analysis) {
     card.querySelector(".card-play").addEventListener("click", (e) => {
       e.stopPropagation();
       seekAndPlay(userStart);
+      scrollToHighlightCard(card.dataset.momentId);
     });
     card.addEventListener("click", () => {
       seekAndPlay(userStart);
+      scrollToHighlightCard(card.dataset.momentId);
     });
     highlightList.appendChild(card);
   }
@@ -1130,19 +1197,23 @@ async function renderAnalysis(songId, analysis) {
   // Overview tiles (above the waveform).
   renderOverviewTiles(analysis.overview, analysis);
 
+  // Performance summary (LLM narrative + takeaways + trends, if available).
+  renderPerformanceSummary(analysis.performance_summary);
+
   // Region markers in song time. NOTE: the Wavesurfer waveform is the
   // user vocal in *user* time; we shift song-time regions back to user
   // time using the analysis.global_offset_s.
   timelineDiv.innerHTML = "";
   const totalDur = currentDuration;
   for (const moment of analysis.highlights.moments) {
-    if (moment.scope === "section") continue; // shown via the section ribbon instead
+    // Skip song-wide trends (>25% of duration) — same filter as cards.
+    if (analysis.duration_s > 0 && (moment.end_s - moment.start_s) / analysis.duration_s > 0.25) continue;
     const userStart = moment.start_s + analysis.global_offset_s;
     const userEnd = moment.end_s + analysis.global_offset_s;
     const left = (userStart / totalDur) * 100;
     const width = ((userEnd - userStart) / totalDur) * 100;
     const region = document.createElement("div");
-    region.className = `region ${moment.type}`;
+    region.className = `region ${regionCategoryClass(moment)}`;
     region.style.left = `${Math.max(0, left)}%`;
     region.style.width = `${Math.max(1, width)}%`;
     region.title = `${moment.title}\n${moment.summary}`;

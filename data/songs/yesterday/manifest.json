@@ -19,5 +19,6 @@
   },
   "reference_pitch_path": "reference/pitch.json",
   "reference_stars_path": "reference/stars.json",
-  "reference_loudness_path": "reference/loudness.json"
+  "reference_loudness_path": "reference/loudness.json",
+  "vocal_profile_path": "vocal_profile.json"
 }

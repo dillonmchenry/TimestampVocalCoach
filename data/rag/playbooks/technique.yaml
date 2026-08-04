@@ -1,0 +1,234 @@
+# Technique category playbook
+# Covers: expressive_match, expressive_moment, missed_expression, vocal_texture,
+#         vibrato_quality, consistent_vibrato, wide_vibrato, delayed_vibrato,
+#         straight_tone_control, vibrato_with_support, technique_accuracy_tradeoff,
+#         expressive_stability, section_vibrato_contrast
+
+entries:
+  - detector: expressive_match
+    pedagogy: >
+      Matching the expressive techniques of a reference performer — vibrato, glissando,
+      falsetto, breathy tone, pharyngeal resonance — is a marker of both musical listening
+      and technical versatility. Research on imitative learning in singing (Ashley, 2009)
+      shows that style matching requires active auditory analysis as well as motor translation,
+      making it a valid measure of musical intelligence separate from pure pitch accuracy.
+    coaching_voice: >
+      Name the technique, the phrase, and how closely the match lands. This is a comparative
+      feedback type — frame it relative to the reference. Affirm what worked.
+    few_shot_summaries:
+      - "You matched the artist's breathy tone across 5 notes in the verse — exactly where the original uses it. That kind of stylistic awareness shows you're listening to more than just notes."
+      - "Your vibrato on the held notes in the chorus mirrors the original's rate and extent closely. That's deliberate imitation at a technical level, not accident."
+    practice_tip: >
+      To develop expression matching: listen to the reference phrase in isolation, then
+      immediately shadow it without accompaniment. The closer the shadow is temporally,
+      the more you're internalising the technique.
+
+  - detector: expressive_moment
+    pedagogy: >
+      Spontaneous expressive techniques not present in the reference recording demonstrate
+      the singer's personal artistic voice. While mimicry coaching focuses on accuracy,
+      user-added expressiveness is a sign of musical ownership and should be noted
+      positively — as long as it enhances rather than obscures the melody.
+    coaching_voice: >
+      Name the technique and the phrase. Acknowledge it as an addition the singer brought,
+      not a match. Brief and encouraging.
+    few_shot_summaries:
+      - "You added falsetto on a note where the original stays in full voice — it's a personal choice that works well in this context. That kind of stylistic ownership is worth developing."
+      - "Your breathy tone on this phrase is something you brought — the original doesn't use it there. It suits the lyric well and gives the line more intimacy."
+    practice_tip: >
+      Catalogue your expressive additions across takes. Which ones feel intentional vs.
+      accidental? Developing conscious control over technique additions is the difference
+      between a stylistic choice and a reflex.
+
+  - detector: missed_expression
+    pedagogy: >
+      When a reference performer uses an expressive technique on a phrase and the singer
+      does not, it creates a gap in the stylistic profile of the performance. Missing
+      expressiveness is not a pitch error but it reduces the perceptual similarity to the
+      reference and can flatten emotional delivery. Some techniques (falsetto, pharyngeal
+      resonance) require specific motor learning before they are available on demand.
+    coaching_voice: >
+      Name the specific technique the reference used and the phrase. Be clear this is
+      a stylistic gap, not a pitch issue. Suggest it as something to add in the next take.
+    few_shot_summaries:
+      - "The original uses vibrato across 4 notes in the second verse — you sang those straight. The straight tone sounds clean, but adding vibrato there would bring you closer to the reference interpretation."
+      - "The reference uses a glissando slide into the chorus — you didn't include it. That slide is a big part of the song's character. Try working it in on your next pass."
+    practice_tip: >
+      Isolate the phrase and practice adding the missing technique in slow motion — exaggerated
+      and obvious. Once it's accessible at slow tempo, bring it back to performance speed.
+
+  - detector: vocal_texture
+    pedagogy: >
+      Vocal texture describes the timbral quality of a voice — breathiness, creak, fullness,
+      or resonance — that arises from phonatory settings above the level of pitch and loudness.
+      Different textures reflect different acoustic configurations of the vocal tract and
+      fold adduction patterns. Breathy tone involves incomplete glottal closure; strong or
+      full tone involves complete adduction; falsetto involves a different vibratory pattern
+      from modal voice.
+    coaching_voice: >
+      Name the texture observed and which notes it appeared on. If it matches the reference,
+      note that. If it's a consistent texture choice, affirm it as a style element.
+    few_shot_summaries:
+      - "You're using a breathy tone across the opening verse — incomplete closure giving the tone that airy quality. The original uses it too in those phrases; you're capturing the intimate feel of the recording."
+      - "Strong, full tone through the chorus — complete adduction making the voice ring out. That's the right texture for this section; the original uses the same approach."
+    practice_tip: >
+      To develop texture control: alternate the same phrase between full tone and breathy
+      tone intentionally. Building the switch expands your texture vocabulary and makes
+      style choices more deliberate.
+
+  - detector: vibrato_quality
+    pedagogy: >
+      Healthy vibrato is a regular oscillation of pitch at 4–7 Hz with an extent of 50–100
+      cents, produced by natural subglottic pressure pulsing in the relaxed larynx. Vibrato
+      outside these parameters — too slow (wobble, < 4 Hz), too fast (bleat or flutter,
+      > 7 Hz), or too wide (> 120 cents) — indicates either muscular interference or
+      excessive breath pressure. Miller (2000) describes natural vibrato as an automatic
+      result of a free, well-supported tone; forced vibrato always sounds mechanical.
+    coaching_voice: >
+      State the measured rate and extent. Name the specific deviation (wobble, bleat, wide)
+      and give a single mechanical direction. Don't pile on multiple causes.
+    few_shot_summaries:
+      - "Your vibrato is running a bit slow — around 3.8 Hz on the held notes. That gives it a slight wobble quality. Vibrato in the 5–6.5 Hz range sounds most natural; try increasing support slightly to speed it up."
+      - "Your vibrato rate at 7.2 Hz is at the fast edge — it can sound a little tight or bleating. Relaxing the jaw and throat slightly usually brings the rate down to a more natural range."
+    practice_tip: >
+      For a too-slow wobble: engage support more firmly while sustaining. For a too-fast
+      bleat: check for jaw or tongue tension and release it. A free tone on 'ah' with open
+      throat is the natural vibrato baseline.
+
+  - detector: consistent_vibrato
+    pedagogy: >
+      Consistent vibrato — where rate and extent remain stable across multiple sustained
+      notes — is a hallmark of advanced technique. Rate consistency below 0.5 Hz standard
+      deviation indicates that vibrato is automatic and unselfconscious, arising from a
+      well-established physiological habit rather than conscious production.
+    coaching_voice: >
+      Affirming. State the rate and the consistency metric. Connect to what it reflects
+      about the technique.
+    few_shot_summaries:
+      - "Your vibrato rate was remarkably consistent across the held notes — 5.8 Hz with very little variation. That kind of steady vibrato comes from deeply embedded muscle memory. It sounds natural because it is."
+      - "Consistent vibrato at 5.5 Hz through the whole verse. Rate stays almost flat note to note — that's the hallmark of a mature vibrato technique."
+    practice_tip: >
+      Maintain this by sustaining long tones on difficult vowels ('ee', 'i') where vibrato
+      wants to tighten. If it stays consistent there, it's robust.
+
+  - detector: wide_vibrato
+    pedagogy: >
+      Vibrato extent above 120 cents (a semitone or more peak-to-peak) produces a
+      perceivable pitch instability and can obscure the pitch centre. Wide vibrato is
+      often caused by excessive laryngeal oscillation rather than the efficient subglottic
+      pulsing of healthy vibrato. Some operatic styles traditionally use wider extents, but
+      for most contemporary styles 50–90 cents is the accepted range.
+    coaching_voice: >
+      Name the extent measurement and how it differs from the healthy range. One
+      mechanical cause, one fix direction. Check reference for stylistic context.
+    few_shot_summaries:
+      - "Your vibrato extent is running wide — around 135 cents peak-to-peak. At that width the pitch centre becomes hard to hear. Try relaxing the larynx and letting vibrato happen with less muscular effort."
+      - "The vibrato on sustained notes is 140 cents wide. That makes the pitch sound unstable rather than ornamental. Reducing jaw tension often brings extent into a more settled range."
+    practice_tip: >
+      Sustain a note on 'mm' (humming) and let vibrato naturally appear. Humming tends to
+      reduce laryngeal effort and usually produces a narrower, more natural extent. Carry
+      that sensation into the open vowel.
+
+  - detector: delayed_vibrato
+    pedagogy: >
+      Vibrato that appears only in the second half of a sustained note (rather than
+      establishing earlier) may be intentional ornamentation (common in certain baroque
+      and early music styles, as well as some pop inflections) or it may reflect a technical
+      habit where the singer activates vibrato consciously rather than allowing it to arise
+      naturally from a free tone.
+    coaching_voice: >
+      Check the reference: if the original delays vibrato on these notes, frame as stylistic
+      matching. If not, frame as a technique habit to examine. Either way, name the pattern.
+    few_shot_summaries:
+      - "You add vibrato in the second half of held notes — the start is straight, then it comes in. The original does the same thing on these phrases, so you're matching the stylistic approach correctly."
+      - "Vibrato appears late on your held notes — the first half is straight, then it comes in. That delayed entry is a style choice you're making; just make sure it's deliberate. The reference starts vibrato earlier on these notes."
+    practice_tip: >
+      To practise earlier vibrato entry: on a sustained note, aim to feel vibrato emerging
+      by beat 2 rather than beat 3 or 4. Starting with a strong, supported onset helps
+      vibrato establish itself sooner.
+
+  - detector: straight_tone_control
+    pedagogy: >
+      Intentional straight tone — avoiding vibrato for expressive or stylistic effect —
+      requires active suppression of the natural laryngeal pulsing that produces vibrato.
+      In contemporary pop, folk, and early music, straight tone is often the default style.
+      The ability to sing straight tone steadily (without wobble or flutter) on sustained
+      notes is itself a technique skill.
+    coaching_voice: >
+      Check the reference: if it uses vibrato and the singer uses straight tone, it's a
+      stylistic divergence to note. If the reference is also straight, affirm the choice.
+    few_shot_summaries:
+      - "You're sustaining straight tone where the original uses vibrato — a different but valid stylistic choice. Your straight tone is steady and controlled, which is hard to do on long notes."
+      - "Your straight tone through the verse perfectly matches the reference — the original deliberately avoids vibrato in these phrases to keep the texture intimate. You've captured that quality."
+    practice_tip: >
+      To build steady straight tone: sustain a note on 'mm' and actively resist any wobble.
+      Then open to 'ah' keeping that same stability. The physical sensation is a slight
+      increase in cord adduction relative to vibrato tone.
+
+  - detector: vibrato_with_support
+    pedagogy: >
+      Vibrato that occurs alongside steady breath support — measured as low RMS standard
+      deviation during the sustain — demonstrates advanced coordination: the singer can
+      oscillate pitch without disrupting the underlying breath management. This combination
+      is a marker of mature technique and produces the 'floating' quality prized in operatic
+      and musical theatre styles.
+    coaching_voice: >
+      Affirming. Name the technique combination and the section. Brief technical note on
+      what it reflects.
+    few_shot_summaries:
+      - "You're producing vibrato on the held notes while maintaining very steady volume — that combination is technically demanding. It means your vibrato is arising from laryngeal release, not breath pressure fluctuation."
+      - "Vibrato with steady support through the chorus. The volume doesn't waver with the pitch — that's exactly the free-tone quality that makes vibrato sound natural rather than forced."
+    practice_tip: >
+      To maintain this: practise sustained vibrato while monitoring volume on a meter or
+      DAW. If volume fluctuates with the vibrato rate, pressure pulsing is the source;
+      increase laryngeal relaxation.
+
+  - detector: technique_accuracy_tradeoff
+    pedagogy: >
+      Some singers sacrifice pitch accuracy when executing expressive techniques — vibrato,
+      glissando, or stylistic ornaments — because technique execution consumes attentional
+      and motor resources that otherwise support intonation. This tradeoff is common at
+      intermediate skill levels and resolves when techniques become automatic.
+    coaching_voice: >
+      Name the pattern directly: technique density is high but pitch accuracy drops in
+      those same windows. Frame as a priority choice, not a failure.
+    few_shot_summaries:
+      - "In the sections where you're most expressive — matching the reference's techniques — your pitch accuracy drops from 68% to 41%. The techniques are pulling focus from intonation. That's a normal tradeoff that resolves as the techniques automate."
+      - "High expression matching, lower pitch accuracy in the same windows. You're spending cognitive resources on stylistic execution right now; pitch will come back as the techniques become more automatic."
+    practice_tip: >
+      Drill the expressive techniques separately, out of the song context, until they feel
+      effortless. When they stop requiring conscious attention, pitch accuracy will stop
+      suffering alongside them.
+
+  - detector: expressive_stability
+    pedagogy: >
+      When a singer achieves both high expression matching and accurate pitch simultaneously,
+      it indicates that the expressive techniques have become automatic — no longer competing
+      with intonation for cognitive resources. This is the hallmark of performance-ready
+      technique integration.
+    coaching_voice: >
+      Affirming, specific. Name the section, the technique density, and the pitch accuracy.
+      Connect to what the combination means technically.
+    few_shot_summaries:
+      - "In the bridge you're matching 65% of the reference's techniques AND maintaining 68% pitch accuracy simultaneously. That combination is rare — it means expression is becoming automatic for you."
+      - "Strong expression stability in the second verse: high style matching and solid intonation at the same time. The techniques are no longer costing you accuracy — that's the integration you're working toward."
+    practice_tip: >
+      Extend this stability to the sections where it's not yet present by drilling those
+      sections with the same technique-then-pitch sequential approach used to get here.
+
+  - detector: section_vibrato_contrast
+    pedagogy: >
+      Vibrato usage that varies systematically between section types (e.g. heavy in the
+      chorus, absent in the verse) reflects musical awareness and deliberate dynamic shaping.
+      If this contrast matches the reference recording, it demonstrates stylistic understanding.
+      If it contradicts the reference, it identifies a stylistic gap.
+    coaching_voice: >
+      Name the sections and the vibrato density difference. Compare to reference if applicable.
+      Frame as deliberate contrast (positive) or unintentional divergence (area to address).
+    few_shot_summaries:
+      - "Your vibrato density is much higher in the chorus than the verse — exactly matching how the original uses it. That dynamic shaping of vibrato adds to the sense of build in the song."
+      - "You use more vibrato in the verse than the chorus, which is the reverse of the original recording. The artist saves vibrato for the chorus climax; matching that contrast would add more drama to the build."
+    practice_tip: >
+      Listen to the reference with vibrato-awareness — note specifically where vibrato
+      appears and disappears. Map that pattern consciously and replicate it as an intentional
+      choice rather than a reflex.

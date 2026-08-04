@@ -35,10 +35,13 @@ from fastapi.staticfiles import StaticFiles
 
 from vocal_coach.align_v2 import measure_song
 from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH
+from vocal_coach.feedback import generate_performance_summary, rewrite_card_summaries
 from vocal_coach.highlights import select_highlights
+from vocal_coach.llm import LLMClient
 from vocal_coach.loudness import compute_loudness, write_loudness_track
 from vocal_coach.overview import compute_overview
 from vocal_coach.pitch import extract_f0, write_pitch_track
+from vocal_coach.rag import RAGStore, DEFAULT_DB_PATH
 from vocal_coach.reference import load_reference
 from vocal_coach.schemas import (
     LoudnessTrack,
@@ -46,9 +49,11 @@ from vocal_coach.schemas import (
     PitchTrack,
     StarsMetadataEntry,
     StarsTrack,
+    VocalProfile,
 )
 from vocal_coach.song import load_manifest
 from vocal_coach.trends import compute_section_trends
+from vocal_coach.vocal_profile import load_vocal_profile
 from vocal_coach.stars_runner import (
     DEFAULT_STARS_DIR,
     STARS_PROFILE_FAST,
@@ -191,6 +196,7 @@ def list_songs():
                 "has_instrumental": manifest.instrumental_path is not None,
                 "has_reference_pitch": manifest.reference_pitch_path is not None,
                 "has_reference_stars": manifest.reference_stars_path is not None,
+                "has_vocal_profile": manifest.vocal_profile_path is not None,
             }
         )
     return {"songs": out}
@@ -207,6 +213,23 @@ def get_reference_annotation(song_id: str):
     song_dir = _song_dir(song_id)
     annotation = load_reference(song_dir)
     return JSONResponse(content=annotation.model_dump())
+
+
+@app.get("/api/songs/{song_id}/vocal_profile")
+def get_vocal_profile(song_id: str):
+    """Return the LLM-generated vocal profile for a song, or 404 if not yet generated."""
+    song_dir = _song_dir(song_id)
+    manifest = load_manifest(song_dir)
+    if not manifest.vocal_profile_path:
+        raise HTTPException(
+            status_code=404,
+            detail="Vocal profile not yet generated. Run scripts/build_song.py.",
+        )
+    profile_path = song_dir / manifest.vocal_profile_path
+    profile = load_vocal_profile(profile_path)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="Vocal profile file missing or unreadable.")
+    return JSONResponse(content=profile.model_dump())
 
 
 @app.get("/api/songs/{song_id}/audio/instrumental")
@@ -315,13 +338,20 @@ async def analyze(
         config=cfg,
     )
     section_trends = compute_section_trends(reference, notes, techniques)
+
+    # Sprint 3: load vocal profile for highlight emphasis weighting (optional)
+    _vp_path = song_dir / (manifest.vocal_profile_path or "vocal_profile.json")
+    vocal_profile = load_vocal_profile(_vp_path)
+
     highlights = select_highlights(
         reference,
         notes,
         techniques,
         config=cfg,
         sections=section_trends,
+        vocal_profile=vocal_profile,
     )
+
     overview = compute_overview(
         notes,
         techniques,
@@ -330,6 +360,37 @@ async def analyze(
         octave_shift_semitones=octave_shift,
         arrival_late_ms=cfg.arrival.late_ms,
     )
+
+    # Sprint 3 Phase B: LLM feedback (card rewriting + performance summary)
+    _llm_client = LLMClient.from_config(cfg.llm)
+    _rag_store: RAGStore | None = None
+    if _llm_client is not None:
+        _db_path = REPO_ROOT / DEFAULT_DB_PATH
+        if _db_path.is_dir():
+            _rag_store = RAGStore(db_path=_db_path)
+        rewrite_card_summaries(
+            highlights.moments,
+            llm=_llm_client,
+            rag=_rag_store,
+            vocal_profile=vocal_profile,
+            reference=reference,
+            song_title=manifest.title,
+            artist=manifest.artist,
+            max_tokens=cfg.llm.card_rewrite_max_tokens,
+        )
+        _perf_summary = generate_performance_summary(
+            highlights.moments,
+            overview,
+            section_trends,
+            llm=_llm_client,
+            rag=_rag_store,
+            vocal_profile=vocal_profile,
+            song_title=manifest.title,
+            artist=manifest.artist,
+            max_tokens=cfg.llm.summary_max_tokens,
+        )
+    else:
+        _perf_summary = None
 
     analysis = PerformanceAnalysis(
         song_id=manifest.song_id,
@@ -359,6 +420,7 @@ async def analyze(
         highlights=highlights,
         sections=section_trends,
         overview=overview,
+        performance_summary=_perf_summary,
     )
     out_path = perf_dir / "analysis.json"
     out_path.write_text(analysis.model_dump_json(indent=2), encoding="utf-8")

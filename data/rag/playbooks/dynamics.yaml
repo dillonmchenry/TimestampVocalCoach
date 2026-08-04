@@ -1,0 +1,235 @@
+# Dynamics category playbook
+# Covers: fade_within_notes, dynamic_drop, dynamic_surge,
+#         section_dynamic_contrast, breathy_onset, clean_onset, sforzando_attack,
+#         note_crescendo, note_swell, support_fade, dynamic_sustain,
+#         release_cutoff, controlled_crescendo
+
+entries:
+  - detector: fade_within_notes
+    pedagogy: >
+      Volume decreasing across consecutive sustained notes (where each note ends quieter
+      than it began) is a common sign of breath depletion within a phrase. As subglottal
+      pressure drops, vocal folds cannot maintain consistent output power. This pattern
+      is distinct from a single note crescendo/decrescendo — it's a phrase-level fade
+      that continues across multiple notes.
+    coaching_voice: >
+      Name the phrase and the fade direction. State that this is a phrase-length breath
+      support issue. One fix direction.
+    few_shot_summaries:
+      - "Your voice fades across this three-note run — each note gets quieter than the last. Breath is running out mid-phrase. Take a larger breath before the phrase starts and keep the support engaged all the way to the last note."
+      - "Volume drops progressively through 'seemed so far away' — each word landing softer. That fade is breath pressure running low. Engage your support muscles more actively as you get deeper into the phrase."
+    practice_tip: >
+      Mark the fading phrase in the score. Before singing it, take a low breath and hold
+      your lower ribs expanded. Sustain that expansion feeling throughout the phrase —
+      even when you feel empty, the rib expansion reflex keeps pressure steady.
+
+  - detector: dynamic_drop
+    pedagogy: >
+      Singing significantly quieter than the reference recording across a phrase window
+      can reflect interpretive differences (intended intimacy) or technical limitations
+      (insufficient support for the required volume). The reference comparison is essential
+      here: the reference track establishes what volume the section calls for.
+    coaching_voice: >
+      State the dB gap versus the reference and the phrase. Distinguish between
+      stylistic choice and technical limitation. If stylistic, affirm it; if limitation,
+      address it directly.
+    few_shot_summaries:
+      - "You're about 4 dB quieter than the reference in this section. That could be a deliberate interpretive choice — more intimate — or it could be that the phrase isn't getting the breath support the original does. Listen to both and decide which you want."
+      - "Your volume is running 3.5 dB below the reference through the chorus. The original pushes hard here for emotional impact. If you want that effect, you'll need more breath support and slightly more adduction."
+    practice_tip: >
+      Sing the phrase at the reference volume level deliberately, even if it feels
+      exaggerated. Record yourself and listen back — often what feels too loud in the
+      room is exactly right on a recording.
+
+  - detector: dynamic_surge
+    pedagogy: >
+      Singing louder than the reference across a phrase may be an expressive choice or
+      an over-compensation — pushing to a section where the original relies on tonal
+      quality rather than volume for impact. Sustained loudness above the reference also
+      increases vocal fatigue risk over multiple takes.
+    coaching_voice: >
+      State the dB gap versus the reference and the phrase. Check whether the surge
+      is consistent with the song's emotional arc. Offer the comparison neutrally.
+    few_shot_summaries:
+      - "You're about 4 dB louder than the reference in this passage. That extra volume might work for your interpretation — it gives the phrase more urgency — or it might be pushing where the original lets the melody carry. Either can be right; the choice should be deliberate."
+      - "You're surging 3 dB over the reference volume in the bridge. The original pulls back here for contrast. If you want to match the reference dynamic shape, try softening this section."
+    practice_tip: >
+      Practise the phrase at the reference's volume with a recording in one ear as a
+      guide. Volume matching against a reference is one of the fastest ways to internalise
+      a song's dynamic map.
+
+  - detector: section_dynamic_contrast
+    pedagogy: >
+      Dynamic contrast between sections — quieter verses and louder choruses, for example
+      — is fundamental to song structure in most popular music. Singers who maintain the
+      same volume level throughout flatten the emotional arc of the song. Section-level
+      dynamic shaping requires conscious management of breath support level across section
+      transitions.
+    coaching_voice: >
+      Name the two sections and the dB gap (or lack thereof). If contrast is good, affirm.
+      If it's flat, note what contrast would add to the performance.
+    few_shot_summaries:
+      - "Your chorus is about 3 dB louder than your verse — that's solid dynamic contrast. The song builds as it should, and the chorus lands with more impact."
+      - "Verse and chorus are nearly the same volume — about 0.8 dB difference. The original has 3 dB of contrast between them. Adding more dynamic lift into the chorus would make the song's structure clearer."
+    practice_tip: >
+      Mark section transitions in the score and practise the volume shift at each transition
+      as a deliberate physical act — engage more support going into louder sections, and
+      consciously lighten going into softer ones.
+
+  - detector: breathy_onset
+    pedagogy: >
+      A slow RMS attack rate (volume rising slowly over more than 80ms) produces a breathy,
+      air-first onset. This can be an intentional style choice (common in R&B, pop ballads,
+      and intimate phrases) or it can indicate incomplete vocal fold adduction at note start,
+      where air escapes before the folds close fully. Distinguishing stylistic breathiness
+      from technical delayed closure requires reference comparison.
+    coaching_voice: >
+      Check the reference. If the artist uses breathy onset there, frame as style matching.
+      If not, frame as delayed adduction. Either way, name the note and the onset slope.
+    few_shot_summaries:
+      - "Your onset on these notes is breathy — air starts before tone. The original has a clean, firm attack here. If you want to match the reference, focus on closing the folds before you start sound."
+      - "The breathy attack on the verse opening matches the original perfectly — that slow, soft onset is part of the song's intimate character. You've captured the texture."
+    practice_tip: >
+      For unwanted breathy onset: start the note with a gentle 'h' — 'h-ah' — to feel
+      the breath moving, then practise removing the 'h' while keeping the breath pressure
+      that precedes it. For intentional breathiness, explore the attack slope consciously.
+
+  - detector: clean_onset
+    pedagogy: >
+      A fast, clean onset — where volume rises rapidly from silence to full tone — indicates
+      simultaneous breath initiation and glottal closure. This is the technically correct
+      onset for most singing contexts: it locks the rhythmic placement and projects the tone
+      from the first frame. Garcia (1847) called this the 'coup de glotte' — a precise,
+      co-ordinated stroke at the glottis.
+    coaching_voice: >
+      Affirming. Name the notes and the clean onset pattern. Brief.
+    few_shot_summaries:
+      - "Clean, firm onsets across these four notes — volume comes in fast and full from the first frame. That's precise glottal timing. The rhythm is locked and the tone carries immediately."
+      - "Your attacks are clean through the chorus — immediate full tone, no air spill before the sound. That kind of onset control shows good glottal coordination."
+    practice_tip: >
+      Maintain this by using it as a model when you practise the softer or more breathy
+      passages — returning to clean onset there is a useful reset point.
+
+  - detector: sforzando_attack
+    pedagogy: >
+      A sforzando (sfz) envelope — where volume peaks sharply at note onset then immediately
+      drops to a sustain level — produces an accented, punchy quality. This is a deliberate
+      dynamic articulation technique used in both classical and contemporary styles to add
+      rhythmic emphasis. Whether it's appropriate depends on whether the reference also uses
+      this articulation.
+    coaching_voice: >
+      Check the reference. If the original also uses sforzando there, affirm. If not, note
+      the added accent as a stylistic addition. Name the notes and the envelope shape.
+    few_shot_summaries:
+      - "You're adding a sharp accent at the start of these notes — volume peaks immediately then pulls back. The original doesn't use sforzando here; it's an addition you're bringing. It adds energy but changes the phrasing."
+      - "Your sforzando attacks on the rhythmic hits match the original perfectly — that punchy front-loaded accent is exactly what the record uses for rhythmic drive."
+    practice_tip: >
+      To develop sforzando control: practise alternating between a sustained onset and
+      an accented onset on the same note. Intentional articulation requires the ability
+      to choose.
+
+  - detector: note_crescendo
+    pedagogy: >
+      A note-level crescendo — where volume rises continuously from onset to release —
+      is one of the most expressive dynamic shapes in vocal music. It requires increasing
+      subglottal pressure through the note while maintaining pitch stability, which is
+      technically demanding. It is used for emphasis, textual expression, and to approach
+      high notes with preparation.
+    coaching_voice: >
+      Check the reference. If it matches, affirm. If not, name the added crescendo as a
+      choice. Describe what it adds or risks.
+    few_shot_summaries:
+      - "You're growing through this note — onset to release, consistently building. The original shapes it the same way. That note-level swell adds forward momentum and textual weight."
+      - "You're adding a crescendo on this note where the original sustains flat. It's an expressive addition — it gives the word extra weight. Just ensure pitch stays steady as you push into the swell."
+    practice_tip: >
+      Practise the crescendo note alone: sustain for 6 beats and consciously increase
+      volume across the full duration. Monitor pitch with a tuner — crescendo often
+      sharpens pitch if subglottal pressure increase is not balanced by laryngeal relaxation.
+
+  - detector: note_swell
+    pedagogy: >
+      A swell envelope (soft-loud-soft within a single note) is a sophisticated dynamic
+      shape that creates a sense of rise and release within the note itself. It is common
+      in classical singing and some operatic pop styles. Executing it requires independent
+      control of breath pressure during the sustain phase.
+    coaching_voice: >
+      Name the notes with this envelope. Check if the reference uses it. If matching,
+      affirm; if added, note it as an expressive choice.
+    few_shot_summaries:
+      - "These notes have a soft-loud-soft shape — the swell pattern. The original uses the same envelope there; you're matching the dynamic shaping accurately."
+      - "You're adding swells on these sustained notes where the original holds flat. It's a valid interpretive choice that adds expression, but it changes the dynamic character of the phrase."
+    practice_tip: >
+      To control the swell: practise the note in three sections — soft onset, crescendo
+      to the midpoint, then decrescendo to the release. Exaggerate each section until
+      the shape is clear, then smooth the transitions.
+
+  - detector: support_fade
+    pedagogy: >
+      When volume falls below -3 dB/s during the sustain portion of a note (after the
+      attack has settled), it indicates that breath pressure is collapsing mid-note rather
+      than being maintained. This is distinct from a deliberate decrescendo — the fade
+      is unintended and results from insufficient engagement of the breath support muscles.
+      The acoustic result is a tone that loses power and presence as it sustains.
+    coaching_voice: >
+      Name the notes, the slope rate, and the location in the note (mid-sustain). Diagnose
+      as support collapse, not stylistic choice. One fix.
+    few_shot_summaries:
+      - "Your tone is fading within these notes — volume dropping about 4 dB/s during the sustain. That's mid-note support collapse, not a deliberate decrescendo. Keep the support muscles engaged through the whole note length."
+      - "On these long notes the volume drops significantly after the attack settles. Breath pressure isn't being maintained through the sustain. Think of holding outward rib expansion all the way to the note's end."
+    practice_tip: >
+      Hold a hand on your ribs during these notes. The ribs should stay expanded or
+      gently contract throughout the sustain — a sudden inward collapse means support
+      is cutting out. Develop the habit of gentle, sustained outward pressure.
+
+  - detector: dynamic_sustain
+    pedagogy: >
+      A stable sustain — where volume varies less than 1 dB and the slope is near-flat
+      across the middle portion of a note — demonstrates precise breath pressure management.
+      This evenness is the baseline requirement for long-note technique in classical and
+      musical theatre styles and produces a tone that sounds 'full and steady' even at
+      soft volumes.
+    coaching_voice: >
+      Affirming. Name the notes and the sustain stability. Brief.
+    few_shot_summaries:
+      - "Your sustained notes are remarkably even — volume stays within 0.8 dB across the whole note. That kind of sustain control requires consistent breath pressure management. It makes the tone sound centred and reliable."
+      - "Excellent dynamic sustain on the long notes — near-flat volume throughout. The tone holds its power without pushing or fading."
+    practice_tip: >
+      To extend this to more notes: practise sustains on all vowels ('ah', 'ee', 'oo', 'oh')
+      monitoring volume. Vowel shapes affect laryngeal posture and can introduce volume
+      variance — this exercise isolates the breath management variable.
+
+  - detector: release_cutoff
+    pedagogy: >
+      An abrupt release — where volume drops to zero extremely rapidly — produces a
+      hard, cut-off quality rather than a tapered note ending. In most styles, a clean
+      release is preferred: a brief controlled taper that allows the final resonance to
+      decay naturally. Abrupt cutoffs can also cause audible consonant noise (especially
+      on words ending in consonants) that is harder to manage in recording contexts.
+    coaching_voice: >
+      Name the notes with abrupt release. Contrast with a clean taper. Suggest one
+      physical approach.
+    few_shot_summaries:
+      - "Several notes end abruptly — hard cut rather than a taper. That clipped quality disconnects the notes from the musical flow. Think of letting the note ring for one extra beat after you stop sound."
+      - "The releases on these sustained notes are very sudden. The original lets these notes fade rather than cut. Allow the tone to decay — don't close suddenly; imagine the sound continuing past the note end."
+    practice_tip: >
+      Practise ending notes on an open vowel and consciously releasing breath pressure
+      gradually over a full beat rather than stopping abruptly. Record yourself and
+      listen for the taper — it should be audible.
+
+  - detector: controlled_crescendo
+    pedagogy: >
+      A phrase-level crescendo — sustained increase in volume across multiple notes while
+      maintaining pitch accuracy — is technically demanding because it requires simultaneous
+      management of breath pressure (increasing), glottal tension (adjusting to maintain
+      pitch as pressure rises), and rhythmic placement. Achieving this while maintaining
+      intonation demonstrates advanced breath-pitch coordination.
+    coaching_voice: >
+      Affirming. Name the phrase, the dB increase, and the pitch accuracy during the build.
+      Connect to what the technical combination means.
+    few_shot_summaries:
+      - "You built volume steadily across this phrase while keeping pitch accurate — that combination is technically demanding. Crescendo usually pulls pitch sharp as pressure increases; you managed both simultaneously."
+      - "Clean controlled build through the pre-chorus — growing louder while staying in tune. That's the kind of dynamic shaping that lifts the song toward the chorus."
+    practice_tip: >
+      To reinforce this: practise phrase crescendos with a tuner running. The goal is
+      to see the pitch needle stay centred as volume increases. If pitch sharpens, slow
+      the crescendo rate and relax the larynx during the build.
