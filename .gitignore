@@ -1,3 +1,6 @@
+# Docker build context staging (populated by scripts/prepare_docker_context.ps1)
+nanopitch/
+
 # Python
 __pycache__/
 *.py[cod]

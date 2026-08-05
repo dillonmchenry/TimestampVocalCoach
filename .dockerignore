@@ -1,0 +1,62 @@
+# .dockerignore - keep the build context lean
+# Docker reads the entire build context before building. Excluding large/irrelevant
+# files speeds up `docker build` significantly.
+
+# Version control
+.git/
+.gitignore
+
+# Python cache
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Secrets (injected at runtime via --env-file .env)
+.env
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Jupyter artifacts
+.ipynb_checkpoints/
+notebooks/
+
+# Large data artifacts not needed in the image
+data/samples/
+data/raw/
+data/cache/
+data/processed/
+data/student_corpus/
+
+# STARS teacher weights (~700 MB) - not needed for fast/student profile
+stars_chinese/
+stars_chinese_english_bilingual/
+*.ckpt
+
+# STARS third_party runtime outputs (generated at build time inside the image)
+third_party/stars/checkpoints/
+third_party/stars/infer_out/
+
+# NanoPitch: exclude all epoch checkpoints - only best.pth is needed.
+# The prepare_docker_context.ps1 script copies just the required files
+# into nanopitch/ before the build, so nanopitch/ itself is NOT excluded.
+nanopitch/training/runs/*/checkpoints/epoch_*.pth
+
+# pytest cache
+.pytest_cache/
+tests/
+
+# Cursor / editor
+.cursor/
+
+# Scripts not needed in the image
+scripts/prepare_docker_context.ps1

@@ -202,6 +202,12 @@ class LLMClient:
             return None
 
         choice = resp.choices[0]
+        if choice.finish_reason == "length":
+            logger.warning(
+                "[llm] response truncated by max_tokens=%d — increase max_tokens "
+                "or reduce prompt size to avoid JSON parse errors",
+                self.max_tokens,
+            )
         return choice.message.content
 
 

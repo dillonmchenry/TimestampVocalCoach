@@ -1,0 +1,6 @@
+{
+  "buildCommand": "echo \"window.API_BASE = '${API_BASE}';\" > web/static/config.js",
+  "outputDirectory": "web/static",
+  "framework": null,
+  "trailingSlash": false
+}
