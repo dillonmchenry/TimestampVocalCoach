@@ -1,5 +1,15 @@
 import WaveSurfer from "https://unpkg.com/wavesurfer.js@7.8.6/dist/wavesurfer.esm.js";
 
+/**
+ * Prefix a /api/... path with the configured API base URL.
+ * window.API_BASE is set by config.js (empty string for same-origin local dev,
+ * or the full RunPod URL for Vercel-hosted deployments).
+ */
+function apiUrl(path) {
+  const base = (window.API_BASE || "").replace(/\/$/, "");
+  return base + path;
+}
+
 const songSelect = document.getElementById("songSelect");
 const songBadges = document.getElementById("songBadges");
 const dropZone = document.getElementById("dropZone");
@@ -364,7 +374,7 @@ let allSongs = [];
 async function loadSongs() {
   status.textContent = "Loading songs…";
   try {
-    const r = await fetch("/api/songs");
+    const r = await fetch(apiUrl("/api/songs"));
     if (!r.ok) throw new Error(`status ${r.status}`);
     const data = await r.json();
     allSongs = data.songs || [];
@@ -485,7 +495,7 @@ analyzeButton.addEventListener("click", async () => {
   fd.append("stars_profile", currentStarsProfile());
 
   try {
-    const r = await fetch(`/api/songs/${encodeURIComponent(songId)}/analyze`, {
+    const r = await fetch(apiUrl(`/api/songs/${encodeURIComponent(songId)}/analyze`), {
       method: "POST",
       body: fd,
     });
@@ -493,7 +503,9 @@ analyzeButton.addEventListener("click", async () => {
       const detail = await r.text();
       throw new Error(`HTTP ${r.status}: ${detail.slice(0, 200)}`);
     }
-    const analysis = await r.json();
+    const { job_id } = await r.json();
+    status.textContent = "Analyzing… (this may take up to a minute)";
+    const analysis = await pollJob(job_id);
     status.textContent = `Done. Performance ID: ${analysis.perf_id}`;
     await renderAnalysis(songId, analysis);
   } catch (e) {
@@ -505,13 +517,29 @@ analyzeButton.addEventListener("click", async () => {
   }
 });
 
+/**
+ * Poll GET /api/jobs/{job_id} every 2 s until the job reaches "done" or
+ * "error", then return the analysis result or throw.
+ */
+async function pollJob(jobId) {
+  while (true) {
+    await new Promise((res) => setTimeout(res, 2000));
+    const r = await fetch(apiUrl(`/api/jobs/${encodeURIComponent(jobId)}`));
+    if (!r.ok) throw new Error(`Job poll failed: HTTP ${r.status}`);
+    const job = await r.json();
+    if (job.status === "done") return job.result;
+    if (job.status === "error") throw new Error(`Analysis error: ${job.error}`);
+    // "pending" or "running" — keep polling
+  }
+}
+
 async function getReferenceAnnotation(songId) {
   if (currentReference && currentReferenceSongId === songId) {
     return currentReference;
   }
   try {
     const r = await fetch(
-      `/api/songs/${encodeURIComponent(songId)}/reference_annotation`,
+      apiUrl(`/api/songs/${encodeURIComponent(songId)}/reference_annotation`),
     );
     if (!r.ok) throw new Error(`status ${r.status}`);
     currentReference = await r.json();
@@ -951,9 +979,9 @@ function currentStarsProfile() {
 async function fetchPeaks(songId, perfId) {
   try {
     const r = await fetch(
-      `/api/songs/${encodeURIComponent(songId)}/performances/${encodeURIComponent(
+      apiUrl(`/api/songs/${encodeURIComponent(songId)}/performances/${encodeURIComponent(
         perfId,
-      )}/loudness`,
+      )}/loudness`),
     );
     if (!r.ok) return null;
     const track = await r.json();
@@ -1002,7 +1030,7 @@ function ensureMixMedia() {
 }
 
 function mixLayerUrl(songId, kind) {
-  const base = `/api/songs/${encodeURIComponent(songId)}/audio`;
+  const base = apiUrl(`/api/songs/${encodeURIComponent(songId)}/audio`);
   return kind === "instrumental" ? `${base}/instrumental` : `${base}/reference`;
 }
 
@@ -1158,9 +1186,9 @@ async function renderAnalysis(songId, analysis) {
     wavesurfer = null;
   }
 
-  const audioUrl = `/api/songs/${encodeURIComponent(songId)}/performances/${encodeURIComponent(
+  const audioUrl = apiUrl(`/api/songs/${encodeURIComponent(songId)}/performances/${encodeURIComponent(
     analysis.perf_id,
-  )}/audio`;
+  )}/audio`);
 
   // Dedicated streaming media element: plays via HTTP range requests and is
   // a reliable fallback for the play-from-here actions regardless of whether
@@ -1483,14 +1511,16 @@ async function endKaraokeSession({ analyze }) {
   fd.append("stars_profile", currentStarsProfile());
   try {
     const r = await fetch(
-      `/api/songs/${encodeURIComponent(songId)}/analyze`,
+      apiUrl(`/api/songs/${encodeURIComponent(songId)}/analyze`),
       { method: "POST", body: fd },
     );
     if (!r.ok) {
       const detail = await r.text();
       throw new Error(`HTTP ${r.status}: ${detail.slice(0, 200)}`);
     }
-    const analysis = await r.json();
+    const { job_id } = await r.json();
+    status.textContent = "Analyzing… (this may take up to a minute)";
+    const analysis = await pollJob(job_id);
     status.textContent = `Done. Performance ID: ${analysis.perf_id}`;
     await renderAnalysis(songId, analysis);
   } catch (e) {
@@ -1532,7 +1562,7 @@ karaokeRecordBtn.addEventListener("click", async () => {
   karaokeViz.hidden = false;
 
   // Play instrumental
-  karaokeAudio.src = `/api/songs/${encodeURIComponent(songId)}/audio/instrumental`;
+  karaokeAudio.src = apiUrl(`/api/songs/${encodeURIComponent(songId)}/audio/instrumental`);
   karaokeAudio.hidden = false;
   karaokeAudio.currentTime = 0;
   await karaokeAudio.play().catch(() => {
