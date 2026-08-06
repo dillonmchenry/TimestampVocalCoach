@@ -284,22 +284,37 @@ def rewrite_card_summaries(
     if song_ctx_parts:
         system += "\n\nSONG CONTEXT:\n" + " ".join(song_ctx_parts)
 
-    user = json.dumps({"cards": evidence_list}, ensure_ascii=False, indent=2)
+    # Process cards in chunks so each LLM call stays well within token limits.
+    # ~5 cards per call keeps each response comfortably under 1 000 output tokens.
+    CHUNK_SIZE = 5
+    chunks = [
+        evidence_list[i : i + CHUNK_SIZE]
+        for i in range(0, len(evidence_list), CHUNK_SIZE)
+    ]
 
-    # Override max_tokens for the batch call.
+    rewritten: dict[str, str] = {}
     orig_max = llm.max_tokens
     llm.max_tokens = max_tokens
     try:
-        result = llm.chat_json(system=system, user=user, schema=_CardSummaryBatch)
+        for chunk_idx, chunk in enumerate(chunks):
+            user = json.dumps({"cards": chunk}, ensure_ascii=False, indent=2)
+            result = llm.chat_json(system=system, user=user, schema=_CardSummaryBatch)
+            if result is None:
+                logger.warning(
+                    "[feedback] card rewriting failed for chunk %d/%d — those cards keep deterministic summaries",
+                    chunk_idx + 1, len(chunks),
+                )
+                continue
+            for c in result.cards:
+                if c.summary.strip():
+                    rewritten[c.id] = c.summary
+            logger.debug(
+                "[feedback] chunk %d/%d: %d/%d cards rewritten",
+                chunk_idx + 1, len(chunks), len(result.cards), len(chunk),
+            )
     finally:
         llm.max_tokens = orig_max
 
-    if result is None:
-        logger.warning("[feedback] card rewriting LLM call failed — keeping deterministic summaries")
-        return moments
-
-    # Build lookup by id.
-    rewritten: dict[str, str] = {c.id: c.summary for c in result.cards if c.summary.strip()}
     matched = 0
     for m, ev in zip(moments, evidence_list):
         new_summary = rewritten.get(m.id, "")
@@ -309,7 +324,6 @@ def rewrite_card_summaries(
             m.summary = new_summary
             matched += 1
         else:
-            # LLM omitted this card — keep original.
             logger.debug("[feedback] no LLM summary for card %s — keeping deterministic", m.id)
 
     logger.info("[feedback] card rewriting: %d/%d cards updated", matched, len(moments))

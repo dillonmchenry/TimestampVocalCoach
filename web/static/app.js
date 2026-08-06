@@ -1302,8 +1302,9 @@ const karaokeLyrics = document.getElementById("karaokeLyrics");
 const karaokeAudio = document.getElementById("karaokeAudio");
 const karaokeViz = document.getElementById("karaokeViz");
 
-let karaokeMediaRecorder = null;
-let karaokeChunks = [];
+let karaokeScriptNode = null;   // ScriptProcessorNode used for WAV capture
+let karaokePcmBuffers = [];     // Float32Array chunks collected during recording
+let karaokeRecordSr = 44100;    // actual AudioContext sample rate
 let karaokeStream = null;
 let karaokeRafHandle = null;
 let karaokeStartTs = 0;
@@ -1313,6 +1314,37 @@ let karaokeWordRows = [];
 let karaokeAudioCtx = null;
 let karaokeAnalyser = null;
 let karaokeVizData = null;  // Uint8Array reused each frame
+
+/**
+ * Encode collected PCM buffers into a 16-bit mono WAV Blob.
+ * Runs entirely in the browser — the server receives a plain WAV file that
+ * soundfile can open without any conversion or audioread fallback.
+ */
+function _wavEncode(buffers, sampleRate) {
+  const totalSamples = buffers.reduce((s, b) => s + b.length, 0);
+  const ab = new ArrayBuffer(44 + totalSamples * 2);
+  const v = new DataView(ab);
+  const ws = (off, str) => { for (let i = 0; i < str.length; i++) v.setUint8(off + i, str.charCodeAt(i)); };
+  ws(0, "RIFF"); v.setUint32(4, 36 + totalSamples * 2, true);
+  ws(8, "WAVE"); ws(12, "fmt ");
+  v.setUint32(16, 16, true);       // fmt chunk size
+  v.setUint16(20, 1, true);        // PCM
+  v.setUint16(22, 1, true);        // mono
+  v.setUint32(24, sampleRate, true);
+  v.setUint32(28, sampleRate * 2, true); // byte rate
+  v.setUint16(32, 2, true);        // block align
+  v.setUint16(34, 16, true);       // bits per sample
+  ws(36, "data"); v.setUint32(40, totalSamples * 2, true);
+  let off = 44;
+  for (const buf of buffers) {
+    for (let i = 0; i < buf.length; i++) {
+      const s = Math.max(-1, Math.min(1, buf[i]));
+      v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+      off += 2;
+    }
+  }
+  return new Blob([ab], { type: "audio/wav" });
+}
 
 // Rolling-window constants (seconds).
 const LYRIC_PAST_S = 1.0;    // keep just-sung words visible for this long after they end
@@ -1466,19 +1498,19 @@ function resetKaraokeLyricsView() {
 }
 
 async function endKaraokeSession({ analyze }) {
-  if (!karaokeMediaRecorder) return;
-  const recorder = karaokeMediaRecorder;
-  const stopped = new Promise((resolve) => {
-    recorder.onstop = resolve;
-  });
-  recorder.stop();
+  if (!karaokeScriptNode) return;
+  // Stop capturing PCM — disconnect before closing AudioContext.
+  karaokeScriptNode.disconnect();
+  karaokeScriptNode = null;
+  // Encode collected PCM to WAV before the AudioContext is torn down.
+  const wavBlob = analyze ? _wavEncode(karaokePcmBuffers, karaokeRecordSr) : null;
+  karaokePcmBuffers = [];
+
   karaokeAudio.pause();
   karaokeRecordBtn.disabled = false;
   karaokeStopBtn.disabled = true;
   karaokeCancelBtn.disabled = true;
   cancelAnimationFrame(karaokeRafHandle);
-  await stopped;
-  karaokeMediaRecorder = null;
   if (karaokeStream) {
     karaokeStream.getTracks().forEach((t) => t.stop());
     karaokeStream = null;
@@ -1490,11 +1522,9 @@ async function endKaraokeSession({ analyze }) {
     karaokeVizData = null;
   }
   karaokeViz.hidden = true;
-  const recordedChunks = karaokeChunks;
-  karaokeChunks = [];
   resetKaraokeLyricsView();
 
-  if (!analyze) {
+  if (!analyze || !wavBlob) {
     status.textContent = "";
     status.classList.remove("error");
     return;
@@ -1502,12 +1532,9 @@ async function endKaraokeSession({ analyze }) {
 
   const songId = songSelect.value;
   if (!songId) return;
-  const mime = recorder.mimeType || "audio/webm";
-  const ext = mime.includes("ogg") ? "ogg" : mime.includes("mp4") ? "m4a" : "webm";
-  const blob = new Blob(recordedChunks, { type: mime });
   status.textContent = "Analyzing karaoke take…";
   const fd = new FormData();
-  fd.append("file", blob, `karaoke.${ext}`);
+  fd.append("file", wavBlob, "recording.wav");
   fd.append("stars_profile", currentStarsProfile());
   try {
     const r = await fetch(
@@ -1533,8 +1560,8 @@ async function endKaraokeSession({ analyze }) {
 karaokeRecordBtn.addEventListener("click", async () => {
   const songId = songSelect.value;
   if (!songId) return;
-  if (!navigator.mediaDevices || !window.MediaRecorder) {
-    status.textContent = "Browser does not support MediaRecorder.";
+  if (!navigator.mediaDevices) {
+    status.textContent = "Browser does not support microphone access.";
     status.classList.add("error");
     return;
   }
@@ -1545,20 +1572,27 @@ karaokeRecordBtn.addEventListener("click", async () => {
     status.classList.add("error");
     return;
   }
-  karaokeChunks = [];
-  karaokeMediaRecorder = new MediaRecorder(karaokeStream);
-  karaokeMediaRecorder.ondataavailable = (e) => {
-    if (e.data && e.data.size > 0) karaokeChunks.push(e.data);
-  };
-  karaokeMediaRecorder.start();
+  karaokePcmBuffers = [];
 
-  // Wire mic stream into the Web Audio AnalyserNode for the live waveform.
+  // Build Web Audio graph: mic source -> analyser (waveform viz) + scriptNode (PCM capture).
   karaokeAudioCtx = new AudioContext();
+  karaokeRecordSr = karaokeAudioCtx.sampleRate;
   karaokeAnalyser = karaokeAudioCtx.createAnalyser();
   karaokeAnalyser.fftSize = 512;
   karaokeAnalyser.smoothingTimeConstant = 0.6;
   karaokeVizData = new Uint8Array(karaokeAnalyser.fftSize);
-  karaokeAudioCtx.createMediaStreamSource(karaokeStream).connect(karaokeAnalyser);
+
+  const micSrc = karaokeAudioCtx.createMediaStreamSource(karaokeStream);
+  micSrc.connect(karaokeAnalyser);
+
+  // ScriptProcessorNode captures raw PCM float samples into karaokePcmBuffers.
+  // Must be connected to destination to fire onaudioprocess reliably.
+  karaokeScriptNode = karaokeAudioCtx.createScriptProcessor(4096, 1, 1);
+  karaokeScriptNode.onaudioprocess = (e) => {
+    karaokePcmBuffers.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+  };
+  micSrc.connect(karaokeScriptNode);
+  karaokeScriptNode.connect(karaokeAudioCtx.destination);
   karaokeViz.hidden = false;
 
   // Play instrumental

@@ -162,5 +162,5 @@ llm:
   enabled: true          # set to false to disable all LLM calls
   emphasis_boost: 1.5    # score multiplier for emphasize_highlights from vocal profile
   deemphasis_penalty: 0.5  # score multiplier for deemphasize_highlights from vocal profile
-  card_rewrite_max_tokens: 4096   # batched card rewriting call (Phase B); raised from 2048 to avoid truncation on songs with 30+ cards
+  card_rewrite_max_tokens: 1024   # per-chunk card rewriting call; cards are processed in batches of 5 so this is sufficient
   summary_max_tokens: 1024        # performance summary call (Phase B)

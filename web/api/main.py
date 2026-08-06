@@ -23,11 +23,15 @@ async task pattern (job_id + polling endpoint).
 
 from __future__ import annotations
 
+import logging
 import shutil
 import threading
 import uuid
+import warnings
 from pathlib import Path
 from typing import Any, Dict, Optional
+
+logger = logging.getLogger(__name__)
 
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -72,7 +76,7 @@ SONGS_ROOT = REPO_ROOT / "data" / "songs"
 STATIC_ROOT = REPO_ROOT / "web" / "static"
 CONFIG_PATH = REPO_ROOT / DEFAULT_CONFIG_RELPATH
 
-AUDIO_SUFFIXES = {".wav", ".mp3", ".flac", ".ogg", ".m4a"}
+AUDIO_SUFFIXES = {".wav", ".mp3", ".flac", ".ogg", ".m4a", ".webm"}
 AUDIO_MIME = {
     ".wav": "audio/wav",
     ".mp3": "audio/mpeg",
@@ -428,6 +432,74 @@ def _run_analysis_job(
         _jobs[job_id]["error"] = str(exc)
 
 
+def _sniff_extension(path: Path) -> str:
+    """Return the correct file extension based on magic bytes.
+
+    Windows Media Foundation (used by audioread on Windows) is extension-
+    sensitive: feeding it WebM bytes in a .wav file causes it to pick the
+    wrong decoder and fail.  Reading the first 12 bytes lets us detect the
+    real container format so we can rename before decoding.
+    """
+    try:
+        with path.open("rb") as f:
+            header = f.read(12)
+    except OSError:
+        return path.suffix.lower()
+
+    if header[:4] == b"RIFF":
+        return ".wav"
+    if header[:4] == b"fLaC":
+        return ".flac"
+    if header[:4] == b"OggS":
+        return ".ogg"
+    # WebM / Matroska EBML header
+    if header[:4] == b"\x1a\x45\xdf\xa3":
+        return ".webm"
+    # MP4/M4A: "ftyp" box starts at byte 4
+    if header[4:8] == b"ftyp":
+        return ".m4a"
+    return path.suffix.lower()
+
+
+def _ensure_wav(src: Path) -> Path:
+    """Convert browser-recorded audio (webm, ogg, m4a) to WAV.
+
+    Chrome's MediaRecorder produces audio/webm (Opus) and Firefox produces
+    audio/ogg.  Windows audioread (WMF) is extension-sensitive: it picks the
+    wrong decoder when WebM bytes are stored in a .wav file, causing the load
+    to fail entirely.  This function:
+
+      1. Sniffs the real container format from magic bytes.
+      2. Renames to the correct extension if needed so decoders get the right hint.
+      3. Converts to a clean PCM-16 WAV via librosa + soundfile.
+
+    Downstream loaders (NanoPitch, loudness, STARS) only ever see a valid WAV.
+    Returns the path to the WAV (same as ``src`` if it was already valid WAV).
+    """
+    import librosa
+    import soundfile as sf
+
+    real_ext = _sniff_extension(src)
+
+    # Already a real WAV — nothing to do.
+    if real_ext == ".wav":
+        return src
+
+    # Rename so the OS/audioread decoder gets the correct extension hint.
+    correctly_named = src.with_suffix(real_ext)
+    if correctly_named != src:
+        src.rename(correctly_named)
+        src = correctly_named
+
+    logger.info("[analyze] converting %s -> WAV", src.name)
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        wav, sr = librosa.load(str(src), sr=None, mono=True)
+    out = src.with_suffix(".wav")
+    sf.write(str(out), wav, sr, subtype="PCM_16")
+    return out
+
+
 @app.post("/api/songs/{song_id}/analyze")
 async def analyze(
     song_id: str,
@@ -463,6 +535,10 @@ async def analyze(
     user_audio = perf_dir / f"performance{suffix}"
     with user_audio.open("wb") as fp:
         shutil.copyfileobj(file.file, fp)
+
+    # Convert webm/ogg/m4a from MediaRecorder to WAV so all downstream
+    # processing (NanoPitch, STARS, loudness) uses soundfile cleanly.
+    user_audio = _ensure_wav(user_audio)
 
     torch_device = _resolve_torch_device(device)
     job_id = uuid.uuid4().hex[:8]
