@@ -201,7 +201,7 @@ def detect_best_pitch_phrases(
             },
         )
 
-    return _collect_top_pitch_phrases(
+    result = _collect_top_pitch_phrases(
         reference,
         notes,
         config=config,
@@ -212,6 +212,23 @@ def detect_best_pitch_phrases(
         rank_key=lambda m: m,
         build_moment=build_moment,
     )
+    if result:
+        return result
+
+    # Fallback: always emit the single best phrase window even if it falls
+    # below the quality threshold, giving _select_diverse a guaranteed-best
+    # candidate to anchor positive pitch feedback on every performance.
+    return _collect_top_pitch_phrases(
+        reference,
+        notes,
+        config=config,
+        moment_type="best_pitch_phrase",
+        window_min=cfg.pitch_window_min,
+        window_max=cfg.pitch_window_max,
+        qualify=lambda m: True,
+        rank_key=lambda m: m,
+        build_moment=build_moment,
+    )[:1]
 
 
 def detect_pitch_struggles(
@@ -3013,6 +3030,8 @@ def _select_diverse(
     max_per_type: int,
     max_per_category: int,
     suppress_low: bool = True,
+    guaranteed_types: frozenset = frozenset({"best_pitch_phrase"}),
+    category_caps: Optional[dict[str, int]] = None,
 ) -> list[CoachingMoment]:
     """Pick moments round-robin across categories for maximum variety.
 
@@ -3022,10 +3041,20 @@ def _select_diverse(
     before any category gets a second slot.
 
     Low-confidence moments are dropped before the round-robin when
-    ``suppress_low`` is True (default).
+    ``suppress_low`` is True (default).  Moments whose type appears in
+    ``guaranteed_types`` are exempt from the low-confidence filter and are
+    pre-selected before the round-robin begins, ensuring at least one slot
+    per guaranteed type regardless of score competition.
+
+    ``category_caps`` overrides ``max_per_category`` for specific category
+    names, e.g. ``{"alignment": 2}`` limits timing highlights to 2 total.
     """
+    cat_cap = dict(category_caps) if category_caps else {}
+
     if suppress_low:
-        moments = [m for m in moments if m.confidence != "low"]
+        # Guaranteed types bypass the low-confidence filter so there is always
+        # a candidate available for the pre-selection step below.
+        moments = [m for m in moments if m.confidence != "low" or m.type in guaranteed_types]
 
     queues: dict[str, list[CoachingMoment]] = {}
     for m in moments:
@@ -3043,13 +3072,27 @@ def _select_diverse(
     type_counts: dict[str, int] = {}
     cat_counts: dict[str, int] = {}
 
+    # Pre-select the single best candidate for each guaranteed type before the
+    # round-robin, so it is always present in the final set.
+    for gtype in guaranteed_types:
+        gcat = MOMENT_CATEGORY.get(gtype, "other")
+        queue = queues.get(gcat, [])
+        for i, candidate in enumerate(queue):
+            if candidate.type == gtype:
+                chosen.append(candidate)
+                type_counts[gtype] = 1
+                cat_counts[gcat] = cat_counts.get(gcat, 0) + 1
+                queue.pop(i)
+                break
+
     progress = True
     while len(chosen) < cap and progress:
         progress = False
         for cat in cats:
             if len(chosen) >= cap:
                 break
-            if cat_counts.get(cat, 0) >= max_per_category:
+            effective_cap = cat_cap.get(cat, max_per_category)
+            if cat_counts.get(cat, 0) >= effective_cap:
                 continue
             queue = queues.get(cat, [])
             while queue:
@@ -3224,6 +3267,7 @@ def select_highlights(
         max_per_type=cfg.highlights.max_per_type,
         max_per_category=cfg.highlights.max_per_category,
         suppress_low=cfg.confidence.suppress_low,
+        category_caps={"alignment": cfg.highlights.max_per_category_alignment},
     )
     chosen.sort(key=lambda m: m.start_s)
     return HighlightsReport(moments=chosen, cap=cfg.highlights.cap)

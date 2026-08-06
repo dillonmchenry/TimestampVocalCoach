@@ -1,0 +1,17 @@
+# Section labels for "Wake Me Up When September Ends" by Green Day.
+#
+# BPM=105, GAP=9427ms → sec/beat = 15/105 = 0.14286
+# Phrase-break beats converted: t = 9.427 + beat * 0.14286
+#
+# The song has a quiet acoustic first half and an electric/rock second half
+# starting around the bridge (~132s), then returns to quiet for the outro.
+
+sections:
+  - name: Intro
+    kind: intro
+    start_s: 0.0
+    end_s: 13.6
+  - name: Verse 1
+    kind: verse
+    start_s: 13.6
+    end_s: 42.4

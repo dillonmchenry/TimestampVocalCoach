@@ -1,0 +1,17 @@
+# Section labels for "Yesterday" by The Beatles.
+# Overrides auto "Phrase N" sections on import (see vocal_coach/song.py).
+
+sections:
+  - name: Intro
+    kind: intro
+    start_s: 0.0
+    end_s: 5.0
+  - name: Verse 1
+    kind: verse
+    start_s: 5.0
+    end_s: 22.0
+  - name: Verse 2
+    kind: verse
+    start_s: 22.0
+    end_s: 39.7
+

@@ -191,8 +191,13 @@ class HighlightsConfig:
     # Multiple entrance timing callouts
     # ------------------------------------------------------------------
 
-    entrance_timing_max: int = 4
+    entrance_timing_max: int = 2
     """How many individual late/early entrance notes to surface."""
+
+    max_per_category_alignment: int = 2
+    """Maximum timing/alignment highlights in the final list.  Overrides
+    ``max_per_category`` for the 'alignment' category so that low-value
+    per-note timing callouts don't crowd out pitch and expression feedback."""
 
     # ------------------------------------------------------------------
     # Timing-consistency window detector

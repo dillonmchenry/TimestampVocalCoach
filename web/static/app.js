@@ -306,6 +306,15 @@ function applyHighlightFilter() {
     card.classList.toggle("hidden", !(catMatch && basisMatch));
     if (catMatch && basisMatch) visible += 1;
   }
+
+  // Mirror the category filter onto timeline regions so they stay in sync.
+  for (const region of timelineDiv.querySelectorAll(".region[data-category]")) {
+    region.classList.toggle(
+      "hidden",
+      !!(activeHighlightFilter && region.dataset.category !== activeHighlightFilter)
+    );
+  }
+
   let empty = highlightList.querySelector(".filter-empty");
   if ((activeHighlightFilter || activeBasisFilter !== "all") && visible === 0 && cards.length > 0) {
     if (!empty) {
@@ -1246,6 +1255,7 @@ async function renderAnalysis(songId, analysis) {
     region.style.width = `${Math.max(1, width)}%`;
     region.title = `${moment.title}\n${moment.summary}`;
     region.dataset.momentId = momentDomId(moment);
+    region.dataset.category = momentCategoryKey(moment);
     region.addEventListener("click", () => {
       seekAndPlay(userStart);
       scrollToHighlightCard(region.dataset.momentId);
@@ -1497,7 +1507,12 @@ function resetKaraokeLyricsView() {
   applyKaraokeLyricsAtTime(0);
 }
 
+function _handleKaraokeEnded() {
+  endKaraokeSession({ analyze: true });
+}
+
 async function endKaraokeSession({ analyze }) {
+  karaokeAudio.removeEventListener("ended", _handleKaraokeEnded);
   if (!karaokeScriptNode) return;
   // Stop capturing PCM — disconnect before closing AudioContext.
   karaokeScriptNode.disconnect();
@@ -1599,6 +1614,7 @@ karaokeRecordBtn.addEventListener("click", async () => {
   karaokeAudio.src = apiUrl(`/api/songs/${encodeURIComponent(songId)}/audio/instrumental`);
   karaokeAudio.hidden = false;
   karaokeAudio.currentTime = 0;
+  karaokeAudio.addEventListener("ended", _handleKaraokeEnded);
   await karaokeAudio.play().catch(() => {
     /* autoplay restrictions may block; the user can click the visible controls */
   });

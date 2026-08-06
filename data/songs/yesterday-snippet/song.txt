@@ -1,0 +1,83 @@
+#ARTIST:The Beatles
+#TITLE:Yesterday (Snippet)
+#MP3:The Beatles - Yesterday.mp3
+#CREATOR:IC
+#EDITION:[SC]-Songs 2.0
+#GENRE:Pop Rock, Folk Rock
+#YEAR:1965
+#LANGUAGE:English
+#BPM:384
+#GAP:5440
+#VIDEO:a=NrgmdOz227I,co=yesterday--act-naturally-67f17124d2578.jpg,bg=beatles-the-54174f76557db.jpg,preview=59.66,medley=1388-2936
+: 0 4 7 Yes
+: 7 2 5 ter
+: 10 29 5 day 
+- 41
+: 78 6 9 All 
+: 86 6 11 my 
+: 95 4 13 trou
+: 100 8 14 bles 
+: 111 7 16 seemed 
+: 120 6 17 so 
+* 131 14 16 far 
+: 147 6 14 a
+: 154 29 14 way 
+- 185
+: 204 3 12 Now 
+: 208 5 14 it 
+: 216 6 12 looks 
+: 225 4 10 as 
+: 231 4 9 thou
+: 236 5 7 ~gh 
+: 244 7 7 they’re 
+: 252 12 10 here 
+: 268 4 9 to 
+: 275 11 9 stay
+: 287 2 7 ~ 
+- 291
+: 304 9 7 Oh, 
+: 315 12 5 I 
+: 329 7 9 be
+: 338 18 7 lieve 
+: 368 6 2 in 
+: 376 11 5 yes
+: 392 2 7 te
+: 395 3 9 ~r
+: 400 26 9 day 
+- 428
+: 441 3 7 Sud
+: 445 5 5 den
+: 452 22 5 ly 
+- 476
+: 519 6 9 I’m 
+: 527 6 11 not 
+: 536 5 13 half 
+: 544 3 14 the 
+: 548 10 16 man 
+* 559 8 17 I 
+: 568 5 16 used 
+: 577 4 14 to 
+: 583 30 14 be 
+- 615
+: 645 4 12 There’s 
+: 650 4 14 a 
+: 656 6 12 sha
+: 663 10 10 dow 
+: 675 5 9 hang
+: 682 4 7 in’ 
+: 687 17 10 o
+: 706 6 9 ver 
+: 714 16 9 me 
+- 732
+: 747 9 7 Oh, 
+: 758 5 5 yes
+: 769 2 7 te
+: 772 4 9 ~r
+: 778 16 7 day 
+- 796
+: 808 6 2 Came 
+: 818 14 5 sud
+: 833 3 7 de
+: 837 4 9 ~n
+: 842 22 9 ly
+E

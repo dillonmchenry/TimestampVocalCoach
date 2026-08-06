@@ -1,0 +1,2694 @@
+{
+  "sample_id": "when-september-ends-snippet",
+  "sample_rate": 24000,
+  "hop_seconds": 0.005333333333333333,
+  "style": {
+    "language": "English",
+    "gender": "female",
+    "emotion": "happy",
+    "method": "pop",
+    "pace": "moderate",
+    "range": "medium",
+    "technique_group": "strong"
+  },
+  "phonemes": [
+    {
+      "index": 0,
+      "phoneme": "S",
+      "word": "Summer",
+      "word_index": 0,
+      "start_s": 0.0,
+      "end_s": 9.194666666666667,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 1,
+      "phoneme": "AH1",
+      "word": "has",
+      "word_index": 1,
+      "start_s": 9.194666666666667,
+      "end_s": 9.402666666666667,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 2,
+      "phoneme": "M",
+      "word": "has",
+      "word_index": 1,
+      "start_s": 9.402666666666667,
+      "end_s": 10.181333333333333,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 3,
+      "phoneme": "ER0",
+      "word": "has",
+      "word_index": 1,
+      "start_s": 10.181333333333333,
+      "end_s": 10.272,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 4,
+      "phoneme": "HH",
+      "word": "has",
+      "word_index": 1,
+      "start_s": 10.272,
+      "end_s": 10.821333333333333,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 5,
+      "phoneme": "AE1",
+      "word": "come",
+      "word_index": 2,
+      "start_s": 10.821333333333333,
+      "end_s": 10.826666666666666,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 6,
+      "phoneme": "Z",
+      "word": "come",
+      "word_index": 2,
+      "start_s": 10.826666666666666,
+      "end_s": 10.831999999999999,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 7,
+      "phoneme": "K",
+      "word": "come",
+      "word_index": 2,
+      "start_s": 10.831999999999999,
+      "end_s": 10.837333333333332,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 8,
+      "phoneme": "AH1",
+      "word": "and",
+      "word_index": 3,
+      "start_s": 10.837333333333332,
+      "end_s": 10.842666666666664,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 9,
+      "phoneme": "M",
+      "word": "and",
+      "word_index": 3,
+      "start_s": 10.842666666666664,
+      "end_s": 13.146666666666665,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 10,
+      "phoneme": "AH0",
+      "word": "and",
+      "word_index": 3,
+      "start_s": 13.146666666666665,
+      "end_s": 13.151999999999997,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 11,
+      "phoneme": "N",
+      "word": "past,",
+      "word_index": 4,
+      "start_s": 13.151999999999997,
+      "end_s": 13.15733333333333,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 12,
+      "phoneme": "D",
+      "word": "past,",
+      "word_index": 4,
+      "start_s": 13.15733333333333,
+      "end_s": 13.162666666666663,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 13,
+      "phoneme": "P",
+      "word": "past,",
+      "word_index": 4,
+      "start_s": 13.162666666666663,
+      "end_s": 13.167999999999996,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 14,
+      "phoneme": "AE1",
+      "word": "The",
+      "word_index": 5,
+      "start_s": 13.167999999999996,
+      "end_s": 13.173333333333328,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 15,
+      "phoneme": "S",
+      "word": "The",
+      "word_index": 5,
+      "start_s": 13.173333333333328,
+      "end_s": 13.178666666666661,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 16,
+      "phoneme": "T",
+      "word": "The",
+      "word_index": 5,
+      "start_s": 13.178666666666661,
+      "end_s": 13.210666666666661,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 17,
+      "phoneme": "DH",
+      "word": "The",
+      "word_index": 5,
+      "start_s": 13.210666666666661,
+      "end_s": 13.386666666666661,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 18,
+      "phoneme": "AH0",
+      "word": "innocent",
+      "word_index": 6,
+      "start_s": 13.386666666666661,
+      "end_s": 13.722666666666662,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 19,
+      "phoneme": "IH1",
+      "word": "can",
+      "word_index": 7,
+      "start_s": 13.722666666666662,
+      "end_s": 13.775999999999994,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 20,
+      "phoneme": "N",
+      "word": "can",
+      "word_index": 7,
+      "start_s": 13.775999999999994,
+      "end_s": 13.781333333333327,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 21,
+      "phoneme": "AH0",
+      "word": "never",
+      "word_index": 8,
+      "start_s": 13.781333333333327,
+      "end_s": 13.935999999999995,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 22,
+      "phoneme": "S",
+      "word": "never",
+      "word_index": 8,
+      "start_s": 13.935999999999995,
+      "end_s": 13.941333333333327,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 23,
+      "phoneme": "AH0",
+      "word": "never",
+      "word_index": 8,
+      "start_s": 13.941333333333327,
+      "end_s": 13.94666666666666,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 24,
+      "phoneme": "N",
+      "word": "never",
+      "word_index": 8,
+      "start_s": 13.94666666666666,
+      "end_s": 13.951999999999993,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 25,
+      "phoneme": "T",
+      "word": "never",
+      "word_index": 8,
+      "start_s": 13.951999999999993,
+      "end_s": 13.957333333333326,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 26,
+      "phoneme": "K",
+      "word": "never",
+      "word_index": 8,
+      "start_s": 13.957333333333326,
+      "end_s": 13.962666666666658,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 27,
+      "phoneme": "AE1",
+      "word": "never",
+      "word_index": 8,
+      "start_s": 13.962666666666658,
+      "end_s": 13.967999999999991,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 28,
+      "phoneme": "N",
+      "word": "last,",
+      "word_index": 9,
+      "start_s": 13.967999999999991,
+      "end_s": 13.973333333333324,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 29,
+      "phoneme": "N",
+      "word": "last,",
+      "word_index": 9,
+      "start_s": 13.973333333333324,
+      "end_s": 13.978666666666657,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 30,
+      "phoneme": "EH1",
+      "word": "last,",
+      "word_index": 9,
+      "start_s": 13.978666666666657,
+      "end_s": 13.98399999999999,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 31,
+      "phoneme": "V",
+      "word": "Wake",
+      "word_index": 10,
+      "start_s": 13.98399999999999,
+      "end_s": 13.989333333333322,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 32,
+      "phoneme": "ER0",
+      "word": "Wake",
+      "word_index": 10,
+      "start_s": 13.989333333333322,
+      "end_s": 14.501333333333323,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 33,
+      "phoneme": "L",
+      "word": "Wake",
+      "word_index": 10,
+      "start_s": 14.501333333333323,
+      "end_s": 14.549333333333323,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 34,
+      "phoneme": "AE1",
+      "word": "Wake",
+      "word_index": 10,
+      "start_s": 14.549333333333323,
+      "end_s": 14.554666666666655,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 35,
+      "phoneme": "S",
+      "word": "me",
+      "word_index": 11,
+      "start_s": 14.554666666666655,
+      "end_s": 14.575999999999988,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 36,
+      "phoneme": "T",
+      "word": "me",
+      "word_index": 11,
+      "start_s": 14.575999999999988,
+      "end_s": 14.623999999999988,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 37,
+      "phoneme": "W",
+      "word": "me",
+      "word_index": 11,
+      "start_s": 14.623999999999988,
+      "end_s": 14.869333333333321,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 38,
+      "phoneme": "EY1",
+      "word": "me",
+      "word_index": 11,
+      "start_s": 14.869333333333321,
+      "end_s": 14.874666666666654,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 39,
+      "phoneme": "K",
+      "word": "up",
+      "word_index": 12,
+      "start_s": 14.874666666666654,
+      "end_s": 14.879999999999987,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 40,
+      "phoneme": "M",
+      "word": "up",
+      "word_index": 12,
+      "start_s": 14.879999999999987,
+      "end_s": 14.927999999999987,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 41,
+      "phoneme": "IY1",
+      "word": "up",
+      "word_index": 12,
+      "start_s": 14.927999999999987,
+      "end_s": 14.93333333333332,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 42,
+      "phoneme": "AH1",
+      "word": "when",
+      "word_index": 13,
+      "start_s": 14.93333333333332,
+      "end_s": 14.938666666666652,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 43,
+      "phoneme": "P",
+      "word": "when",
+      "word_index": 13,
+      "start_s": 14.938666666666652,
+      "end_s": 15.098666666666652,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 44,
+      "phoneme": "W",
+      "word": "September",
+      "word_index": 14,
+      "start_s": 15.098666666666652,
+      "end_s": 15.103999999999985,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 45,
+      "phoneme": "EH1",
+      "word": "September",
+      "word_index": 14,
+      "start_s": 15.103999999999985,
+      "end_s": 15.109333333333318,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 46,
+      "phoneme": "N",
+      "word": "ends,",
+      "word_index": 15,
+      "start_s": 15.109333333333318,
+      "end_s": 15.11466666666665,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 47,
+      "phoneme": "S",
+      "word": "ends,",
+      "word_index": 15,
+      "start_s": 15.11466666666665,
+      "end_s": 15.119999999999983,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 48,
+      "phoneme": "EH0",
+      "word": "ends,",
+      "word_index": 15,
+      "start_s": 15.119999999999983,
+      "end_s": 15.205333333333316,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 49,
+      "phoneme": "P",
+      "word": "Like",
+      "word_index": 16,
+      "start_s": 15.205333333333316,
+      "end_s": 15.210666666666649,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 50,
+      "phoneme": "T",
+      "word": "Like",
+      "word_index": 16,
+      "start_s": 15.210666666666649,
+      "end_s": 15.215999999999982,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 51,
+      "phoneme": "EH1",
+      "word": "Like",
+      "word_index": 16,
+      "start_s": 15.215999999999982,
+      "end_s": 15.221333333333314,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 52,
+      "phoneme": "M",
+      "word": "Like",
+      "word_index": 16,
+      "start_s": 15.221333333333314,
+      "end_s": 15.413333333333314,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 53,
+      "phoneme": "B",
+      "word": "Like",
+      "word_index": 16,
+      "start_s": 15.413333333333314,
+      "end_s": 15.79199999999998,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 54,
+      "phoneme": "ER0",
+      "word": "Like",
+      "word_index": 16,
+      "start_s": 15.79199999999998,
+      "end_s": 15.95199999999998,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 55,
+      "phoneme": "EH1",
+      "word": "Like",
+      "word_index": 16,
+      "start_s": 15.95199999999998,
+      "end_s": 15.957333333333313,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 56,
+      "phoneme": "N",
+      "word": "Like",
+      "word_index": 16,
+      "start_s": 15.957333333333313,
+      "end_s": 15.962666666666646,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 57,
+      "phoneme": "D",
+      "word": "my",
+      "word_index": 17,
+      "start_s": 15.962666666666646,
+      "end_s": 16.46399999999998,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 58,
+      "phoneme": "Z",
+      "word": "my",
+      "word_index": 17,
+      "start_s": 16.46399999999998,
+      "end_s": 16.469333333333314,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 59,
+      "phoneme": "L",
+      "word": "my",
+      "word_index": 17,
+      "start_s": 16.469333333333314,
+      "end_s": 16.474666666666646,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 60,
+      "phoneme": "AY1",
+      "word": "my",
+      "word_index": 17,
+      "start_s": 16.474666666666646,
+      "end_s": 16.47999999999998,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 61,
+      "phoneme": "K",
+      "word": "fathers",
+      "word_index": 18,
+      "start_s": 16.47999999999998,
+      "end_s": 16.485333333333312,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 62,
+      "phoneme": "M",
+      "word": "fathers",
+      "word_index": 18,
+      "start_s": 16.485333333333312,
+      "end_s": 16.490666666666645,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 63,
+      "phoneme": "AY1",
+      "word": "fathers",
+      "word_index": 18,
+      "start_s": 16.490666666666645,
+      "end_s": 16.495999999999977,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 64,
+      "phoneme": "F",
+      "word": "come",
+      "word_index": 19,
+      "start_s": 16.495999999999977,
+      "end_s": 16.50133333333331,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 65,
+      "phoneme": "AA1",
+      "word": "come",
+      "word_index": 19,
+      "start_s": 16.50133333333331,
+      "end_s": 16.506666666666643,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 66,
+      "phoneme": "DH",
+      "word": "to",
+      "word_index": 20,
+      "start_s": 16.506666666666643,
+      "end_s": 16.543999999999976,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 67,
+      "phoneme": "ER0",
+      "word": "to",
+      "word_index": 20,
+      "start_s": 16.543999999999976,
+      "end_s": 16.54933333333331,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 68,
+      "phoneme": "Z",
+      "word": "to",
+      "word_index": 20,
+      "start_s": 16.54933333333331,
+      "end_s": 16.55466666666664,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 69,
+      "phoneme": "K",
+      "word": "to",
+      "word_index": 20,
+      "start_s": 16.55466666666664,
+      "end_s": 17.14666666666664,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 70,
+      "phoneme": "AH1",
+      "word": "to",
+      "word_index": 20,
+      "start_s": 17.14666666666664,
+      "end_s": 17.151999999999973,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 71,
+      "phoneme": "M",
+      "word": "pass,",
+      "word_index": 21,
+      "start_s": 17.151999999999973,
+      "end_s": 17.157333333333305,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 72,
+      "phoneme": "T",
+      "word": "pass,",
+      "word_index": 21,
+      "start_s": 17.157333333333305,
+      "end_s": 17.669333333333306,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 73,
+      "phoneme": "UW1",
+      "word": "pass,",
+      "word_index": 21,
+      "start_s": 17.669333333333306,
+      "end_s": 17.67466666666664,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 74,
+      "phoneme": "P",
+      "word": "Seven",
+      "word_index": 22,
+      "start_s": 17.67466666666664,
+      "end_s": 17.67999999999997,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 75,
+      "phoneme": "AE1",
+      "word": "Seven",
+      "word_index": 22,
+      "start_s": 17.67999999999997,
+      "end_s": 17.685333333333304,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 76,
+      "phoneme": "S",
+      "word": "years",
+      "word_index": 23,
+      "start_s": 17.685333333333304,
+      "end_s": 17.690666666666637,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 77,
+      "phoneme": "S",
+      "word": "years",
+      "word_index": 23,
+      "start_s": 17.690666666666637,
+      "end_s": 17.69599999999997,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 78,
+      "phoneme": "EH1",
+      "word": "years",
+      "word_index": 23,
+      "start_s": 17.69599999999997,
+      "end_s": 17.701333333333302,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 79,
+      "phoneme": "V",
+      "word": "has",
+      "word_index": 24,
+      "start_s": 17.701333333333302,
+      "end_s": 17.706666666666635,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 80,
+      "phoneme": "AH0",
+      "word": "has",
+      "word_index": 24,
+      "start_s": 17.706666666666635,
+      "end_s": 17.711999999999968,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 81,
+      "phoneme": "N",
+      "word": "has",
+      "word_index": 24,
+      "start_s": 17.711999999999968,
+      "end_s": 17.7173333333333,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 82,
+      "phoneme": "Y",
+      "word": "has",
+      "word_index": 24,
+      "start_s": 17.7173333333333,
+      "end_s": 17.722666666666633,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 83,
+      "phoneme": "IH1",
+      "word": "has",
+      "word_index": 24,
+      "start_s": 17.722666666666633,
+      "end_s": 17.727999999999966,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 84,
+      "phoneme": "R",
+      "word": "gone",
+      "word_index": 25,
+      "start_s": 17.727999999999966,
+      "end_s": 17.7333333333333,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 85,
+      "phoneme": "Z",
+      "word": "gone",
+      "word_index": 25,
+      "start_s": 17.7333333333333,
+      "end_s": 17.73866666666663,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 86,
+      "phoneme": "HH",
+      "word": "gone",
+      "word_index": 25,
+      "start_s": 17.73866666666663,
+      "end_s": 17.743999999999964,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 87,
+      "phoneme": "AE1",
+      "word": "gone",
+      "word_index": 25,
+      "start_s": 17.743999999999964,
+      "end_s": 17.749333333333297,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 88,
+      "phoneme": "Z",
+      "word": "so",
+      "word_index": 26,
+      "start_s": 17.749333333333297,
+      "end_s": 17.759999999999962,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 89,
+      "phoneme": "G",
+      "word": "so",
+      "word_index": 26,
+      "start_s": 17.759999999999962,
+      "end_s": 17.765333333333295,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 90,
+      "phoneme": "AO1",
+      "word": "so",
+      "word_index": 26,
+      "start_s": 17.765333333333295,
+      "end_s": 17.770666666666628,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 91,
+      "phoneme": "N",
+      "word": "fast,",
+      "word_index": 27,
+      "start_s": 17.770666666666628,
+      "end_s": 17.77599999999996,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 92,
+      "phoneme": "S",
+      "word": "fast,",
+      "word_index": 27,
+      "start_s": 17.77599999999996,
+      "end_s": 17.781333333333293,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 93,
+      "phoneme": "OW1",
+      "word": "fast,",
+      "word_index": 27,
+      "start_s": 17.781333333333293,
+      "end_s": 17.786666666666626,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 94,
+      "phoneme": "F",
+      "word": "Wake",
+      "word_index": 28,
+      "start_s": 17.786666666666626,
+      "end_s": 17.79199999999996,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 95,
+      "phoneme": "AE1",
+      "word": "Wake",
+      "word_index": 28,
+      "start_s": 17.79199999999996,
+      "end_s": 17.802666666666624,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 96,
+      "phoneme": "S",
+      "word": "me",
+      "word_index": 29,
+      "start_s": 17.802666666666624,
+      "end_s": 17.807999999999957,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 97,
+      "phoneme": "T",
+      "word": "me",
+      "word_index": 29,
+      "start_s": 17.807999999999957,
+      "end_s": 17.81333333333329,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 98,
+      "phoneme": "W",
+      "word": "me",
+      "word_index": 29,
+      "start_s": 17.81333333333329,
+      "end_s": 17.823999999999955,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 99,
+      "phoneme": "EY1",
+      "word": "me",
+      "word_index": 29,
+      "start_s": 17.823999999999955,
+      "end_s": 17.83466666666662,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 100,
+      "phoneme": "K",
+      "word": "up",
+      "word_index": 30,
+      "start_s": 17.83466666666662,
+      "end_s": 18.479999999999954,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 101,
+      "phoneme": "M",
+      "word": "when",
+      "word_index": 31,
+      "start_s": 18.479999999999954,
+      "end_s": 18.59733333333329,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 102,
+      "phoneme": "IY1",
+      "word": "when",
+      "word_index": 31,
+      "start_s": 18.59733333333329,
+      "end_s": 18.98133333333329,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 103,
+      "phoneme": "AH1",
+      "word": "when",
+      "word_index": 31,
+      "start_s": 18.98133333333329,
+      "end_s": 19.114666666666622,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 104,
+      "phoneme": "P",
+      "word": "September",
+      "word_index": 32,
+      "start_s": 19.114666666666622,
+      "end_s": 19.189333333333288,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 105,
+      "phoneme": "W",
+      "word": "September",
+      "word_index": 32,
+      "start_s": 19.189333333333288,
+      "end_s": 19.477333333333288,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 106,
+      "phoneme": "EH1",
+      "word": "ends",
+      "word_index": 33,
+      "start_s": 19.477333333333288,
+      "end_s": 19.978666666666623,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 107,
+      "phoneme": "N",
+      "word": "ends",
+      "word_index": 33,
+      "start_s": 19.978666666666623,
+      "end_s": 20.015999999999956,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 108,
+      "phoneme": "S",
+      "word": "",
+      "word_index": 34,
+      "start_s": 20.015999999999956,
+      "end_s": 20.60266666666662,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 109,
+      "phoneme": "EH0",
+      "word": "",
+      "word_index": 35,
+      "start_s": 20.60266666666662,
+      "end_s": 20.879999999999956,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 110,
+      "phoneme": "P",
+      "word": "",
+      "word_index": 35,
+      "start_s": 20.879999999999956,
+      "end_s": 21.20533333333329,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 111,
+      "phoneme": "T",
+      "word": "",
+      "word_index": 35,
+      "start_s": 21.20533333333329,
+      "end_s": 21.30133333333329,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 112,
+      "phoneme": "EH1",
+      "word": "",
+      "word_index": 36,
+      "start_s": 21.30133333333329,
+      "end_s": 21.674666666666624,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 113,
+      "phoneme": "M",
+      "word": "",
+      "word_index": 36,
+      "start_s": 21.674666666666624,
+      "end_s": 21.679999999999957,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 114,
+      "phoneme": "B",
+      "word": "",
+      "word_index": 36,
+      "start_s": 21.679999999999957,
+      "end_s": 21.68533333333329,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 115,
+      "phoneme": "ER0",
+      "word": "",
+      "word_index": 36,
+      "start_s": 21.68533333333329,
+      "end_s": 21.74933333333329,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 116,
+      "phoneme": "EH1",
+      "word": "",
+      "word_index": 36,
+      "start_s": 21.74933333333329,
+      "end_s": 22.10133333333329,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 117,
+      "phoneme": "N",
+      "word": "",
+      "word_index": 36,
+      "start_s": 22.10133333333329,
+      "end_s": 22.239999999999956,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 118,
+      "phoneme": "D",
+      "word": "",
+      "word_index": 36,
+      "start_s": 22.239999999999956,
+      "end_s": 22.28266666666662,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 119,
+      "phoneme": "Z",
+      "word": "",
+      "word_index": 36,
+      "start_s": 22.28266666666662,
+      "end_s": 23.146666666666622,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    }
+  ],
+  "notes": [
+    {
+      "index": 0,
+      "start_s": 0.0,
+      "end_s": 9.397333333333332,
+      "midi_pitch": 0
+    },
+    {
+      "index": 1,
+      "start_s": 9.397333333333332,
+      "end_s": 10.266666666666666,
+      "midi_pitch": 57
+    },
+    {
+      "index": 2,
+      "start_s": 10.266666666666666,
+      "end_s": 10.837333333333332,
+      "midi_pitch": 59
+    },
+    {
+      "index": 3,
+      "start_s": 10.837333333333332,
+      "end_s": 11.514666666666665,
+      "midi_pitch": 59
+    },
+    {
+      "index": 4,
+      "start_s": 11.514666666666665,
+      "end_s": 11.679999999999998,
+      "midi_pitch": 59
+    },
+    {
+      "index": 5,
+      "start_s": 11.679999999999998,
+      "end_s": 12.245333333333331,
+      "midi_pitch": 59
+    },
+    {
+      "index": 6,
+      "start_s": 12.245333333333331,
+      "end_s": 12.410666666666664,
+      "midi_pitch": 59
+    },
+    {
+      "index": 7,
+      "start_s": 12.410666666666664,
+      "end_s": 12.554666666666664,
+      "midi_pitch": 59
+    },
+    {
+      "index": 8,
+      "start_s": 12.554666666666664,
+      "end_s": 13.167999999999997,
+      "midi_pitch": 59
+    },
+    {
+      "index": 9,
+      "start_s": 13.167999999999997,
+      "end_s": 13.39733333333333,
+      "midi_pitch": 59
+    },
+    {
+      "index": 10,
+      "start_s": 13.39733333333333,
+      "end_s": 13.775999999999996,
+      "midi_pitch": 0
+    },
+    {
+      "index": 11,
+      "start_s": 13.775999999999996,
+      "end_s": 13.983999999999996,
+      "midi_pitch": 52
+    },
+    {
+      "index": 12,
+      "start_s": 13.983999999999996,
+      "end_s": 14.61333333333333,
+      "midi_pitch": 57
+    },
+    {
+      "index": 13,
+      "start_s": 14.61333333333333,
+      "end_s": 14.86933333333333,
+      "midi_pitch": 59
+    },
+    {
+      "index": 14,
+      "start_s": 14.86933333333333,
+      "end_s": 15.167999999999996,
+      "midi_pitch": 59
+    },
+    {
+      "index": 15,
+      "start_s": 15.167999999999996,
+      "end_s": 15.306666666666663,
+      "midi_pitch": 59
+    },
+    {
+      "index": 16,
+      "start_s": 15.306666666666663,
+      "end_s": 15.407999999999996,
+      "midi_pitch": 55
+    },
+    {
+      "index": 17,
+      "start_s": 15.407999999999996,
+      "end_s": 15.791999999999996,
+      "midi_pitch": 55
+    },
+    {
+      "index": 18,
+      "start_s": 15.791999999999996,
+      "end_s": 16.00533333333333,
+      "midi_pitch": 55
+    },
+    {
+      "index": 19,
+      "start_s": 16.00533333333333,
+      "end_s": 16.266666666666662,
+      "midi_pitch": 62
+    },
+    {
+      "index": 20,
+      "start_s": 16.266666666666662,
+      "end_s": 16.47466666666666,
+      "midi_pitch": 64
+    },
+    {
+      "index": 21,
+      "start_s": 16.47466666666666,
+      "end_s": 17.17866666666666,
+      "midi_pitch": 62
+    },
+    {
+      "index": 22,
+      "start_s": 17.17866666666666,
+      "end_s": 17.375999999999994,
+      "midi_pitch": 62
+    },
+    {
+      "index": 23,
+      "start_s": 17.375999999999994,
+      "end_s": 17.78133333333333,
+      "midi_pitch": 55
+    },
+    {
+      "index": 24,
+      "start_s": 17.78133333333333,
+      "end_s": 18.469333333333328,
+      "midi_pitch": 0
+    },
+    {
+      "index": 25,
+      "start_s": 18.469333333333328,
+      "end_s": 18.597333333333328,
+      "midi_pitch": 61
+    },
+    {
+      "index": 26,
+      "start_s": 18.597333333333328,
+      "end_s": 18.703999999999994,
+      "midi_pitch": 61
+    },
+    {
+      "index": 27,
+      "start_s": 18.703999999999994,
+      "end_s": 18.975999999999992,
+      "midi_pitch": 62
+    },
+    {
+      "index": 28,
+      "start_s": 18.975999999999992,
+      "end_s": 19.146666666666658,
+      "midi_pitch": 55
+    },
+    {
+      "index": 29,
+      "start_s": 19.146666666666658,
+      "end_s": 19.47199999999999,
+      "midi_pitch": 55
+    },
+    {
+      "index": 30,
+      "start_s": 19.47199999999999,
+      "end_s": 20.005333333333326,
+      "midi_pitch": 55
+    },
+    {
+      "index": 31,
+      "start_s": 20.005333333333326,
+      "end_s": 20.58666666666666,
+      "midi_pitch": 0
+    },
+    {
+      "index": 32,
+      "start_s": 20.58666666666666,
+      "end_s": 20.68266666666666,
+      "midi_pitch": 62
+    },
+    {
+      "index": 33,
+      "start_s": 20.68266666666666,
+      "end_s": 20.879999999999992,
+      "midi_pitch": 60
+    },
+    {
+      "index": 34,
+      "start_s": 20.879999999999992,
+      "end_s": 21.007999999999992,
+      "midi_pitch": 60
+    },
+    {
+      "index": 35,
+      "start_s": 21.007999999999992,
+      "end_s": 21.205333333333325,
+      "midi_pitch": 62
+    },
+    {
+      "index": 36,
+      "start_s": 21.205333333333325,
+      "end_s": 21.295999999999992,
+      "midi_pitch": 62
+    },
+    {
+      "index": 37,
+      "start_s": 21.295999999999992,
+      "end_s": 21.413333333333327,
+      "midi_pitch": 62
+    },
+    {
+      "index": 38,
+      "start_s": 21.413333333333327,
+      "end_s": 21.525333333333325,
+      "midi_pitch": 57
+    },
+    {
+      "index": 39,
+      "start_s": 21.525333333333325,
+      "end_s": 21.743999999999993,
+      "midi_pitch": 55
+    },
+    {
+      "index": 40,
+      "start_s": 21.743999999999993,
+      "end_s": 22.101333333333326,
+      "midi_pitch": 55
+    },
+    {
+      "index": 41,
+      "start_s": 22.101333333333326,
+      "end_s": 22.277333333333324,
+      "midi_pitch": 55
+    },
+    {
+      "index": 42,
+      "start_s": 22.277333333333324,
+      "end_s": 22.885333333333325,
+      "midi_pitch": 57
+    },
+    {
+      "index": 43,
+      "start_s": 22.885333333333325,
+      "end_s": 23.381333333333323,
+      "midi_pitch": 59
+    },
+    {
+      "index": 44,
+      "start_s": 23.381333333333323,
+      "end_s": 23.541333333333323,
+      "midi_pitch": 59
+    },
+    {
+      "index": 45,
+      "start_s": 23.541333333333323,
+      "end_s": 25.42399999999999,
+      "midi_pitch": 0
+    }
+  ]
+}

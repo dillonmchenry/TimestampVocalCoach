@@ -1,0 +1,62 @@
+#TITLE:Wake me up when september ends (Snippet)
+#ARTIST:Green Day
+#MP3:Green day - Wake me up when september ends.mp3
+#EDITION:2000's
+#BACKGROUND:sept4.jpg
+#BPM:105
+#GAP:9427
+: 0 6 57 Sum
+: 6 4 59 mer
+: 10 6 59  has
+: 16 4 57  come
+: 20 2 59  and
+: 22 6 59  past,
+- 29
+: 30 2 52 The
+: 32 4 57  in
+: 36 2 59 no
+: 38 4 59 cent
+: 42 4 55  can
+: 46 4 64  nev
+: 50 4 62 er
+: 54 1 59  la
+: 55 1 57 s
+: 56 4 55 t,
+- 62
+: 64 4 62 Wake
+: 68 2 55  me
+: 70 6 55  up
+: 80 4 62  when
+: 84 2 60  Sep
+: 86 4 55 tem
+: 90 4 57 ber
+: 94 6 59  ends,
+- 125
+: 128 4 57 Like
+: 132 2 59  my
+: 134 4 59  fa
+: 138 6 59 thers
+: 144 4 57  come
+: 148 2 59  to
+: 150 6 59  pass,
+- 155
+: 160 4 57 Sev
+: 164 2 59 en
+: 166 4 59  years
+: 170 4 55  has
+: 174 4 64  gone
+: 178 4 62  so
+: 182 1 59  fa
+: 183 1 57 s
+: 184 4 55 t,
+- 190
+: 192 4 62 Wake
+: 196 2 55  me
+: 198 6 55  up
+: 208 4 62  when
+: 212 2 60  Sep
+: 214 4 55 tem
+: 218 4 57 ber
+: 222 6 59  ends
+- 250
+E

@@ -61,7 +61,9 @@ highlights:
   sharp_flat_note_min_cents: 25.0
   sharp_flat_note_max: 3
   # Entrance timing
-  entrance_timing_max: 4
+  entrance_timing_max: 2
+  # Per-category caps (override max_per_category for specific categories)
+  max_per_category_alignment: 2
   # Timing consistency
   timing_consistency_window_min: 4
   timing_consistency_window_max: 8

@@ -1,0 +1,2444 @@
+{
+  "sample_id": "yesterday-snippet",
+  "sample_rate": 24000,
+  "hop_seconds": 0.005333333333333333,
+  "style": {
+    "language": "English",
+    "gender": "male",
+    "emotion": "happy",
+    "method": "pop",
+    "pace": "fast",
+    "range": "medium",
+    "technique_group": "pharyngeal"
+  },
+  "phonemes": [
+    {
+      "index": 0,
+      "phoneme": "Y",
+      "word": "Yesterday",
+      "word_index": 0,
+      "start_s": 0.0,
+      "end_s": 5.509333333333333,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 1,
+      "phoneme": "EH1",
+      "word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "start_s": 5.509333333333333,
+      "end_s": 6.037333333333333,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 2,
+      "phoneme": "S",
+      "word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "start_s": 6.037333333333333,
+      "end_s": 7.061333333333333,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 3,
+      "phoneme": "T",
+      "word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "start_s": 7.061333333333333,
+      "end_s": 7.082666666666666,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 4,
+      "phoneme": "ER0",
+      "word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "start_s": 7.082666666666666,
+      "end_s": 9.306666666666667,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 5,
+      "phoneme": "D",
+      "word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "start_s": 9.306666666666667,
+      "end_s": 9.312,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 6,
+      "phoneme": "EY2",
+      "word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "start_s": 9.312,
+      "end_s": 9.317333333333332,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 7,
+      "phoneme": "AE2",
+      "word": "All my troubles seemed so far away",
+      "word_index": 1,
+      "start_s": 9.317333333333332,
+      "end_s": 9.322666666666665,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 8,
+      "phoneme": "L",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 9.322666666666665,
+      "end_s": 9.327999999999998,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 9,
+      "phoneme": "M",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 9.327999999999998,
+      "end_s": 9.791999999999998,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 10,
+      "phoneme": "AY0",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 9.791999999999998,
+      "end_s": 9.802666666666665,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 11,
+      "phoneme": "T",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 9.802666666666665,
+      "end_s": 9.877333333333333,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 12,
+      "phoneme": "R",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 9.877333333333333,
+      "end_s": 10.255999999999998,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 13,
+      "phoneme": "UW1",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 10.255999999999998,
+      "end_s": 10.319999999999999,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 14,
+      "phoneme": "M",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 10.319999999999999,
+      "end_s": 10.469333333333331,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 15,
+      "phoneme": "ER0",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 10.469333333333331,
+      "end_s": 10.661333333333332,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 16,
+      "phoneme": "SH",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 10.661333333333332,
+      "end_s": 10.666666666666664,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 17,
+      "phoneme": "AH0",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 10.666666666666664,
+      "end_s": 10.671999999999997,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 18,
+      "phoneme": "L",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 10.671999999999997,
+      "end_s": 10.67733333333333,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 19,
+      "phoneme": "IY0",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 10.67733333333333,
+      "end_s": 10.682666666666663,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 20,
+      "phoneme": "OW2",
+      "word": "Now it looks as though theyâ€™re here to stay",
+      "word_index": 2,
+      "start_s": 10.682666666666663,
+      "end_s": 10.687999999999995,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 21,
+      "phoneme": "N",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 10.687999999999995,
+      "end_s": 10.693333333333328,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 22,
+      "phoneme": "IY0",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 10.693333333333328,
+      "end_s": 10.69866666666666,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 23,
+      "phoneme": "T",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 10.69866666666666,
+      "end_s": 10.703999999999994,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 24,
+      "phoneme": "OW0",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 10.703999999999994,
+      "end_s": 10.837333333333326,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 25,
+      "phoneme": "K",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 10.837333333333326,
+      "end_s": 10.84266666666666,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 26,
+      "phoneme": "L",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 10.84266666666666,
+      "end_s": 10.847999999999992,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 27,
+      "phoneme": "EH2",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 10.847999999999992,
+      "end_s": 11.322666666666658,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 28,
+      "phoneme": "R",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 11.322666666666658,
+      "end_s": 11.32799999999999,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 29,
+      "phoneme": "T",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 11.32799999999999,
+      "end_s": 11.333333333333323,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 30,
+      "phoneme": "AH0",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 11.333333333333323,
+      "end_s": 11.338666666666656,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 31,
+      "phoneme": "F",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 11.338666666666656,
+      "end_s": 11.615999999999989,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 32,
+      "phoneme": "ER1",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 11.615999999999989,
+      "end_s": 11.621333333333322,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 33,
+      "phoneme": "S",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 11.621333333333322,
+      "end_s": 11.727999999999989,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 34,
+      "phoneme": "IY0",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 11.727999999999989,
+      "end_s": 11.733333333333322,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 35,
+      "phoneme": "OW0",
+      "word": "Oh, I believe in yesterday",
+      "word_index": 3,
+      "start_s": 11.733333333333322,
+      "end_s": 12.773333333333323,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 36,
+      "phoneme": "HH",
+      "word": "Suddenly",
+      "word_index": 4,
+      "start_s": 12.773333333333323,
+      "end_s": 13.541333333333323,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 37,
+      "phoneme": "IY0",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 13.541333333333323,
+      "end_s": 13.546666666666656,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 38,
+      "phoneme": "B",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 13.546666666666656,
+      "end_s": 13.781333333333324,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 39,
+      "phoneme": "AH0",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 13.781333333333324,
+      "end_s": 13.786666666666656,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 40,
+      "phoneme": "L",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 13.786666666666656,
+      "end_s": 13.79199999999999,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 41,
+      "phoneme": "AH0",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 13.79199999999999,
+      "end_s": 14.762666666666656,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 42,
+      "phoneme": "JH",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 14.762666666666656,
+      "end_s": 15.077333333333321,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 43,
+      "phoneme": "EH1",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 15.077333333333321,
+      "end_s": 15.087999999999989,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 44,
+      "phoneme": "S",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 15.087999999999989,
+      "end_s": 15.093333333333321,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 45,
+      "phoneme": "T",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 15.093333333333321,
+      "end_s": 15.381333333333322,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 46,
+      "phoneme": "AH0",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 15.381333333333322,
+      "end_s": 15.386666666666654,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 47,
+      "phoneme": "V",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 15.386666666666654,
+      "end_s": 15.402666666666654,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 48,
+      "phoneme": "IY0",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 15.402666666666654,
+      "end_s": 15.439999999999987,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 49,
+      "phoneme": "S",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 15.439999999999987,
+      "end_s": 15.450666666666654,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 50,
+      "phoneme": "AH1",
+      "word": "Iâ€™m not half the man I used to be",
+      "word_index": 5,
+      "start_s": 15.450666666666654,
+      "end_s": 15.90933333333332,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 51,
+      "phoneme": "D",
+      "word": "Thereâ€™s a shadow hanginâ€™ over me",
+      "word_index": 6,
+      "start_s": 15.90933333333332,
+      "end_s": 16.32533333333332,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 52,
+      "phoneme": "AH0",
+      "word": "Thereâ€™s a shadow hanginâ€™ over me",
+      "word_index": 6,
+      "start_s": 16.32533333333332,
+      "end_s": 16.33066666666665,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 53,
+      "phoneme": "N",
+      "word": "Thereâ€™s a shadow hanginâ€™ over me",
+      "word_index": 6,
+      "start_s": 16.33066666666665,
+      "end_s": 16.335999999999984,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 54,
+      "phoneme": "L",
+      "word": "Thereâ€™s a shadow hanginâ€™ over me",
+      "word_index": 6,
+      "start_s": 16.335999999999984,
+      "end_s": 16.341333333333317,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 55,
+      "phoneme": "IY0",
+      "word": "Thereâ€™s a shadow hanginâ€™ over me",
+      "word_index": 6,
+      "start_s": 16.341333333333317,
+      "end_s": 16.895999999999983,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 56,
+      "phoneme": "IH2",
+      "word": "Thereâ€™s a shadow hanginâ€™ over me",
+      "word_index": 6,
+      "start_s": 16.895999999999983,
+      "end_s": 18.421333333333315,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 57,
+      "phoneme": "N",
+      "word": "Thereâ€™s a shadow hanginâ€™ over me",
+      "word_index": 6,
+      "start_s": 18.421333333333315,
+      "end_s": 19.54666666666665,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 58,
+      "phoneme": "D",
+      "word": "Oh, yesterday",
+      "word_index": 7,
+      "start_s": 19.54666666666665,
+      "end_s": 19.96266666666665,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 59,
+      "phoneme": "OW0",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 19.96266666666665,
+      "end_s": 19.967999999999982,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 60,
+      "phoneme": "M",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 19.967999999999982,
+      "end_s": 20.25066666666665,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 61,
+      "phoneme": "TH",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 20.25066666666665,
+      "end_s": 20.261333333333315,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 62,
+      "phoneme": "AO2",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 20.261333333333315,
+      "end_s": 20.266666666666648,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 63,
+      "phoneme": "R",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 20.266666666666648,
+      "end_s": 20.27199999999998,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 64,
+      "phoneme": "AH0",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 20.27199999999998,
+      "end_s": 20.277333333333313,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 65,
+      "phoneme": "B",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 20.277333333333313,
+      "end_s": 20.282666666666646,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 66,
+      "phoneme": "AH0",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 20.282666666666646,
+      "end_s": 20.71999999999998,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 67,
+      "phoneme": "L",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 20.71999999999998,
+      "end_s": 20.986666666666647,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 68,
+      "phoneme": "D",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 20.986666666666647,
+      "end_s": 21.237333333333314,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 69,
+      "phoneme": "EY1",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 21.237333333333314,
+      "end_s": 21.242666666666647,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 70,
+      "phoneme": "SH",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 21.242666666666647,
+      "end_s": 21.24799999999998,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 71,
+      "phoneme": "AH0",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 21.24799999999998,
+      "end_s": 21.253333333333313,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 72,
+      "phoneme": "DH",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 21.253333333333313,
+      "end_s": 21.58933333333331,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 73,
+      "phoneme": "EH2",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 21.58933333333331,
+      "end_s": 21.594666666666644,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 74,
+      "phoneme": "R",
+      "word": "Came suddenly",
+      "word_index": 8,
+      "start_s": 21.594666666666644,
+      "end_s": 21.599999999999977,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 1,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 75,
+      "phoneme": "AH0",
+      "word": "",
+      "word_index": 9,
+      "start_s": 21.599999999999977,
+      "end_s": 21.60533333333331,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 76,
+      "phoneme": "S",
+      "word": "",
+      "word_index": 9,
+      "start_s": 21.60533333333331,
+      "end_s": 22.122666666666642,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 77,
+      "phoneme": "AH0",
+      "word": "",
+      "word_index": 9,
+      "start_s": 22.122666666666642,
+      "end_s": 22.229333333333308,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 78,
+      "phoneme": "F",
+      "word": "",
+      "word_index": 9,
+      "start_s": 22.229333333333308,
+      "end_s": 22.23466666666664,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 79,
+      "phoneme": "AH0",
+      "word": "",
+      "word_index": 9,
+      "start_s": 22.23466666666664,
+      "end_s": 22.623999999999974,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 80,
+      "phoneme": "SH",
+      "word": "",
+      "word_index": 9,
+      "start_s": 22.623999999999974,
+      "end_s": 22.63466666666664,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 81,
+      "phoneme": "EY1",
+      "word": "",
+      "word_index": 9,
+      "start_s": 22.63466666666664,
+      "end_s": 22.783999999999974,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 82,
+      "phoneme": "N",
+      "word": "",
+      "word_index": 9,
+      "start_s": 22.783999999999974,
+      "end_s": 22.895999999999972,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 83,
+      "phoneme": "D",
+      "word": "",
+      "word_index": 9,
+      "start_s": 22.895999999999972,
+      "end_s": 22.901333333333305,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 84,
+      "phoneme": "AO2",
+      "word": "",
+      "word_index": 9,
+      "start_s": 22.901333333333305,
+      "end_s": 22.906666666666638,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 85,
+      "phoneme": "V",
+      "word": "",
+      "word_index": 9,
+      "start_s": 22.906666666666638,
+      "end_s": 22.91199999999997,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 86,
+      "phoneme": "OW0",
+      "word": "",
+      "word_index": 9,
+      "start_s": 22.91199999999997,
+      "end_s": 22.965333333333305,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 87,
+      "phoneme": "HH",
+      "word": "",
+      "word_index": 9,
+      "start_s": 22.965333333333305,
+      "end_s": 22.970666666666638,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 88,
+      "phoneme": "AY1",
+      "word": "",
+      "word_index": 9,
+      "start_s": 22.970666666666638,
+      "end_s": 22.97599999999997,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 89,
+      "phoneme": "S",
+      "word": "",
+      "word_index": 10,
+      "start_s": 22.97599999999997,
+      "end_s": 22.981333333333303,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 90,
+      "phoneme": "T",
+      "word": "",
+      "word_index": 10,
+      "start_s": 22.981333333333303,
+      "end_s": 22.986666666666636,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 1,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 91,
+      "phoneme": "R",
+      "word": "",
+      "word_index": 10,
+      "start_s": 22.986666666666636,
+      "end_s": 22.99199999999997,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 92,
+      "phoneme": "EY2",
+      "word": "",
+      "word_index": 10,
+      "start_s": 22.99199999999997,
+      "end_s": 22.9973333333333,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 93,
+      "phoneme": "D",
+      "word": "",
+      "word_index": 10,
+      "start_s": 22.9973333333333,
+      "end_s": 23.1093333333333,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 94,
+      "phoneme": "K",
+      "word": "",
+      "word_index": 10,
+      "start_s": 23.1093333333333,
+      "end_s": 23.114666666666633,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 95,
+      "phoneme": "AE1",
+      "word": "",
+      "word_index": 10,
+      "start_s": 23.114666666666633,
+      "end_s": 23.119999999999965,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 1
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 96,
+      "phoneme": "M",
+      "word": "",
+      "word_index": 10,
+      "start_s": 23.119999999999965,
+      "end_s": 23.125333333333298,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 97,
+      "phoneme": "AH0",
+      "word": "",
+      "word_index": 11,
+      "start_s": 23.125333333333298,
+      "end_s": 23.13066666666663,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 98,
+      "phoneme": "Z",
+      "word": "",
+      "word_index": 11,
+      "start_s": 23.13066666666663,
+      "end_s": 23.141333333333296,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 99,
+      "phoneme": "AH0",
+      "word": "",
+      "word_index": 11,
+      "start_s": 23.141333333333296,
+      "end_s": 23.14666666666663,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 100,
+      "phoneme": "D",
+      "word": "",
+      "word_index": 11,
+      "start_s": 23.14666666666663,
+      "end_s": 23.151999999999962,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 101,
+      "phoneme": "EH2",
+      "word": "",
+      "word_index": 11,
+      "start_s": 23.151999999999962,
+      "end_s": 23.162666666666627,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 102,
+      "phoneme": "N",
+      "word": "",
+      "word_index": 11,
+      "start_s": 23.162666666666627,
+      "end_s": 23.173333333333293,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 103,
+      "phoneme": "T",
+      "word": "",
+      "word_index": 11,
+      "start_s": 23.173333333333293,
+      "end_s": 23.18399999999996,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 104,
+      "phoneme": "L",
+      "word": "",
+      "word_index": 11,
+      "start_s": 23.18399999999996,
+      "end_s": 23.194666666666624,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    },
+    {
+      "index": 105,
+      "phoneme": "IY0",
+      "word": "",
+      "word_index": 11,
+      "start_s": 23.194666666666624,
+      "end_s": 23.20533333333329,
+      "techniques": {
+        "bubble": 0,
+        "breathe": 0,
+        "pharyngeal": 0,
+        "vibrato": 0,
+        "glissando": 0,
+        "mixed": 0,
+        "falsetto": 0,
+        "weak": 0,
+        "strong": 0
+      },
+      "technique_scores": null
+    }
+  ],
+  "notes": [
+    {
+      "index": 0,
+      "start_s": 0.0,
+      "end_s": 5.530666666666667,
+      "midi_pitch": 0
+    },
+    {
+      "index": 1,
+      "start_s": 5.530666666666667,
+      "end_s": 5.648000000000001,
+      "midi_pitch": 53
+    },
+    {
+      "index": 2,
+      "start_s": 5.648000000000001,
+      "end_s": 5.797333333333334,
+      "midi_pitch": 53
+    },
+    {
+      "index": 3,
+      "start_s": 5.797333333333334,
+      "end_s": 7.104000000000001,
+      "midi_pitch": 53
+    },
+    {
+      "index": 4,
+      "start_s": 7.104000000000001,
+      "end_s": 8.592,
+      "midi_pitch": 0
+    },
+    {
+      "index": 5,
+      "start_s": 8.592,
+      "end_s": 8.906666666666666,
+      "midi_pitch": 53
+    },
+    {
+      "index": 6,
+      "start_s": 8.906666666666666,
+      "end_s": 9.168,
+      "midi_pitch": 53
+    },
+    {
+      "index": 7,
+      "start_s": 9.168,
+      "end_s": 9.504,
+      "midi_pitch": 62
+    },
+    {
+      "index": 8,
+      "start_s": 9.504,
+      "end_s": 9.872,
+      "midi_pitch": 62
+    },
+    {
+      "index": 9,
+      "start_s": 9.872,
+      "end_s": 10.16,
+      "midi_pitch": 64
+    },
+    {
+      "index": 10,
+      "start_s": 10.16,
+      "end_s": 10.266666666666667,
+      "midi_pitch": 64
+    },
+    {
+      "index": 11,
+      "start_s": 10.266666666666667,
+      "end_s": 10.490666666666668,
+      "midi_pitch": 64
+    },
+    {
+      "index": 12,
+      "start_s": 10.490666666666668,
+      "end_s": 10.661333333333335,
+      "midi_pitch": 64
+    },
+    {
+      "index": 13,
+      "start_s": 10.661333333333335,
+      "end_s": 10.800000000000002,
+      "midi_pitch": 62
+    },
+    {
+      "index": 14,
+      "start_s": 10.800000000000002,
+      "end_s": 11.296000000000003,
+      "midi_pitch": 64
+    },
+    {
+      "index": 15,
+      "start_s": 11.296000000000003,
+      "end_s": 11.621333333333336,
+      "midi_pitch": 62
+    },
+    {
+      "index": 16,
+      "start_s": 11.621333333333336,
+      "end_s": 12.688000000000002,
+      "midi_pitch": 62
+    },
+    {
+      "index": 17,
+      "start_s": 12.688000000000002,
+      "end_s": 12.789333333333335,
+      "midi_pitch": 62
+    },
+    {
+      "index": 18,
+      "start_s": 12.789333333333335,
+      "end_s": 13.562666666666669,
+      "midi_pitch": 0
+    },
+    {
+      "index": 19,
+      "start_s": 13.562666666666669,
+      "end_s": 13.781333333333336,
+      "midi_pitch": 57
+    },
+    {
+      "index": 20,
+      "start_s": 13.781333333333336,
+      "end_s": 13.936000000000003,
+      "midi_pitch": 55
+    },
+    {
+      "index": 21,
+      "start_s": 13.936000000000003,
+      "end_s": 14.208000000000004,
+      "midi_pitch": 57
+    },
+    {
+      "index": 22,
+      "start_s": 14.208000000000004,
+      "end_s": 14.368000000000004,
+      "midi_pitch": 57
+    },
+    {
+      "index": 23,
+      "start_s": 14.368000000000004,
+      "end_s": 14.469333333333337,
+      "midi_pitch": 57
+    },
+    {
+      "index": 24,
+      "start_s": 14.469333333333337,
+      "end_s": 14.592000000000004,
+      "midi_pitch": 55
+    },
+    {
+      "index": 25,
+      "start_s": 14.592000000000004,
+      "end_s": 15.05066666666667,
+      "midi_pitch": 55
+    },
+    {
+      "index": 26,
+      "start_s": 15.05066666666667,
+      "end_s": 15.392000000000003,
+      "midi_pitch": 55
+    },
+    {
+      "index": 27,
+      "start_s": 15.392000000000003,
+      "end_s": 15.882666666666669,
+      "midi_pitch": 57
+    },
+    {
+      "index": 28,
+      "start_s": 15.882666666666669,
+      "end_s": 16.032000000000004,
+      "midi_pitch": 57
+    },
+    {
+      "index": 29,
+      "start_s": 16.032000000000004,
+      "end_s": 16.30933333333334,
+      "midi_pitch": 57
+    },
+    {
+      "index": 30,
+      "start_s": 16.30933333333334,
+      "end_s": 16.837333333333337,
+      "midi_pitch": 57
+    },
+    {
+      "index": 31,
+      "start_s": 16.837333333333337,
+      "end_s": 17.365333333333336,
+      "midi_pitch": 55
+    },
+    {
+      "index": 32,
+      "start_s": 17.365333333333336,
+      "end_s": 17.824,
+      "midi_pitch": 55
+    },
+    {
+      "index": 33,
+      "start_s": 17.824,
+      "end_s": 18.325333333333337,
+      "midi_pitch": 53
+    },
+    {
+      "index": 34,
+      "start_s": 18.325333333333337,
+      "end_s": 18.42666666666667,
+      "midi_pitch": 55
+    },
+    {
+      "index": 35,
+      "start_s": 18.42666666666667,
+      "end_s": 18.730666666666668,
+      "midi_pitch": 57
+    },
+    {
+      "index": 36,
+      "start_s": 18.730666666666668,
+      "end_s": 19.546666666666667,
+      "midi_pitch": 55
+    },
+    {
+      "index": 37,
+      "start_s": 19.546666666666667,
+      "end_s": 19.962666666666667,
+      "midi_pitch": 0
+    },
+    {
+      "index": 38,
+      "start_s": 19.962666666666667,
+      "end_s": 20.250666666666667,
+      "midi_pitch": 57
+    },
+    {
+      "index": 39,
+      "start_s": 20.250666666666667,
+      "end_s": 20.693333333333335,
+      "midi_pitch": 53
+    },
+    {
+      "index": 40,
+      "start_s": 20.693333333333335,
+      "end_s": 20.87466666666667,
+      "midi_pitch": 55
+    },
+    {
+      "index": 41,
+      "start_s": 20.87466666666667,
+      "end_s": 21.13066666666667,
+      "midi_pitch": 55
+    },
+    {
+      "index": 42,
+      "start_s": 21.13066666666667,
+      "end_s": 21.24266666666667,
+      "midi_pitch": 57
+    },
+    {
+      "index": 43,
+      "start_s": 21.24266666666667,
+      "end_s": 22.229333333333336,
+      "midi_pitch": 57
+    },
+    {
+      "index": 44,
+      "start_s": 22.229333333333336,
+      "end_s": 22.624000000000002,
+      "midi_pitch": 0
+    },
+    {
+      "index": 45,
+      "start_s": 22.624000000000002,
+      "end_s": 22.789333333333335,
+      "midi_pitch": 57
+    },
+    {
+      "index": 46,
+      "start_s": 22.789333333333335,
+      "end_s": 22.912000000000003,
+      "midi_pitch": 55
+    },
+    {
+      "index": 47,
+      "start_s": 22.912000000000003,
+      "end_s": 23.11466666666667,
+      "midi_pitch": 53
+    },
+    {
+      "index": 48,
+      "start_s": 23.11466666666667,
+      "end_s": 23.205333333333336,
+      "midi_pitch": 53
+    },
+    {
+      "index": 49,
+      "start_s": 23.205333333333336,
+      "end_s": 24.245333333333335,
+      "midi_pitch": 53
+    },
+    {
+      "index": 50,
+      "start_s": 24.245333333333335,
+      "end_s": 26.021333333333335,
+      "midi_pitch": 0
+    }
+  ]
+}

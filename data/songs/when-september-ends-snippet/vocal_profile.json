@@ -1,0 +1,36 @@
+{
+  "song_id": "when-september-ends-snippet",
+  "genre_tags": [
+    "Punk Rock",
+    "Alternative Rock",
+    "Pop Punk"
+  ],
+  "vocal_style": "Green Day's vocal approach is characterized by a raw, emotional delivery that often incorporates a mix of chest voice and a slightly edgy tone. Billie Joe Armstrong frequently utilizes a conversational style, making the lyrics feel personal and relatable.",
+  "key_techniques": [
+    "expressive_match",
+    "vocal_texture",
+    "consistent_vibrato",
+    "clean_attack"
+  ],
+  "emphasize_highlights": [
+    "best_pitch_phrase",
+    "section_strength",
+    "expressive_match"
+  ],
+  "deemphasize_highlights": [
+    "pitch_struggle",
+    "section_weakness",
+    "dynamic_drop"
+  ],
+  "highlight_notes": {
+    "best_pitch_phrase": "This section showcases the singer's strongest pitch accuracy, which should be emulated.",
+    "section_strength": "The overall strength in pitch accuracy during this section indicates effective vocal technique.",
+    "expressive_match": "The singer successfully matched the emotional expressiveness of the original artist, enhancing the performance.",
+    "pitch_struggle": "This section shows significant pitch inaccuracies that need attention to improve overall performance.",
+    "section_weakness": "This part lacks the necessary pitch control, indicating a need for focused practice.",
+    "dynamic_drop": "This phrase is notably quieter than the reference, suggesting a need for stronger breath support."
+  },
+  "coaching_context": "When coaching this song, focus on maintaining strong pitch accuracy and emotional expressiveness. Pay attention to sections where pitch struggles occur, and encourage the singer to utilize dynamic contrasts effectively to match the original's energy.",
+  "model_used": "gpt-4o-mini",
+  "generated_at": "2026-08-06T21:32:12.703235+00:00"
+}

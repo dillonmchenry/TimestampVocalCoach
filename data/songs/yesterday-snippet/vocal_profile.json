@@ -1,0 +1,34 @@
+{
+  "song_id": "yesterday-snippet",
+  "genre_tags": [
+    "Pop",
+    "Rock",
+    "Ballad"
+  ],
+  "vocal_style": "The Beatles' vocal approach in 'Yesterday' is characterized by a soft, emotive delivery that emphasizes lyrical storytelling. The lead vocals are smooth and often feature a gentle vibrato, creating an intimate atmosphere.",
+  "key_techniques": [
+    "soft_passage_control",
+    "steady_sustain",
+    "expressive_match",
+    "clean_attack",
+    "vibrato_with_support"
+  ],
+  "emphasize_highlights": [
+    "best_pitch_phrase",
+    "section_strength",
+    "expressive_stability"
+  ],
+  "deemphasize_highlights": [
+    "pitch_struggle",
+    "section_weakness",
+    "loud_pitch_instability"
+  ],
+  "highlight_notes": {
+    "best_pitch_phrase": "This phrase showcases the singer's best intonation and emotional connection to the lyrics.",
+    "section_strength": "The section displays strong overall pitch accuracy, enhancing the song's emotional impact.",
+    "expressive_stability": "This section combines both expressive techniques and pitch accuracy, demonstrating effective vocal control."
+  },
+  "coaching_context": "Focus on maintaining soft passage control while ensuring that the emotional delivery does not compromise pitch accuracy. Encourage the singer to explore their expressive techniques while keeping a steady vibrato and breath support throughout the performance.",
+  "model_used": "gpt-4o-mini",
+  "generated_at": "2026-08-06T02:40:16.606196+00:00"
+}
