@@ -874,6 +874,14 @@ class PerformanceAnalysis(BaseModel):
             'observed cross-highlight trends. None when LLM is unavailable or disabled.'
         ),
     )
+    segment_end_song_s: Optional[float] = Field(
+        None,
+        description=(
+            'Song-time (seconds) at which this analysis ends. None when the full song '
+            'was recorded. Set for karaoke sessions where the user stopped early — '
+            'the frontend uses this to filter the section ribbon and show a segment label.'
+        ),
+    )
     analysis_version: str = Field("v6", description='Schema version tag for migrations')
 
 

@@ -206,36 +206,68 @@ section {
   border: 1px solid var(--border);
 }
 
-/* Rolling lyric window */
+/* Vertical lyric display */
 .karaoke-lyrics {
   background: var(--panel-2);
   border-radius: 12px;
   border: 1px solid var(--border);
-  padding: 20px 24px;
+  padding: 0 24px;
   margin-top: 12px;
-  min-height: 80px;
-  overflow: hidden;
+  height: 280px;
+  overflow-y: scroll;
+  scrollbar-width: none;       /* Firefox */
+  scroll-behavior: smooth;
+  position: relative;
   font-size: 22px;
   font-weight: 300;
-  line-height: 1.65;
+  line-height: 1.6;
   letter-spacing: 0.01em;
+}
+
+.karaoke-lyrics::-webkit-scrollbar {
+  display: none;               /* Chrome / Safari */
+}
+
+/* Spacer divs at top/bottom let the first and last lines reach center-ish */
+.karaoke-lyric-spacer {
+  flex-shrink: 0;
+}
+
+.karaoke-line {
+  width: 100%;
   text-align: center;
+  padding: 8px 0;
+  transition: opacity 0.35s ease, color 0.35s ease, font-size 0.35s ease;
+  font-size: 1em;
+  font-weight: 300;
+  color: var(--muted);
+  opacity: 0.4;
+}
+
+.karaoke-line.active {
+  opacity: 1;
+  color: var(--text);
+  font-size: 1.14em;
+  font-weight: 600;
+}
+
+.karaoke-line.upcoming {
+  opacity: 0.4;
+  color: var(--muted);
+  font-size: 1em;
+  font-weight: 300;
+}
+
+.karaoke-line.sung {
+  opacity: 0.15;
+  color: var(--muted);
+  font-size: 1em;
+  font-weight: 300;
 }
 
 .karaoke-word {
   display: inline;
   margin-right: 6px;
-  color: var(--muted);
-  transition: color 0.15s ease, transform 0.15s ease, opacity 0.25s ease;
-}
-
-.karaoke-word.sung { color: rgba(120, 113, 108, 0.4); }
-
-.karaoke-word.active {
-  color: var(--accent);
-  font-weight: 600;
-  transform: scale(1.06);
-  text-shadow: 0 0 18px rgba(59, 111, 212, 0.3);
 }
 
 #karaokeAudio {
@@ -374,6 +406,12 @@ section {
   margin-top: 12px;
   font-size: 13px;
   color: var(--muted);
+}
+
+.segment-info {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
 }
 
 .status.error {

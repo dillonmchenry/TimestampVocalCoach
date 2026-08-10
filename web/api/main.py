@@ -40,7 +40,7 @@ from fastapi.staticfiles import StaticFiles
 
 import time
 
-from vocal_coach.align_v2 import measure_song
+from vocal_coach.align_v2 import estimate_global_offset_s, measure_song
 from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH
 from vocal_coach.feedback import generate_performance_summary, rewrite_card_summaries
 from vocal_coach.highlights import select_highlights
@@ -275,6 +275,7 @@ def _run_analysis_job(
     stars_profile: str,
     skip_user_stars: bool,
     torch_device: str,
+    recording_duration_s: Optional[float] = None,
 ) -> None:
     """Background worker: runs the full pipeline and writes results to _jobs."""
     _jobs[job_id]["status"] = "running"
@@ -330,8 +331,31 @@ def _run_analysis_job(
                 (perf_dir / "stars_error.txt").write_text(str(exc), encoding="utf-8")
 
         cfg = CoachingConfig.load(CONFIG_PATH)
+
+        # For karaoke partial recordings, estimate the global offset first so we
+        # can convert recording_duration_s (user time) into song time and filter
+        # the reference to only the notes the user actually sang.
+        segment_end_song_s: Optional[float] = None
+        analysis_reference = reference
+        if (
+            recording_duration_s is not None
+            and recording_duration_s < reference.duration_s - 2.0
+        ):
+            early_offset = estimate_global_offset_s(reference, pitch_user, config=cfg)
+            # song_time = user_time - offset  →  segment_end = duration - offset
+            seg_end = recording_duration_s - early_offset
+            if seg_end > 5.0:
+                segment_end_song_s = round(seg_end, 3)
+                # Shallow-copy the reference with filtered notes and sections.
+                filtered_notes = [n for n in reference.notes if n.start_s < seg_end]
+                filtered_sections = [s for s in reference.sections if s.start_s < seg_end]
+                analysis_reference = reference.model_copy(update={
+                    "notes": filtered_notes,
+                    "sections": filtered_sections,
+                })
+
         notes, techniques, offset, octave_shift = measure_song(
-            reference,
+            analysis_reference,
             pitch_user=pitch_user,
             pitch_ref=pitch_ref,
             stars_ref=stars_ref,
@@ -340,7 +364,7 @@ def _run_analysis_job(
             loudness_ref=loudness_ref,
             config=cfg,
         )
-        section_trends = compute_section_trends(reference, notes, techniques)
+        section_trends = compute_section_trends(analysis_reference, notes, techniques)
 
         # Step 3 — Selecting coaching highlights
         _jobs[job_id]["step"] = 3
@@ -348,7 +372,7 @@ def _run_analysis_job(
         vocal_profile = load_vocal_profile(_vp_path)
 
         highlights = select_highlights(
-            reference,
+            analysis_reference,
             notes,
             techniques,
             config=cfg,
@@ -379,7 +403,7 @@ def _run_analysis_job(
                 llm=_llm_client,
                 rag=_rag_store,
                 vocal_profile=vocal_profile,
-                reference=reference,
+                reference=analysis_reference,
                 song_title=manifest.title,
                 artist=manifest.artist,
                 max_tokens=cfg.llm.card_rewrite_max_tokens,
@@ -398,11 +422,15 @@ def _run_analysis_job(
         else:
             _perf_summary = None
 
+        # For partial recordings, duration_s reflects the recording length so
+        # the frontend timeline scales to the recorded portion only.
+        perf_duration_s = recording_duration_s if recording_duration_s is not None else manifest.duration_s
+
         analysis = PerformanceAnalysis(
             song_id=manifest.song_id,
             perf_id=perf_id,
             reference_sample_id=reference.sample_id,
-            duration_s=manifest.duration_s,
+            duration_s=perf_duration_s,
             global_offset_s=offset,
             octave_shift_semitones=octave_shift,
             pitch_user_path=str(pitch_path.relative_to(song_dir)).replace("\\", "/"),
@@ -427,6 +455,7 @@ def _run_analysis_job(
             sections=section_trends,
             overview=overview,
             performance_summary=_perf_summary,
+            segment_end_song_s=segment_end_song_s,
         )
         out_path = perf_dir / "analysis.json"
         out_path.write_text(analysis.model_dump_json(indent=2), encoding="utf-8")
@@ -517,6 +546,7 @@ async def analyze(
     skip_user_stars: bool = Form(False),
     device: str = Form("cuda"),
     stars_profile: str = Form(STARS_PROFILE_FAST),
+    recording_duration_s: Optional[float] = Form(None),
 ):
     """Upload a performance and start analysis in the background.
 
@@ -555,8 +585,17 @@ async def analyze(
 
     thread = threading.Thread(
         target=_run_analysis_job,
-        args=(job_id, song_dir, perf_id, perf_dir, user_audio,
-              stars_profile, skip_user_stars, torch_device),
+        kwargs=dict(
+            job_id=job_id,
+            song_dir=song_dir,
+            perf_id=perf_id,
+            perf_dir=perf_dir,
+            user_audio=user_audio,
+            stars_profile=stars_profile,
+            skip_user_stars=skip_user_stars,
+            torch_device=torch_device,
+            recording_duration_s=recording_duration_s,
+        ),
         daemon=True,
     )
     thread.start()

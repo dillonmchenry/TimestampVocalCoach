@@ -58,6 +58,17 @@
           <button id="karaokeStop" class="browse" type="button" disabled>Stop &amp; analyze</button>
           <button id="karaokeCancel" class="browse browse-secondary" type="button" disabled>Cancel</button>
           <span id="karaokeTime" class="karaoke-time">0:00</span>
+          <div class="mix-toggles" role="group" aria-label="Karaoke mix" style="margin-left: auto;">
+            <button
+              id="karaokeRefVocal"
+              type="button"
+              class="mix-toggle"
+              aria-pressed="false"
+              title="Play reference vocals alongside the instrumental"
+            >
+              Original vocal
+            </button>
+          </div>
         </div>
         <p class="hint">
           Plays the instrumental. Sing along — your mic is recorded and sent through the
@@ -145,6 +156,7 @@
 
     <section class="results" id="results" hidden>
       <h2>Performance Analysis</h2>
+      <p id="segmentInfo" class="segment-info" hidden></p>
 
       <div id="performanceSummary" class="performance-summary" hidden></div>
       <div id="overviewTiles" class="overview-tiles" hidden></div>

@@ -31,6 +31,7 @@ const highlightList = document.getElementById("highlightList");
 const highlightFilters = document.getElementById("highlightFilters");
 const basisFilters = document.getElementById("basisFilters");
 const overviewTiles = document.getElementById("overviewTiles");
+const segmentInfo = document.getElementById("segmentInfo");
 const fastProfile = document.getElementById("fastProfile");
 
 let pendingFile = null;
@@ -838,13 +839,19 @@ function renderSectionRibbon(reference, analysis) {
   }
   const totalDur = currentDuration;
   const offset = analysis.global_offset_s || 0;
+  // For partial recordings, only show sections within the recorded segment.
+  const segmentEnd = analysis.segment_end_song_s ?? Infinity;
   const trendByName = {};
   for (const trend of analysis.sections || []) {
     trendByName[trend.name] = trend;
   }
   for (const section of reference.sections) {
+    // Skip sections that start entirely after the recording ended.
+    if (section.start_s >= segmentEnd) continue;
+    // Clamp the section end to the recording boundary.
+    const clampedEnd = Math.min(section.end_s, segmentEnd);
     const userStart = section.start_s + offset;
-    const userEnd = section.end_s + offset;
+    const userEnd = clampedEnd + offset;
     const left = (userStart / totalDur) * 100;
     const width = ((userEnd - userStart) / totalDur) * 100;
     const trend = trendByName[section.name];
@@ -1269,6 +1276,18 @@ async function renderAnalysis(songId, analysis) {
   currentAnalysis = analysis;
   currentPlaybackSongId = songId;
   currentDuration = analysis.duration_s;
+
+  // Show a segment indicator when the user recorded only part of the song.
+  const song = allSongs.find((s) => s.song_id === songId);
+  if (analysis.segment_end_song_s != null && song) {
+    segmentInfo.textContent =
+      `Analyzed ${fmtMmSs(0)}\u2013${fmtMmSs(analysis.segment_end_song_s)} of ${fmtMmSs(song.duration_s)}`;
+    segmentInfo.hidden = false;
+  } else {
+    segmentInfo.hidden = true;
+    segmentInfo.textContent = "";
+  }
+
   resetMixToggles();
   prepareMixLayers(songId);
   updateMixToggleUi(allSongs.find((s) => s.song_id === songId));
@@ -1398,6 +1417,7 @@ const karaokeTime = document.getElementById("karaokeTime");
 const karaokeLyrics = document.getElementById("karaokeLyrics");
 const karaokeAudio = document.getElementById("karaokeAudio");
 const karaokeViz = document.getElementById("karaokeViz");
+const karaokeRefVocalBtn = document.getElementById("karaokeRefVocal");
 
 let karaokeScriptNode = null;   // ScriptProcessorNode used for WAV capture
 let karaokePcmBuffers = [];     // Float32Array chunks collected during recording
@@ -1406,6 +1426,12 @@ let karaokeStream = null;
 let karaokeRafHandle = null;
 let karaokeStartTs = 0;
 let karaokeWordRows = [];
+let karaokeLinesArr = [];       // grouped line-level entries for vertical display
+let karaokeLastScrollFocusIdx = -1; // tracks which line we last scrolled to
+
+// Reference vocal playback during karaoke.
+let karaokeRefVocalMedia = null;
+let karaokeRefVocalOn = false;
 
 // Web Audio API handles for the live mic waveform.
 let karaokeAudioCtx = null;
@@ -1443,9 +1469,19 @@ function _wavEncode(buffers, sampleRate) {
   return new Blob([ab], { type: "audio/wav" });
 }
 
-// Rolling-window constants (seconds).
-const LYRIC_PAST_S = 1.0;    // keep just-sung words visible for this long after they end
-const LYRIC_FUTURE_S = 3.5;  // show this much of upcoming lyrics ahead of current time
+// A timing gap larger than this triggers a line break — but only once the
+// current line has reached LYRIC_MIN_WORDS, so short words like "Yesterday"
+// don't end up alone on a line after a brief pause.
+const LYRIC_LINE_GAP_S = 0.8;
+// A gap this long always forces a new line regardless of word count
+// (covers true section rests / instrumentals).
+const LYRIC_HARD_GAP_S = 5.0;
+// Minimum words a line must accumulate before a normal gap can break it.
+const LYRIC_MIN_WORDS = 4;
+// Absolute maximum words before forcing a line break regardless of timing.
+const LYRIC_MAX_WORDS = 12;
+// How far above the container top the active line is positioned (px).
+const LYRIC_SCROLL_OFFSET_PX = 80;
 
 function setMode(mode) {
   const isUpload = mode === "upload";
@@ -1467,10 +1503,14 @@ modeKaraokeBtn.addEventListener("click", async () => {
 function buildKaraokeLyrics(reference) {
   karaokeLyrics.innerHTML = "";
   karaokeWordRows = [];
+  karaokeLinesArr = [];
+  karaokeLastScrollFocusIdx = -1;
   if (!reference || !Array.isArray(reference.notes)) {
     karaokeLyrics.innerHTML = `<p class="hint">Lyrics will appear here once a reference annotation is available.</p>`;
     return;
   }
+
+  // Deduplicate notes into unique words by word_index.
   const wordsMap = new Map();
   for (const note of reference.notes) {
     const wordIdx = note.word_index;
@@ -1488,17 +1528,66 @@ function buildKaraokeLyrics(reference) {
   }
   const words = [...wordsMap.values()].filter((w) => w.word);
   words.sort((a, b) => a.start_s - b.start_s);
-  for (const w of words) {
-    const span = document.createElement("span");
-    span.className = "karaoke-word";
-    span.textContent = w.word + " ";
-    span.dataset.start = w.start_s;
-    span.dataset.end = w.end_s;
-    // Initially show only the first window so the preview doesn't dump all lyrics.
-    span.style.display = w.start_s <= LYRIC_FUTURE_S ? "" : "none";
-    karaokeLyrics.appendChild(span);
-    karaokeWordRows.push({ span, start_s: w.start_s, end_s: w.end_s });
+
+  // Group words into lines using a minimum-word guard so short words don't
+  // end up alone. A soft gap break (>= LYRIC_LINE_GAP_S) only fires once the
+  // current line has at least LYRIC_MIN_WORDS words. A hard gap
+  // (>= LYRIC_HARD_GAP_S, e.g. an instrumental rest) always breaks immediately.
+  const rawLines = [];
+  let currentLine = [];
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i];
+    const prev = i > 0 ? words[i - 1] : null;
+    const gap = prev ? w.start_s - prev.end_s : 0;
+    if (currentLine.length > 0) {
+      const hardBreak = gap >= LYRIC_HARD_GAP_S;
+      const softBreak = gap >= LYRIC_LINE_GAP_S && currentLine.length >= LYRIC_MIN_WORDS;
+      const maxBreak  = currentLine.length >= LYRIC_MAX_WORDS;
+      if (hardBreak || softBreak || maxBreak) {
+        rawLines.push(currentLine);
+        currentLine = [];
+      }
+    }
+    currentLine.push(w);
   }
+  if (currentLine.length > 0) rawLines.push(currentLine);
+
+  // Top spacer lets the first line scroll to the visual center of the container.
+  const topSpacer = document.createElement("div");
+  topSpacer.className = "karaoke-lyric-spacer";
+  topSpacer.style.height = `${LYRIC_SCROLL_OFFSET_PX}px`;
+  karaokeLyrics.appendChild(topSpacer);
+
+  // Build DOM: one .karaoke-line per group.
+  for (const lineWords of rawLines) {
+    const lineDiv = document.createElement("div");
+    lineDiv.className = "karaoke-line upcoming";
+
+    const wordItems = [];
+    for (const w of lineWords) {
+      const span = document.createElement("span");
+      span.className = "karaoke-word";
+      span.textContent = w.word + " ";
+      lineDiv.appendChild(span);
+      const item = { span, start_s: w.start_s, end_s: w.end_s };
+      wordItems.push(item);
+      karaokeWordRows.push(item);
+    }
+
+    karaokeLyrics.appendChild(lineDiv);
+    karaokeLinesArr.push({
+      div: lineDiv,
+      words: wordItems,
+      start_s: lineWords[0].start_s,
+      end_s: lineWords[lineWords.length - 1].end_s,
+    });
+  }
+
+  // Bottom spacer so the last line can also be scrolled to the visual center.
+  const botSpacer = document.createElement("div");
+  botSpacer.className = "karaoke-lyric-spacer";
+  botSpacer.style.height = `${LYRIC_SCROLL_OFFSET_PX + 160}px`;
+  karaokeLyrics.appendChild(botSpacer);
 }
 
 function fmtMmSs(t) {
@@ -1561,23 +1650,50 @@ function _drawKaraokeWaveform() {
 }
 
 function applyKaraokeLyricsAtTime(t) {
-  let activeIdx = -1;
-  for (let i = 0; i < karaokeWordRows.length; i++) {
-    const row = karaokeWordRows[i];
-    if (t >= row.start_s && t < row.end_s) {
-      activeIdx = i;
-      break;
+  if (karaokeLinesArr.length === 0) return;
+
+  // Find which line is actively being sung.
+  let activeLineIdx = -1;
+  for (let i = 0; i < karaokeLinesArr.length; i++) {
+    const ln = karaokeLinesArr[i];
+    if (t >= ln.start_s && t < ln.end_s) { activeLineIdx = i; break; }
+  }
+
+  // During gaps between lines, pivot around the last completed line so the
+  // next upcoming line stays visible rather than the display going blank.
+  let focusIdx = activeLineIdx;
+  if (focusIdx === -1) {
+    for (let i = karaokeLinesArr.length - 1; i >= 0; i--) {
+      if (karaokeLinesArr[i].end_s <= t) { focusIdx = i; break; }
     }
   }
 
-  const windowStart = t - LYRIC_PAST_S;
-  const windowEnd = t + LYRIC_FUTURE_S;
-  for (let i = 0; i < karaokeWordRows.length; i++) {
-    const row = karaokeWordRows[i];
-    const inWindow = row.end_s >= windowStart && row.start_s <= windowEnd;
-    row.span.style.display = inWindow ? "" : "none";
-    row.span.classList.toggle("active", i === activeIdx);
-    row.span.classList.toggle("sung", i < activeIdx && inWindow);
+  // Apply sung / active / upcoming classes to every line.
+  // No display toggling — all lines stay in the DOM; the container scrolls.
+  for (let i = 0; i < karaokeLinesArr.length; i++) {
+    const ln = karaokeLinesArr[i];
+    const isActive = i === activeLineIdx;
+    const isSung   = activeLineIdx !== -1 ? i < activeLineIdx : i <= focusIdx;
+    const isUpcoming = !isActive && !isSung;
+
+    ln.div.classList.toggle("active",   isActive);
+    ln.div.classList.toggle("sung",     isSung);
+    ln.div.classList.toggle("upcoming", isUpcoming);
+  }
+
+  // Smooth-scroll the container so the active (or focus) line sits just below
+  // the top padding. Only trigger scrollTo when the focus line changes to
+  // avoid fighting the browser's inertia scroll.
+  if (focusIdx !== karaokeLastScrollFocusIdx) {
+    karaokeLastScrollFocusIdx = focusIdx;
+    if (focusIdx >= 0) {
+      const targetLine = karaokeLinesArr[focusIdx].div;
+      const containerRect = karaokeLyrics.getBoundingClientRect();
+      const lineRect = targetLine.getBoundingClientRect();
+      const currentScroll = karaokeLyrics.scrollTop;
+      const targetScroll = lineRect.top - containerRect.top + currentScroll - LYRIC_SCROLL_OFFSET_PX;
+      karaokeLyrics.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+    }
   }
 }
 
@@ -1586,11 +1702,22 @@ function updateKaraokeHighlight() {
   karaokeTime.textContent = fmtMmSs(t);
   _drawKaraokeWaveform();
   applyKaraokeLyricsAtTime(t);
+
+  // Keep reference vocal in sync with the instrumental.
+  if (karaokeRefVocalOn && karaokeRefVocalMedia && !karaokeRefVocalMedia.paused) {
+    const drift = Math.abs(karaokeRefVocalMedia.currentTime - karaokeAudio.currentTime);
+    if (drift > MIX_SYNC_THRESHOLD_S) {
+      karaokeRefVocalMedia.currentTime = karaokeAudio.currentTime;
+    }
+  }
+
   karaokeRafHandle = requestAnimationFrame(updateKaraokeHighlight);
 }
 
 function resetKaraokeLyricsView() {
   karaokeTime.textContent = "0:00";
+  karaokeLastScrollFocusIdx = -1;
+  karaokeLyrics.scrollTop = 0;
   applyKaraokeLyricsAtTime(0);
 }
 
@@ -1601,6 +1728,10 @@ function _handleKaraokeEnded() {
 async function endKaraokeSession({ analyze }) {
   karaokeAudio.removeEventListener("ended", _handleKaraokeEnded);
   if (!karaokeScriptNode) return;
+
+  // Capture duration before tearing anything down.
+  const recordingDuration = (performance.now() - karaokeStartTs) / 1000;
+
   // Stop capturing PCM — disconnect before closing AudioContext.
   karaokeScriptNode.disconnect();
   karaokeScriptNode = null;
@@ -1613,6 +1744,16 @@ async function endKaraokeSession({ analyze }) {
   karaokeStopBtn.disabled = true;
   karaokeCancelBtn.disabled = true;
   cancelAnimationFrame(karaokeRafHandle);
+
+  // Stop reference vocal playback and reset toggle.
+  if (karaokeRefVocalMedia) {
+    karaokeRefVocalMedia.pause();
+    karaokeRefVocalMedia = null;
+  }
+  karaokeRefVocalOn = false;
+  karaokeRefVocalBtn.classList.remove("active");
+  karaokeRefVocalBtn.setAttribute("aria-pressed", "false");
+
   if (karaokeStream) {
     karaokeStream.getTracks().forEach((t) => t.stop());
     karaokeStream = null;
@@ -1644,6 +1785,7 @@ async function endKaraokeSession({ analyze }) {
   const fd = new FormData();
   fd.append("file", wavBlob, "recording.wav");
   fd.append("stars_profile", currentStarsProfile());
+  fd.append("recording_duration_s", recordingDuration.toFixed(3));
   try {
     const r = await fetch(
       apiUrl(`/api/songs/${encodeURIComponent(songId)}/analyze`),
@@ -1722,6 +1864,12 @@ karaokeRecordBtn.addEventListener("click", async () => {
     /* autoplay restrictions may block; the user can click the visible controls */
   });
 
+  // Preload reference vocal so the toggle can start it instantly.
+  karaokeRefVocalMedia = new Audio();
+  karaokeRefVocalMedia.preload = "auto";
+  karaokeRefVocalMedia.src = apiUrl(`/api/songs/${encodeURIComponent(songId)}/audio/reference`);
+  karaokeRefVocalMedia.volume = MIX_LAYER_VOLUME;
+
   karaokeStartTs = performance.now();
   karaokeRecordBtn.disabled = true;
   karaokeStopBtn.disabled = false;
@@ -1735,5 +1883,19 @@ karaokeRecordBtn.addEventListener("click", async () => {
 karaokeStopBtn.addEventListener("click", () => endKaraokeSession({ analyze: true }));
 
 karaokeCancelBtn.addEventListener("click", () => endKaraokeSession({ analyze: false }));
+
+karaokeRefVocalBtn.addEventListener("click", () => {
+  // Only active during a recording session.
+  if (!karaokeRefVocalMedia) return;
+  karaokeRefVocalOn = !karaokeRefVocalOn;
+  karaokeRefVocalBtn.classList.toggle("active", karaokeRefVocalOn);
+  karaokeRefVocalBtn.setAttribute("aria-pressed", String(karaokeRefVocalOn));
+  if (karaokeRefVocalOn) {
+    karaokeRefVocalMedia.currentTime = karaokeAudio.currentTime;
+    karaokeRefVocalMedia.play().catch(() => {});
+  } else {
+    karaokeRefVocalMedia.pause();
+  }
+});
 
 loadSongs();
