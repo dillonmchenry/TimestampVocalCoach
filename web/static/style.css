@@ -1025,3 +1025,278 @@ h3 {
   border-color: rgba(124, 58, 237, 0.25);
 }
 
+/* ─── Analysis Progress Bar ─────────────────────────────────────────── */
+
+/* Hide upload section UI while analysis is running */
+.upload--analyzing .mode-toggle,
+.upload--analyzing .profile-toggle,
+.upload--analyzing #uploadPanel,
+.upload--analyzing #karaokePanel {
+  display: none;
+}
+
+.analysis-progress {
+  margin-top: 12px;
+  padding: 28px 24px 32px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: apFadeIn 0.25s ease;
+}
+
+/* Cancel (×) button */
+.analysis-cancel-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.analysis-cancel-btn:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+.analysis-cancel-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+@keyframes apFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.analysis-progress-icon {
+  width: 60px;
+  height: 41px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.analysis-progress-heading {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-align: center;
+}
+
+.analysis-progress-subtitle {
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+/* Track: row of step nodes and connectors */
+.progress-track {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 650px;
+  margin-top: 18px;
+}
+
+/* Individual step (circle + label stacked) */
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 80px;
+}
+
+/* Connector line between steps */
+.step-connector {
+  flex: 1;
+  height: 36px;          /* matches circle diameter for vertical centering */
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.step-connector::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  position: relative;
+}
+
+/* Filled (blue) portion of connector */
+.step-connector-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 1px;
+  transition: width 0.5s ease;
+}
+
+/* Replace the ::before approach with a positioned wrapper */
+.step-connector {
+  position: relative;
+}
+
+.step-connector::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+}
+
+.step-connector-fill {
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 1px;
+  transition: width 0.5s ease;
+}
+
+.step-connector-fill.filled {
+  width: calc(100%);
+}
+
+/* Circle node */
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: border-color 0.3s ease, background 0.3s ease;
+  flex-shrink: 0;
+}
+
+/* Pending state: gray border, empty */
+.step-circle[data-state="pending"] {
+  border-color: var(--border);
+  background: var(--panel);
+}
+
+/* Active state: blue border, pulsing dot */
+.step-circle[data-state="active"] {
+  border-color: var(--accent);
+  background: var(--panel);
+}
+
+/* Completed state: filled blue, white checkmark */
+.step-circle[data-state="completed"] {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+/* Checkmark SVG — hidden until completed */
+.step-check {
+  width: 20px;
+  height: 20px;
+  display: none;
+  flex-shrink: 0;
+}
+
+.step-circle[data-state="completed"] .step-check {
+  display: block;
+}
+
+/* Pulsing dot — shown only when active */
+.step-pulse-dot {
+  display: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: stepPulse 1.2s ease-in-out infinite;
+}
+
+.step-circle[data-state="active"] .step-pulse-dot {
+  display: block;
+}
+
+@keyframes stepPulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%       { transform: scale(1.5); opacity: 0.6; }
+}
+
+/* Step labels */
+.step-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+.progress-step[data-step] .step-label {
+  transition: color 0.3s ease;
+}
+
+/* Active step label slightly darker */
+.progress-step.is-active .step-label {
+  color: var(--accent);
+  font-weight: 500;
+}
+
+/* Completed step label back to muted */
+.progress-step.is-completed .step-label {
+  color: var(--muted);
+}
+
+/* Waveform icon animation — only runs while the bar is visible */
+#analysisProgress:not([hidden]) .analysis-progress-icon rect {
+  transform-box: fill-box;
+  transform-origin: center center;
+  animation: waveBarPulse 1.4s ease-in-out infinite;
+}
+
+/* Stagger each bar so the pulse travels left to right */
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(1) { animation-delay: 0s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(2) { animation-delay: 0.12s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(3) { animation-delay: 0.24s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(4) { animation-delay: 0.36s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(5) { animation-delay: 0.48s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(6) { animation-delay: 0.60s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(7) { animation-delay: 0.72s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(8) { animation-delay: 0.84s; }
+
+@keyframes waveBarPulse {
+  0%, 100% { transform: scaleY(1); }
+  50%       { transform: scaleY(0.2); }
+}
+

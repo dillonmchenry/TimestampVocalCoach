@@ -68,6 +68,78 @@
         <audio id="karaokeAudio" controls hidden></audio>
       </div>
 
+      <div id="analysisProgress" class="analysis-progress hidden">
+        <button type="button" id="analysisCancelBtn" class="analysis-cancel-btn" aria-label="Cancel analysis">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <line x1="3" y1="3" x2="13" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="13" y1="3" x2="3" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <svg class="analysis-progress-icon" viewBox="0 0 76 52" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0"  y="18" width="6" height="16" rx="3" fill="var(--accent)"/>
+          <rect x="10" y="10" width="6" height="32" rx="3" fill="var(--accent)"/>
+          <rect x="20" y="4"  width="6" height="44" rx="3" fill="var(--accent)"/>
+          <rect x="30" y="0"  width="6" height="52" rx="3" fill="var(--accent)"/>
+          <rect x="40" y="4"  width="6" height="44" rx="3" fill="var(--accent)"/>
+          <rect x="50" y="10" width="6" height="32" rx="3" fill="var(--accent)"/>
+          <rect x="60" y="18" width="6" height="16" rx="3" fill="var(--accent)"/>
+          <rect x="70" y="22" width="6" height="8"  rx="3" fill="var(--accent)"/>
+        </svg>
+        <h3 class="analysis-progress-heading">Analyzing your performance</h3>
+        <p class="analysis-progress-subtitle">Your performance is being compared with the reference track to find coaching feedback.</p>
+        <div class="progress-track">
+          <div class="progress-step" data-step="0">
+            <div class="step-circle" data-state="pending">
+              <svg class="step-check" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polyline points="5,11 9,15 17,7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="step-pulse-dot"></span>
+            </div>
+            <span class="step-label">Preparing<br>audio</span>
+          </div>
+          <div class="step-connector"><div class="step-connector-fill"></div></div>
+          <div class="progress-step" data-step="1">
+            <div class="step-circle" data-state="pending">
+              <svg class="step-check" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polyline points="5,11 9,15 17,7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="step-pulse-dot"></span>
+            </div>
+            <span class="step-label">Tracking pitch<br>and volume</span>
+          </div>
+          <div class="step-connector"><div class="step-connector-fill"></div></div>
+          <div class="progress-step" data-step="2">
+            <div class="step-circle" data-state="pending">
+              <svg class="step-check" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polyline points="5,11 9,15 17,7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="step-pulse-dot"></span>
+            </div>
+            <span class="step-label">Comparing notes<br>and techniques</span>
+          </div>
+          <div class="step-connector"><div class="step-connector-fill"></div></div>
+          <div class="progress-step" data-step="3">
+            <div class="step-circle" data-state="pending">
+              <svg class="step-check" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polyline points="5,11 9,15 17,7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="step-pulse-dot"></span>
+            </div>
+            <span class="step-label">Selecting coaching<br>highlights</span>
+          </div>
+          <div class="step-connector"><div class="step-connector-fill"></div></div>
+          <div class="progress-step" data-step="4">
+            <div class="step-circle" data-state="pending">
+              <svg class="step-check" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polyline points="5,11 9,15 17,7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="step-pulse-dot"></span>
+            </div>
+            <span class="step-label">Preparing your<br>feedback</span>
+          </div>
+        </div>
+      </div>
+
       <p id="status" class="status"></p>
     </section>
 

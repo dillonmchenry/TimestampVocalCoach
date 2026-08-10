@@ -279,16 +279,39 @@ def _run_analysis_job(
     """Background worker: runs the full pipeline and writes results to _jobs."""
     _jobs[job_id]["status"] = "running"
     try:
+        # Step 0 — Preparing audio
+        _jobs[job_id]["step"] = 0
         manifest = load_manifest(song_dir)
         reference = load_reference(song_dir)
 
-        # 1. NanoPitch
+        # Step 1 — Tracking pitch and volume
+        _jobs[job_id]["step"] = 1
         pitch_path = perf_dir / "pitch.json"
         pitch_user = extract_f0(user_audio, device=torch_device)
         pitch_user.sample_id = f"{manifest.song_id}__{perf_id}"
         write_pitch_track(pitch_user, pitch_path)
 
-        # 2. STARS on user vocal (unless explicitly skipped)
+        # Loudness on the user vocal (best-effort, grouped with pitch under step 1)
+        loudness_user: LoudnessTrack | None = None
+        loudness_user_path = perf_dir / "loudness.json"
+        try:
+            loudness_user = compute_loudness(user_audio, sample_id=pitch_user.sample_id)
+            write_loudness_track(loudness_user, loudness_user_path)
+        except Exception:
+            pass
+
+        # Step 2 — Comparing notes and techniques
+        _jobs[job_id]["step"] = 2
+
+        # Reference artifacts (precomputed by build_song.py)
+        stars_ref_path = song_dir / (manifest.reference_stars_path or "reference/stars.json")
+        stars_ref = _maybe_load(stars_ref_path, StarsTrack)
+        pitch_ref_path = song_dir / (manifest.reference_pitch_path or "reference/pitch.json")
+        pitch_ref = _maybe_load(pitch_ref_path, PitchTrack)
+        loudness_ref_path = song_dir / (manifest.reference_loudness_path or "reference/loudness.json")
+        loudness_ref = _maybe_load(loudness_ref_path, LoudnessTrack)
+
+        # STARS on user vocal (unless explicitly skipped)
         stars_user: StarsTrack | None = None
         stars_path = perf_dir / "stars.json"
         if not skip_user_stars:
@@ -306,24 +329,6 @@ def _run_analysis_job(
                 stars_user = None
                 (perf_dir / "stars_error.txt").write_text(str(exc), encoding="utf-8")
 
-        # 3. Reference artifacts (precomputed by build_song.py)
-        stars_ref_path = song_dir / (manifest.reference_stars_path or "reference/stars.json")
-        stars_ref = _maybe_load(stars_ref_path, StarsTrack)
-        pitch_ref_path = song_dir / (manifest.reference_pitch_path or "reference/pitch.json")
-        pitch_ref = _maybe_load(pitch_ref_path, PitchTrack)
-        loudness_ref_path = song_dir / (manifest.reference_loudness_path or "reference/loudness.json")
-        loudness_ref = _maybe_load(loudness_ref_path, LoudnessTrack)
-
-        # 4. Loudness on the user vocal (best-effort)
-        loudness_user: LoudnessTrack | None = None
-        loudness_user_path = perf_dir / "loudness.json"
-        try:
-            loudness_user = compute_loudness(user_audio, sample_id=pitch_user.sample_id)
-            write_loudness_track(loudness_user, loudness_user_path)
-        except Exception:
-            pass
-
-        # 5. Align + section trends + highlights + overview
         cfg = CoachingConfig.load(CONFIG_PATH)
         notes, techniques, offset, octave_shift = measure_song(
             reference,
@@ -337,6 +342,8 @@ def _run_analysis_job(
         )
         section_trends = compute_section_trends(reference, notes, techniques)
 
+        # Step 3 — Selecting coaching highlights
+        _jobs[job_id]["step"] = 3
         _vp_path = song_dir / (manifest.vocal_profile_path or "vocal_profile.json")
         vocal_profile = load_vocal_profile(_vp_path)
 
@@ -349,6 +356,8 @@ def _run_analysis_job(
             vocal_profile=vocal_profile,
         )
 
+        # Step 4 — Preparing your feedback
+        _jobs[job_id]["step"] = 4
         overview = compute_overview(
             notes,
             techniques,
@@ -542,7 +551,7 @@ async def analyze(
 
     torch_device = _resolve_torch_device(device)
     job_id = uuid.uuid4().hex[:8]
-    _jobs[job_id] = {"status": "pending", "result": None, "error": None}
+    _jobs[job_id] = {"status": "pending", "step": None, "result": None, "error": None}
 
     thread = threading.Thread(
         target=_run_analysis_job,
@@ -561,6 +570,7 @@ def get_job(job_id: str):
 
     Response shape:
       {"status": "pending"|"running"|"done"|"error",
+       "step": int|null,       -- 0-4 progress index, null until running
        "job_id": str,
        "perf_id": str|null,
        "song_id": str|null,
@@ -573,6 +583,7 @@ def get_job(job_id: str):
     return JSONResponse({
         "job_id": job_id,
         "status": job["status"],
+        "step": job.get("step"),
         "perf_id": job.get("perf_id"),
         "song_id": job.get("song_id"),
         "result": job.get("result"),

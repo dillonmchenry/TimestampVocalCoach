@@ -16,6 +16,9 @@ const dropZone = document.getElementById("dropZone");
 const fileInput = document.getElementById("fileInput");
 const analyzeButton = document.getElementById("analyzeButton");
 const status = document.getElementById("status");
+const analysisProgress = document.getElementById("analysisProgress");
+const analysisCancelBtn = document.getElementById("analysisCancelBtn");
+const uploadSection = document.querySelector("section.upload");
 const results = document.getElementById("results");
 const waveformDiv = document.getElementById("waveform");
 const sectionRibbon = document.getElementById("sectionRibbon");
@@ -31,6 +34,7 @@ const overviewTiles = document.getElementById("overviewTiles");
 const fastProfile = document.getElementById("fastProfile");
 
 let pendingFile = null;
+let analysisAbortController = null;
 let wavesurfer = null;
 let currentMedia = null;
 let currentDuration = 0;
@@ -463,6 +467,58 @@ function setAnalyzeLoading(loading) {
   if (label) label.textContent = loading ? "Analyzing…" : "Analyze";
 }
 
+/**
+ * Show the analysis progress bar and advance it to the given step index (0–4).
+ * Pass 5 to mark all steps as completed (used on job completion before hiding).
+ * Also hides the rest of the upload section so the progress bar is the sole focus.
+ */
+function showAnalysisProgress(activeStep) {
+  uploadSection.classList.add("upload--analyzing");
+  analysisProgress.classList.remove("hidden");
+
+  const stepEls = analysisProgress.querySelectorAll(".progress-step");
+  const connectorFills = analysisProgress.querySelectorAll(".step-connector-fill");
+
+  stepEls.forEach((el, i) => {
+    const circle = el.querySelector(".step-circle");
+    el.classList.remove("is-active", "is-completed");
+    if (i < activeStep) {
+      circle.dataset.state = "completed";
+      el.classList.add("is-completed");
+    } else if (i === activeStep) {
+      circle.dataset.state = "active";
+      el.classList.add("is-active");
+    } else {
+      circle.dataset.state = "pending";
+    }
+  });
+
+  // Connector i (between step i and step i+1) fills when step i is completed.
+  connectorFills.forEach((fill, i) => {
+    fill.classList.toggle("filled", activeStep > i);
+  });
+}
+
+/** Hide the progress bar, restore the upload section, and reset all step states. */
+function hideAnalysisProgress() {
+  uploadSection.classList.remove("upload--analyzing");
+  analysisProgress.classList.add("hidden");
+  analysisProgress.querySelectorAll(".step-circle").forEach((c) => {
+    c.dataset.state = "pending";
+  });
+  analysisProgress.querySelectorAll(".progress-step").forEach((el) => {
+    el.classList.remove("is-active", "is-completed");
+  });
+  analysisProgress.querySelectorAll(".step-connector-fill").forEach((f) => {
+    f.classList.remove("filled");
+  });
+}
+
+analysisCancelBtn.addEventListener("click", () => {
+  analysisAbortController?.abort();
+  // hideAnalysisProgress() is called by the AbortError catch in the polling loop
+});
+
 function setPendingFile(file) {
   pendingFile = file;
   if (file) {
@@ -495,7 +551,11 @@ analyzeButton.addEventListener("click", async () => {
   const songId = songSelect.value;
   if (!songId) return;
 
+  analysisAbortController = new AbortController();
+  const { signal } = analysisAbortController;
+
   setAnalyzeLoading(true);
+  showAnalysisProgress(0);
   status.classList.remove("error");
   status.textContent = "";
 
@@ -513,29 +573,56 @@ analyzeButton.addEventListener("click", async () => {
       throw new Error(`HTTP ${r.status}: ${detail.slice(0, 200)}`);
     }
     const { job_id } = await r.json();
-    status.textContent = "Analyzing… (this may take up to a minute)";
-    const analysis = await pollJob(job_id);
+    const analysis = await pollJob(job_id, signal);
+    // Flash all steps complete before transitioning to results
+    showAnalysisProgress(5);
+    await new Promise((res) => setTimeout(res, 600));
+    hideAnalysisProgress();
     status.textContent = `Done. Performance ID: ${analysis.perf_id}`;
     await renderAnalysis(songId, analysis);
   } catch (e) {
-    console.error(e);
-    status.textContent = `Analysis failed: ${e.message}`;
-    status.classList.add("error");
+    if (e.name === "AbortError") {
+      hideAnalysisProgress();
+    } else {
+      console.error(e);
+      hideAnalysisProgress();
+      status.textContent = `Analysis failed: ${e.message}`;
+      status.classList.add("error");
+    }
   } finally {
     setAnalyzeLoading(false);
+    analysisAbortController = null;
   }
 });
 
 /**
+ * Sleep for `ms` milliseconds, but resolve immediately if `signal` is aborted.
+ * Throws a DOMException("AbortError") when the signal fires.
+ */
+function sleepOrAbort(ms, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) { reject(new DOMException("cancelled", "AbortError")); return; }
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener("abort", () => {
+      clearTimeout(timer);
+      reject(new DOMException("cancelled", "AbortError"));
+    }, { once: true });
+  });
+}
+
+/**
  * Poll GET /api/jobs/{job_id} every 2 s until the job reaches "done" or
  * "error", then return the analysis result or throw.
+ * Updates the analysis progress bar on each poll via job.step (0–4).
+ * Respects an optional AbortSignal for user-initiated cancellation.
  */
-async function pollJob(jobId) {
+async function pollJob(jobId, signal) {
   while (true) {
-    await new Promise((res) => setTimeout(res, 2000));
-    const r = await fetch(apiUrl(`/api/jobs/${encodeURIComponent(jobId)}`));
+    await sleepOrAbort(2000, signal);
+    const r = await fetch(apiUrl(`/api/jobs/${encodeURIComponent(jobId)}`), { signal });
     if (!r.ok) throw new Error(`Job poll failed: HTTP ${r.status}`);
     const job = await r.json();
+    if (job.step != null) showAnalysisProgress(job.step);
     if (job.status === "done") return job.result;
     if (job.status === "error") throw new Error(`Analysis error: ${job.error}`);
     // "pending" or "running" — keep polling
@@ -1547,7 +1634,13 @@ async function endKaraokeSession({ analyze }) {
 
   const songId = songSelect.value;
   if (!songId) return;
-  status.textContent = "Analyzing karaoke take…";
+
+  analysisAbortController = new AbortController();
+  const { signal } = analysisAbortController;
+
+  showAnalysisProgress(0);
+  status.textContent = "";
+  status.classList.remove("error");
   const fd = new FormData();
   fd.append("file", wavBlob, "recording.wav");
   fd.append("stars_profile", currentStarsProfile());
@@ -1561,14 +1654,24 @@ async function endKaraokeSession({ analyze }) {
       throw new Error(`HTTP ${r.status}: ${detail.slice(0, 200)}`);
     }
     const { job_id } = await r.json();
-    status.textContent = "Analyzing… (this may take up to a minute)";
-    const analysis = await pollJob(job_id);
+    const analysis = await pollJob(job_id, signal);
+    // Flash all steps complete before transitioning to results
+    showAnalysisProgress(5);
+    await new Promise((res) => setTimeout(res, 600));
+    hideAnalysisProgress();
     status.textContent = `Done. Performance ID: ${analysis.perf_id}`;
     await renderAnalysis(songId, analysis);
   } catch (e) {
-    console.error(e);
-    status.textContent = `Analysis failed: ${e.message}`;
-    status.classList.add("error");
+    if (e.name === "AbortError") {
+      hideAnalysisProgress();
+    } else {
+      console.error(e);
+      hideAnalysisProgress();
+      status.textContent = `Analysis failed: ${e.message}`;
+      status.classList.add("error");
+    }
+  } finally {
+    analysisAbortController = null;
   }
 }
 
