@@ -184,16 +184,37 @@
             </button>
           </div>
         </div>
+        <div id="highlightFilters" class="highlight-filters" hidden>
+          <button type="button" class="badge highlight-filter-badge filter-pitch" data-filter="pitch">Pitch</button>
+          <button type="button" class="badge highlight-filter-badge filter-expression" data-filter="expression">Expression</button>
+          <button type="button" class="badge highlight-filter-badge filter-timing" data-filter="timing">Timing</button>
+          <button type="button" class="badge highlight-filter-badge filter-volume" data-filter="volume">Volume</button>
+        </div>
       </div>
-      <div id="waveform" class="waveform"></div>
-      <div id="sectionRibbon" class="section-ribbon"></div>
-      <div id="timeline" class="timeline"></div>
-      
-      <div id="highlightFilters" class="highlight-filters" hidden>
-        <button type="button" class="badge highlight-filter-badge filter-pitch" data-filter="pitch">Pitch</button>
-        <button type="button" class="badge highlight-filter-badge filter-expression" data-filter="expression">Expression</button>
-        <button type="button" class="badge highlight-filter-badge filter-timing" data-filter="timing">Timing</button>
-        <button type="button" class="badge highlight-filter-badge filter-volume" data-filter="volume">Volume</button>
+      <div id="timelineGrid" class="timeline-grid" hidden>
+        <!-- Row 1: section ribbon — no label -->
+        <div class="tl-label"></div>
+        <div id="sectionRibbon" class="section-ribbon"></div>
+
+        <!-- Row 2: analysis graph -->
+        <div class="tl-label" id="analysisGraphLabelCell">
+          <span id="analysisGraphLabel" class="analysis-graph-label">Reference Match</span>
+          <select id="techniqueSelect" class="technique-select" hidden></select>
+        </div>
+        <canvas id="analysisGraphCanvas" class="analysis-graph-canvas"></canvas>
+
+        <!-- Row 3: waveform -->
+        <div class="tl-label">
+          <span class="tl-row-label">Waveform</span>
+          <span class="tl-row-sublabel">Performance audio</span>
+        </div>
+        <div id="waveform" class="waveform"></div>
+
+        <!-- Row 4: highlight regions -->
+        <div class="tl-label">
+          <span class="tl-row-label">Highlights</span>
+        </div>
+        <div id="timeline" class="timeline"></div>
       </div>
       <div id="highlightList" class="highlights"></div>
     </section>

@@ -102,6 +102,10 @@ class HighlightsConfig:
     alignment, dynamics) in the final list.  Enforced via round-robin so every
     category with candidates gets representation."""
 
+    moment_min_duration_s: float = 1.5
+    """Any single-note coaching moment is padded to at least this duration (seconds)
+    so the playback snippet gives the user enough musical context to hear what happened."""
+
     best_phrase_min_pct_in_tune: float = 0.40
     pitch_struggle_max_pct_in_tune: float = 0.55
     expressive_techniques: tuple[str, ...] = (

@@ -663,6 +663,48 @@ def get_perf_pitch(song_id: str, perf_id: str):
     )
 
 
+@app.get("/api/songs/{song_id}/reference/pitch")
+def get_reference_pitch(song_id: str):
+    """Return the precomputed reference pitch track for a song."""
+    song_dir = _song_dir(song_id)
+    manifest = load_manifest(song_dir)
+    rel = manifest.reference_pitch_path or "reference/pitch.json"
+    path = song_dir / rel
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Reference pitch track not found")
+    return JSONResponse(
+        content=PitchTrack.model_validate_json(path.read_text(encoding="utf-8")).model_dump()
+    )
+
+
+@app.get("/api/songs/{song_id}/reference/loudness")
+def get_reference_loudness(song_id: str):
+    """Return the precomputed reference loudness track for a song."""
+    song_dir = _song_dir(song_id)
+    manifest = load_manifest(song_dir)
+    rel = manifest.reference_loudness_path or "reference/loudness.json"
+    path = song_dir / rel
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Reference loudness track not found")
+    return JSONResponse(
+        content=LoudnessTrack.model_validate_json(path.read_text(encoding="utf-8")).model_dump()
+    )
+
+
+@app.get("/api/songs/{song_id}/reference/stars")
+def get_reference_stars(song_id: str):
+    """Return the precomputed reference STARS track for a song."""
+    song_dir = _song_dir(song_id)
+    manifest = load_manifest(song_dir)
+    rel = manifest.reference_stars_path or "reference/stars.json"
+    path = song_dir / rel
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Reference STARS track not found")
+    return JSONResponse(
+        content=StarsTrack.model_validate_json(path.read_text(encoding="utf-8")).model_dump()
+    )
+
+
 @app.get("/api/songs/{song_id}/performances/{perf_id}/loudness")
 def get_perf_loudness(song_id: str, perf_id: str):
     """Per-frame RMS (dB) track; the UI turns this into a waveform envelope.

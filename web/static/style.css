@@ -31,7 +31,6 @@ body {
 
 header {
   padding: 32px 32px 16px;
-  border-bottom: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(8px);
 }
@@ -439,7 +438,6 @@ h3 {
 }
 
 .timeline {
-  margin-top: 10px;
   position: relative;
   height: 28px;
   background: var(--panel-2);
@@ -609,7 +607,6 @@ h3 {
 .section-ribbon {
   position: relative;
   height: 22px;
-  margin-top: 8px;
   background: rgba(0, 0, 0, 0.04);
   border-radius: 6px;
   overflow: hidden;
@@ -780,10 +777,12 @@ h3 {
   padding: 4px 4px 16px;
   display: flex;
   flex-direction: row;
+  align-items: flex-start;
   gap: 12px;
   overflow-x: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+  min-height: 500px;
 }
 
 .highlights::-webkit-scrollbar { height: 6px; }
@@ -796,7 +795,7 @@ h3 {
 }
 
 .card {
-  flex: 0 0 320px;
+  flex: 0 0 280px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-left: 4px solid var(--accent);
@@ -805,7 +804,6 @@ h3 {
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 8px;
   transition: transform 0.12s ease, box-shadow 0.15s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -888,7 +886,11 @@ h3 {
 
 .card-header {
   margin: 0;
-  padding: 5px 0 10px;
+  padding: 5px 0 4px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .card-header h5 {
@@ -897,6 +899,16 @@ h3 {
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: 0.01em;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Timestamp in the header (right-aligned) */
+.card-header .card-stat-meta {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 /* h5 accent matches left border by category */
@@ -954,15 +966,6 @@ h3 {
   font-variant-numeric: tabular-nums;
 }
 
-.card-stat-value {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.card-stat-meta {
-  font-size: 11px;
-  color: var(--muted);
-}
 
 .card-play {
   background: var(--accent);
@@ -978,6 +981,125 @@ h3 {
 }
 
 .card-play:hover { filter: brightness(1.08); }
+
+/* ---------- V2 Card: collapsed / expanded progressive disclosure ---------- */
+
+.card-collapsed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0 0 auto; /* never shrink — keeps disclosure link stationary on expand */
+}
+
+.card-expanded {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  transition: max-height 0.28s ease, opacity 0.18s ease, padding-top 0.28s ease;
+}
+
+.card-expanded.open {
+  max-height: 600px; /* generous upper bound; actual content is ~200-300px */
+  opacity: 1;
+  padding-top: 12px;
+}
+
+.card-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin-top: auto; /* push divider (and disclosure link) to the card bottom */
+}
+
+.card-disclosure {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: none;
+  padding: 2px 0;
+  transition: opacity 0.1s ease;
+  user-select: none;
+}
+
+.card-disclosure:hover { opacity: 0.72; text-decoration: underline; }
+
+/* Collapsed state: clip the card to only show the collapsed portion */
+.card.collapsed { cursor: default; }
+.card.collapsed .card-collapsed { cursor: default; }
+
+/* ---------- Try This section ---------- */
+
+.card-try-this {
+  background: rgba(59, 111, 212, 0.05);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-try-this-label {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.card-try-this-text {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* ---------- Card dual play buttons ---------- */
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.card-play-take,
+.card-play-ref {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+
+.card-play-take:hover,
+.card-play-ref:hover {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.card-play-ref {
+  color: var(--expr);
+  border-color: var(--expr);
+}
+
+.card-play-ref:hover {
+  background: var(--expr);
+  color: #ffffff;
+}
 
 /* ---------- Basis filter row (above category badges) ---------- */
 
@@ -1036,32 +1158,6 @@ h3 {
   margin-bottom: 4px;
 }
 
-/* ---------- Card basis label (Technique / Style tag) ---------- */
-
-.card-basis-label {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 999px;
-  margin-left: 6px;
-  vertical-align: middle;
-  border: 1px solid transparent;
-}
-
-.card-basis-label.basis-absolute {
-  background: rgba(59, 111, 212, 0.10);
-  color: var(--accent);
-  border-color: rgba(59, 111, 212, 0.25);
-}
-
-.card-basis-label.basis-comparative {
-  background: rgba(124, 58, 237, 0.10);
-  color: var(--expr);
-  border-color: rgba(124, 58, 237, 0.25);
-}
 
 /* ─── Analysis Progress Bar ─────────────────────────────────────────── */
 
@@ -1336,5 +1432,86 @@ h3 {
 @keyframes waveBarPulse {
   0%, 100% { transform: scaleY(1); }
   50%       { transform: scaleY(0.2); }
+}
+
+/* ---------- Timeline grid (section ribbon / graph / waveform / highlights) ---------- */
+
+.timeline-grid {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 6px 0;
+  margin-top: 8px;
+}
+
+/* Label cells (left column) */
+.tl-label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 10px 0 0;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tl-row-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.tl-row-sublabel {
+  font-size: 9px;
+  color: var(--muted);
+  opacity: 0.65;
+  line-height: 1.3;
+}
+
+/* Analysis graph label (reused inside .tl-label) */
+.analysis-graph-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+/* Technique dropdown inside the label cell */
+.technique-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--panel-2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M3 4.5 6 7.5 9 4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 16px 3px 6px;
+  font-size: 10px;
+  font-family: inherit;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color 0.12s ease;
+}
+
+.technique-select:focus {
+  border-color: var(--expr);
+}
+
+/* Canvas sits directly in the grid — no wrapper container */
+.analysis-graph-canvas {
+  display: block;
+  width: 100%;
+  height: 175px;
+  cursor: pointer;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  min-width: 0;
 }
 

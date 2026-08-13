@@ -1,4 +1,5 @@
 import WaveSurfer from "https://unpkg.com/wavesurfer.js@7.8.6/dist/wavesurfer.esm.js";
+import { AnalysisGraph } from "./analysis-graph.js";
 
 /**
  * Prefix a /api/... path with the configured API base URL.
@@ -37,6 +38,7 @@ const fastProfile = document.getElementById("fastProfile");
 let pendingFile = null;
 let analysisAbortController = null;
 let wavesurfer = null;
+let analysisGraph = null;
 let currentMedia = null;
 let currentDuration = 0;
 let currentAnalysis = null;
@@ -270,6 +272,25 @@ const PITCH_GOOD_TYPES = new Set([
   "section_improvement",
 ]);
 
+// Card types that do NOT show the "Show coaching & comparison" disclosure section.
+// Mirrors _NO_TRY_THIS_TYPES in highlights.py. Affirming cards (positive reinforcement)
+// and timing cards (practice strategies, not vocal exercises) are excluded because the
+// expanded section adds nothing useful — there is no corrective drill and no meaningful
+// audio comparison to make.
+const NO_DISCLOSURE_TYPES = new Set([
+  // Timing cards
+  "late_entrance", "timing_consistency", "rushed_phrase",
+  "dragged_phrase", "rhythmic_precision", "section_delta",
+  // Affirming / positive-reinforcement cards
+  "best_pitch_phrase", "section_strength", "best_overall_section",
+  "clean_attack", "steady_sustain", "consistent_vibrato",
+  "straight_tone_control", "clean_onset", "dynamic_sustain",
+  "controlled_crescendo", "soft_passage_control",
+  "vibrato_with_support", "expressive_stability",
+  "high_note_control", "section_improvement", "dynamic_surge",
+  "expressive_match", "expressive_moment",
+]);
+
 function cardCategoryClass(moment) {
   const cat = MOMENT_TYPE_CATEGORY[moment.type] || "pitch";
   if (cat === "pitch") {
@@ -332,6 +353,28 @@ function applyHighlightFilter() {
   } else if (empty) {
     empty.remove();
   }
+  equalizeCardHeights();
+}
+
+/**
+ * Measure the tallest visible collapsed card and apply that as min-height to
+ * all collapsed cards so the disclosure links stay on the same horizontal
+ * plane.  Uses align-items: flex-start on the parent, so expanded cards grow
+ * freely beyond the min-height without stretching their siblings.
+ */
+function equalizeCardHeights() {
+  if (!highlightList) return;
+  // Target the inner .card-collapsed panel (not the outer .card) so the
+  // disclosure link anchors to the bottom of a fixed-height area. Expanded
+  // cards grow by pushing .card-expanded *below* this area, not by shrinking it.
+  const panels = Array.from(highlightList.querySelectorAll("article.card:not(.hidden) .card-collapsed"));
+  // Clear first so we measure natural heights in the next frame.
+  panels.forEach(p => p.style.minHeight = "");
+  requestAnimationFrame(() => {
+    if (!panels.length) return;
+    const maxH = Math.max(...panels.map(p => p.offsetHeight));
+    if (maxH > 0) panels.forEach(p => p.style.minHeight = maxH + "px");
+  });
 }
 
 function setHighlightFilter(category) {
@@ -340,6 +383,8 @@ function setHighlightFilter(category) {
     btn.classList.toggle("active", btn.dataset.filter === activeHighlightFilter);
   }
   applyHighlightFilter();
+  // Sync the analysis graph to the new filter
+  if (analysisGraph) analysisGraph.setFilter(activeHighlightFilter);
 }
 
 function setBasisFilter(basis) {
@@ -1036,41 +1081,172 @@ function renderCoachingCards(reference, analysis) {
       ? `<p class="card-section">${moment.section_names.join(" · ")}</p>`
       : "";
     const lyricEl = lyric ? `<blockquote class="card-lyric">“${lyric}”</blockquote>` : "";
-    const basisLabel = `<span class="card-basis-label basis-${basis}">${BASIS_DISPLAY[basis] || basis}</span>`;
     const evidenceBadge =
       moment.confidence === "medium"
         ? `<span class="evidence-badge">Limited evidence</span>`
         : "";
 
-    card.innerHTML = `
-      <header class="card-header">
-        <h5>${cardHeadingText(moment)}${basisLabel}</h5>
-      </header>
-      <p class="card-title">${moment.title}</p>
-      <p class="card-summary">${moment.summary}</p>
-      ${sectionTag}
-      ${lyricEl}
-      ${evidenceBadge}
-      <div class="card-footer">
-        <div class="card-stat">
-          <span class="card-stat-value">${keyStatFor(moment)}</span>
-          <span class="card-stat-meta">${fmtTime(userStart)}–${fmtTime(userEnd)}</span>
+
+    const tryThisEl = moment.practice_tip
+      ? `<div class="card-try-this">
+           <h6 class="card-try-this-label">Try this</h6>
+           <p class="card-try-this-text">${moment.practice_tip}</p>
+         </div>`
+      : "";
+
+    const hasDisclosure = !NO_DISCLOSURE_TYPES.has(moment.type);
+
+    // V2: corrective cards are collapsed by default with a disclosure link.
+    // Affirming and timing cards show all content immediately (no disclosure).
+    card.className = `card ${hasDisclosure ? "collapsed" : ""} ${moment.type} ${cardCategoryClass(moment)} ${scopeClass}${confidenceClass}`.trim();
+
+    const songStart = moment.start_s;
+    const songEnd = moment.end_s;
+
+    const disclosureFooter = hasDisclosure ? `
+        <hr class="card-divider" />
+        <a class="card-disclosure" role="button" tabindex="0">Show coaching &amp; comparison</a>` : "";
+
+    const expandedSection = hasDisclosure ? `
+      <div class="card-expanded">
+        ${lyricEl}
+        ${tryThisEl}
+        <div class="card-actions">
+          <button class="card-play-take" type="button">&#9654; Play your take</button>
+          <button class="card-play-ref" type="button">&#9654; Play reference</button>
         </div>
-        <button class="card-play" type="button">Play from here</button>
+      </div>` : "";
+
+    card.innerHTML = `
+      <div class="card-collapsed">
+        <header class="card-header">
+          <h5>${cardHeadingText(moment)}</h5>
+          <span class="card-stat-meta">${fmtTime(userStart)}&ndash;${fmtTime(userEnd)}</span>
+        </header>
+        <p class="card-title">${moment.title}</p>
+        <p class="card-summary">${moment.summary}</p>
+        ${sectionTag}
+        ${evidenceBadge}
+        ${disclosureFooter}
       </div>
+      ${expandedSection}
     `;
-    card.querySelector(".card-play").addEventListener("click", (e) => {
-      e.stopPropagation();
-      seekAndPlay(userStart);
-      scrollToHighlightCard(card.dataset.momentId);
-    });
+
+    if (hasDisclosure) {
+      const disclosureLink = card.querySelector(".card-disclosure");
+      const expandedEl = card.querySelector(".card-expanded");
+
+      disclosureLink.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isExpanded = expandedEl.classList.contains("open");
+        expandedEl.classList.toggle("open", !isExpanded);
+        disclosureLink.textContent = isExpanded
+          ? "Show coaching & comparison"
+          : "Hide coaching & comparison";
+        card.classList.toggle("collapsed", isExpanded);
+        if (isExpanded) {
+          // Re-equalize heights after the collapse animation (0.28s) finishes.
+          setTimeout(equalizeCardHeights, 300);
+        }
+      });
+      disclosureLink.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          disclosureLink.click();
+        }
+      });
+
+      card.querySelector(".card-play-take").addEventListener("click", (e) => {
+        e.stopPropagation();
+        playRanged(userStart, userEnd);
+      });
+
+      card.querySelector(".card-play-ref").addEventListener("click", (e) => {
+        e.stopPropagation();
+        playReferenceRanged(songStart, songEnd);
+      });
+    }
+
     card.addEventListener("click", () => {
-      seekAndPlay(userStart);
+      playRanged(userStart, userEnd);
       scrollToHighlightCard(card.dataset.momentId);
     });
     highlightList.appendChild(card);
   }
   applyHighlightFilter();
+}
+
+/**
+ * Seek the user's performance to userStart and stop playback at userEnd.
+ * Uses WaveSurfer when available; falls back to the raw media element.
+ */
+function playRanged(userStart, userEnd) {
+  const t = Math.max(0, userStart);
+
+  function attachStop(media) {
+    const stopListener = () => {
+      if (media.currentTime >= userEnd) {
+        media.pause();
+        media.removeEventListener("timeupdate", stopListener);
+      }
+    };
+    media.addEventListener("timeupdate", stopListener);
+  }
+
+  if (wavesurfer) {
+    try {
+      wavesurfer.setTime(t);
+      const media = wavesurfer.getMediaElement
+        ? wavesurfer.getMediaElement()
+        : wavesurfer.media;
+      if (media) attachStop(media);
+      const p = wavesurfer.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+      syncMixLayers(t, true);
+      return;
+    } catch (e) {
+      console.warn("WaveSurfer ranged play failed, using media element:", e);
+    }
+  }
+  if (currentMedia) {
+    try {
+      currentMedia.currentTime = t;
+      attachStop(currentMedia);
+      currentMedia.play().catch(() => {});
+      syncMixLayers(t, true);
+    } catch (e) {
+      console.warn("Media ranged play failed:", e);
+    }
+  }
+}
+
+/**
+ * Play the reference vocal audio from songStart to songEnd (song time, no offset)
+ * then stop. Pauses the user performance while the snippet plays.
+ */
+function playReferenceRanged(songStart, songEnd) {
+  ensureMixMedia();
+  if (!refVocalMedia.src) {
+    console.warn("Reference audio not loaded yet");
+    return;
+  }
+  // Pause the user performance while reference snippet plays.
+  if (wavesurfer && wavesurfer.isPlaying()) wavesurfer.pause();
+  else currentMedia?.pause();
+  pauseMixLayers();
+
+  refVocalMedia.currentTime = Math.max(0, songStart);
+  const stopRef = () => {
+    if (refVocalMedia.currentTime >= songEnd) {
+      refVocalMedia.pause();
+      refVocalMedia.removeEventListener("timeupdate", stopRef);
+    }
+  };
+  refVocalMedia.addEventListener("timeupdate", stopRef);
+  refVocalMedia.play().catch((e) => {
+    console.warn("Reference ranged play failed:", e);
+    refVocalMedia.removeEventListener("timeupdate", stopRef);
+  });
 }
 
 function currentStarsProfile() {
@@ -1241,6 +1417,23 @@ function attachPlaybackMixSync() {
     for (const ev of ["play", "pause", "timeupdate", "seeking", "interaction"]) {
       wavesurfer.on(ev, sync);
     }
+    // Drive the graph playhead loop from WaveSurfer events
+    wavesurfer.on("play",  () => {
+      if (analysisGraph) analysisGraph.startPlayheadLoop(getPerformanceTime);
+    });
+    wavesurfer.on("pause", () => {
+      if (analysisGraph) {
+        analysisGraph.stopPlayheadLoop();
+        const dur = currentDuration || 1;
+        analysisGraph.setPlayheadPosition(getPerformanceTime() / dur);
+      }
+    });
+    wavesurfer.on("seeking", () => {
+      if (analysisGraph) {
+        const dur = currentDuration || 1;
+        analysisGraph.setPlayheadPosition(getPerformanceTime() / dur);
+      }
+    });
   }
 }
 
@@ -1300,6 +1493,10 @@ async function renderAnalysis(songId, analysis) {
     }
     wavesurfer = null;
   }
+  if (analysisGraph) {
+    analysisGraph.destroy();
+    analysisGraph = null;
+  }
 
   const audioUrl = apiUrl(`/api/songs/${encodeURIComponent(songId)}/performances/${encodeURIComponent(
     analysis.perf_id,
@@ -1316,6 +1513,11 @@ async function renderAnalysis(songId, analysis) {
   // Precomputed peaks from the loudness track avoid a fragile in-browser
   // decode of the full (40 MB+) performance WAV.
   const peaks = await fetchPeaks(songId, analysis.perf_id);
+
+  // Unhide the timeline grid BEFORE WaveSurfer.create so that #waveform
+  // has non-zero dimensions when the renderer measures it.
+  const timelineGrid = document.getElementById("timelineGrid");
+  if (timelineGrid) timelineGrid.hidden = false;
 
   wavesurfer = WaveSurfer.create({
     container: waveformDiv,
@@ -1336,6 +1538,23 @@ async function renderAnalysis(songId, analysis) {
     wavesurfer.load(audioUrl);
   }
   attachPlaybackMixSync();
+
+  // Wire up the analysis graph (canvas is already visible inside timelineGrid).
+  const graphCanvas     = document.getElementById("analysisGraphCanvas");
+  const graphLabel      = document.getElementById("analysisGraphLabel");
+  const graphTechSelect = document.getElementById("techniqueSelect");
+  if (graphCanvas && graphLabel && graphTechSelect) {
+    analysisGraph = new AnalysisGraph(
+      graphCanvas,
+      graphLabel,
+      graphTechSelect,
+      apiUrl,
+      seekAndPlay,
+    );
+    const reference = await getReferenceAnnotation(songId);
+    analysisGraph.setAnalysis(analysis, reference);
+    analysisGraph.setFilter(activeHighlightFilter);
+  }
 
   // Overview tiles (above the waveform).
   renderOverviewTiles(analysis.overview, analysis);
@@ -1370,11 +1589,13 @@ async function renderAnalysis(songId, analysis) {
   }
 
   // Section ribbon (verses/choruses/...) under the waveform.
-  const reference = await getReferenceAnnotation(songId);
-  renderSectionRibbon(reference, analysis);
+  // getReferenceAnnotation caches the result; this is effectively free if
+  // we already fetched it above for the analysis graph.
+  const sectionReference = await getReferenceAnnotation(songId);
+  renderSectionRibbon(sectionReference, analysis);
 
   // Rich coaching cards.
-  renderCoachingCards(reference, analysis);
+  renderCoachingCards(sectionReference, analysis);
 }
 
 playPause.addEventListener("click", () => {

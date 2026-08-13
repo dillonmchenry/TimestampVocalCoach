@@ -43,6 +43,7 @@ class _CardSummary(BaseModel):
 
     id: str
     summary: str
+    practice_tip: Optional[str] = None
 
 
 class _CardSummaryBatch(BaseModel):
@@ -69,23 +70,35 @@ class _PerformanceSummaryRaw(BaseModel):
 
 _CARD_SYSTEM_BASE = """\
 You are a vocal coach giving technical, specific feedback on a singing performance.
-For each coaching card, write a concise 1-2 sentence summary: what happened and \
-optionally a quick suggestion. That's it.
+For each coaching card, write a single sentence that describes what the measurements show — \
+the observation only. Do not include coaching suggestions, instructions, or exercises in the summary. \
+Those belong in the practice_tip field, not here.
 
 RULES:
-- Maximum two sentences per card. Be brief.
+- One sentence maximum per card. Shorter is better.
 - Only describe what the measurements show. Do not invent observations.
 - Do NOT mention the associated lyric — it is already displayed separately on the card.
+- Do NOT include any suggestion, instruction, drill, or fix in the summary. \
+The summary is a factual observation ("Your pitch dropped 40 cents flat across this phrase") \
+not a prescription ("Try singing this phrase on a straw").
 - Be direct and technically precise. Avoid vague praise ("great job", "nice work").
 - When a card's feedback_basis is "comparative" (comparing the user to the reference), \
 refer to the original artist by name (provided in SONG CONTEXT below) rather than \
 saying "the reference." Ground your feedback in the artist's known vocal style.
 - When a playbook passage is provided, let its coaching register guide your tone.
 
+PRACTICE TIP ENHANCEMENT (optional):
+If a "practice_tip" is provided in the card evidence, you may optionally produce an enhanced
+version that references specific lyrics or notes from this moment when doing so makes the
+exercise more concrete (e.g. "Try sustaining the 'blue' vowel shape on a single pitch for
+four beats"). If the tip is already sufficiently specific, or the lyric context adds nothing
+meaningful, return it unchanged. If no practice_tip is provided, omit the field entirely.
+
 RESPONSE FORMAT:
 Return valid JSON with a single key "cards" containing an array. Each element must have:
   "id": the exact id string from the input card,
-  "summary": the rewritten 1-2 sentence coaching summary.
+  "summary": the single-sentence observational summary (no suggestions),
+  "practice_tip": (optional) the practice tip, enhanced with lyric context if useful.
 
 Only include cards that were in the input. Do not add cards or omit cards.\
 """
@@ -208,7 +221,7 @@ def _lyric_for_moment(moment, reference) -> str:
 
 def _build_card_evidence(moment, reference, playbook_passage: str) -> dict:
     """Assemble the evidence dict for one CoachingMoment."""
-    return {
+    ev: dict = {
         "id": moment.id,
         "type": moment.type,
         "feedback_basis": moment.feedback_basis,
@@ -222,6 +235,9 @@ def _build_card_evidence(moment, reference, playbook_passage: str) -> dict:
         "measurements": _extract_measurements(moment.detail),
         "playbook": playbook_passage or None,
     }
+    if moment.practice_tip:
+        ev["practice_tip"] = moment.practice_tip
+    return ev
 
 
 # ---------------------------------------------------------------------------
@@ -293,6 +309,7 @@ def rewrite_card_summaries(
     ]
 
     rewritten: dict[str, str] = {}
+    rewritten_tips: dict[str, str] = {}
     orig_max = llm.max_tokens
     llm.max_tokens = max_tokens
     try:
@@ -308,6 +325,8 @@ def rewrite_card_summaries(
             for c in result.cards:
                 if c.summary.strip():
                     rewritten[c.id] = c.summary
+                if c.practice_tip and c.practice_tip.strip():
+                    rewritten_tips[c.id] = c.practice_tip.strip()
             logger.debug(
                 "[feedback] chunk %d/%d: %d/%d cards rewritten",
                 chunk_idx + 1, len(chunks), len(result.cards), len(chunk),
@@ -325,6 +344,10 @@ def rewrite_card_summaries(
             matched += 1
         else:
             logger.debug("[feedback] no LLM summary for card %s — keeping deterministic", m.id)
+        # Apply LLM-enhanced practice tip (falls back to the static one already set).
+        enhanced_tip = rewritten_tips.get(m.id, "")
+        if enhanced_tip:
+            m.practice_tip = enhanced_tip
 
     logger.info("[feedback] card rewriting: %d/%d cards updated", matched, len(moments))
     return moments

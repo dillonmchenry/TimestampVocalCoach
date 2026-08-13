@@ -32,7 +32,10 @@ from __future__ import annotations
 import math
 from typing import Iterable, Optional
 
+from pathlib import Path
+
 from vocal_coach.coaching_config import CoachingConfig
+from vocal_coach.playbook_tips import load_practice_tips
 from vocal_coach.schemas import (
     CoachingMoment,
     HighlightsReport,
@@ -42,6 +45,26 @@ from vocal_coach.schemas import (
     ReferenceNote,
     SectionTrend,
 )
+
+# Default path for practice-tip YAML files (relative to repo root).
+_PLAYBOOKS_DIR = Path("data/rag/playbooks")
+
+# Detector types that should NOT receive a "Try This" practice_tip.
+# Timing cards use practice strategies (metronome, clapping) rather than
+# vocal exercises. Affirming cards are positive reinforcement, not drills.
+_NO_TRY_THIS_TYPES: frozenset[str] = frozenset({
+    # Timing — practice strategies, not vocal exercises
+    "late_entrance", "timing_consistency", "rushed_phrase",
+    "dragged_phrase", "rhythmic_precision", "section_delta",
+    # Affirming — reinforcement, not corrective drills
+    "best_pitch_phrase", "section_strength", "best_overall_section",
+    "clean_attack", "steady_sustain", "consistent_vibrato",
+    "straight_tone_control", "clean_onset", "dynamic_sustain",
+    "controlled_crescendo", "soft_passage_control",
+    "vibrato_with_support", "expressive_stability",
+    "high_note_control", "section_improvement", "dynamic_surge",
+    "expressive_match", "expressive_moment",
+})
 
 
 # User-facing copy for STARS technique keys (short label + coaching explanation).
@@ -120,6 +143,34 @@ def _phrase_window_for_note(
     span = notes[start:end]
     note_indices = [n.note_index for n in span]
     return span[0].start_s, span[-1].end_s, note_indices
+
+
+def _ensure_min_duration(
+    notes: list[NoteMeasurementV2],
+    note: NoteMeasurementV2,
+    min_duration_s: float,
+) -> tuple[float, float, list[int]]:
+    """Pad a single-note window to at least *min_duration_s* seconds.
+
+    The window is expanded symmetrically around the note centre, then all
+    notes whose span overlaps the expanded window are collected so the
+    note_indices list reflects what the user will actually hear during playback.
+    """
+    start_s = note.start_s
+    end_s = note.end_s
+    dur = end_s - start_s
+    if dur < min_duration_s:
+        pad = (min_duration_s - dur) / 2.0
+        start_s = max(0.0, start_s - pad)
+        end_s = end_s + pad
+
+    indices = [
+        n.note_index for n in notes
+        if n.start_s < end_s and n.end_s > start_s
+    ]
+    if not indices:
+        indices = [note.note_index]
+    return start_s, end_s, indices
 
 
 def _windows_overlap(a: tuple[int, int], b: tuple[int, int]) -> bool:
@@ -317,6 +368,7 @@ def detect_late_entrance(
     if worst is None or worst.arrival_offset_ms is None:
         return None
     direction = "late" if worst.arrival_offset_ms > 0 else "early"
+    start_s, end_s, idxs = _ensure_min_duration(notes, worst, config.highlights.moment_min_duration_s)
     return CoachingMoment(
         id=f"late_entrance:{worst.note_index}",
         type="late_entrance",
@@ -324,10 +376,10 @@ def detect_late_entrance(
         summary=(
             f"You came in {abs(worst.arrival_offset_ms):.0f}ms {direction}."
         ),
-        start_s=worst.start_s,
-        end_s=worst.end_s,
+        start_s=start_s,
+        end_s=end_s,
         score=abs(worst.arrival_offset_ms) / 1000.0,
-        note_indices=[worst.note_index],
+        note_indices=idxs,
         detail={
             "arrival_offset_ms": worst.arrival_offset_ms,
         },
@@ -360,6 +412,7 @@ def detect_sharp_flat_notes(
     for _, n in candidates[: cfg.sharp_flat_note_max]:
         direction = "sharp" if n.median_cents > 0 else "flat"  # type: ignore[operator]
         cents = abs(n.median_cents)  # type: ignore[arg-type]
+        start_s, end_s, idxs = _ensure_min_duration(notes, n, cfg.moment_min_duration_s)
         out.append(
             CoachingMoment(
                 id=f"sharp_flat_note:{n.note_index}",
@@ -369,10 +422,10 @@ def detect_sharp_flat_notes(
                     f"This {n.note_name} sat {cents:.0f}c {direction} of target — "
                     f"{'ease off the pressure a touch' if direction == 'sharp' else 'support the note with a bit more energy'}."
                 ),
-                start_s=n.start_s,
-                end_s=n.end_s,
+                start_s=start_s,
+                end_s=end_s,
                 score=cents / 100.0,
-                note_indices=[n.note_index],
+                note_indices=idxs,
                 detail={
                     "median_cents": n.median_cents,
                     "direction": direction,
@@ -411,16 +464,17 @@ def detect_entrance_timing_notes(
     for _, n in candidates[: cfg_h.entrance_timing_max]:
         direction = "late" if n.arrival_offset_ms > 0 else "early"  # type: ignore[operator]
         ms = abs(n.arrival_offset_ms)  # type: ignore[arg-type]
+        start_s, end_s, idxs = _ensure_min_duration(notes, n, cfg_h.moment_min_duration_s)
         out.append(
             CoachingMoment(
                 id=f"late_entrance:{n.note_index}",
                 type="late_entrance",
                 title=f"Watch your entrance on '{n.lyric_word}'",
                 summary=f"You came in {ms:.0f}ms {direction} on this {n.note_name}.",
-                start_s=n.start_s,
-                end_s=n.end_s,
+                start_s=start_s,
+                end_s=end_s,
                 score=ms / 1000.0,
-                note_indices=[n.note_index],
+                note_indices=idxs,
                 detail={
                     "arrival_offset_ms": n.arrival_offset_ms,
                     "section": _section_for(reference, 0.5 * (n.start_s + n.end_s)),
@@ -2180,6 +2234,7 @@ def detect_registration_strain(
     if not strained:
         return None
     worst = max(strained, key=lambda n: n.median_cents)
+    start_s, end_s, idxs = _ensure_min_duration(notes, worst, config.highlights.moment_min_duration_s)
     return CoachingMoment(
         id=f"registration_strain:{worst.note_index}",
         type="registration_strain",
@@ -2188,10 +2243,10 @@ def detect_registration_strain(
             f"This {worst.note_name} sits {worst.median_cents:.0f}c sharp while you're singing loud — "
             f"try easing back the pressure or shifting into a lighter registration."
         ),
-        start_s=worst.start_s,
-        end_s=worst.end_s,
+        start_s=start_s,
+        end_s=end_s,
         score=worst.median_cents / 100.0,
-        note_indices=[worst.note_index],
+        note_indices=idxs,
         detail={"median_cents": round(worst.median_cents, 1),
                 "user_rms_relative_db": round(worst.user_rms_relative_db, 1),
                 "note_name": worst.note_name},
@@ -3270,6 +3325,15 @@ def select_highlights(
         category_caps={"alignment": cfg.highlights.max_per_category_alignment},
     )
     chosen.sort(key=lambda m: m.start_s)
+
+    # Attach practice tips from playbook YAML to eligible moment types.
+    # Tips are excluded for timing cards (metronome/strategy-based) and
+    # affirming cards (positive reinforcement rather than corrective drills).
+    tips = load_practice_tips(_PLAYBOOKS_DIR)
+    for moment in chosen:
+        if moment.type not in _NO_TRY_THIS_TYPES:
+            moment.practice_tip = tips.get(moment.type)
+
     return HighlightsReport(moments=chosen, cap=cfg.highlights.cap)
 
 

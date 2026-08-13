@@ -39,7 +39,8 @@ entries:
     practice_tip: >
       Isolate the two most out-of-tune notes. Sing each in isolation on a sustained 'ah',
       targeting the pitch with your inner ear before you produce sound. Then chain them back
-      into the phrase.
+      into the phrase. Alternatively, lip-trill or straw-phonate through the phrase to let
+      the pitch lock without muscular effort, then transition to open vowels on the same notes.
 
   - detector: sharp_flat_note
     pedagogy: >
@@ -124,7 +125,9 @@ entries:
     practice_tip: >
       For unsupported falls: practice singing the note and mentally 'holding' it for one
       extra beat past where you'd normally release. The physical sensation of sustained
-      support is what you're training.
+      support is what you're training. As a cooldown drill, lip-trill through the phrase —
+      the trill prevents the support collapse at release and reinforces the habit of carrying
+      breath pressure to the very end of each note.
 
   - detector: steady_sustain
     pedagogy: >
@@ -177,7 +180,9 @@ entries:
     practice_tip: >
       Before the phrase, take a breath that fills the lower rib cage (not just the chest).
       Feel the 'buoyancy' of that breath through the entire phrase. The goal is steady
-      outward rib expansion even as you run out of air.
+      outward rib expansion even as you run out of air. For a deeper drill, practise messa
+      di voce (soft-loud-soft) on a single comfortable pitch to train pressure-pitch
+      independence — then apply that breath control to the phrase.
 
   - detector: registration_strain
     pedagogy: >
@@ -195,7 +200,9 @@ entries:
     practice_tip: >
       Sing the strained note on 'ng' (as in 'sing'). The ng position prevents chest pushing.
       If pitch centres on ng, your registration is the issue. Carry that lighter sensation
-      into the full vowel.
+      into the full vowel. If 'ng' alone does not resolve it, try phonating the note through
+      a straw — the back-pressure prevents chest pushing and lets the voice self-organize
+      around the correct register transition.
 
   - detector: loud_pitch_instability
     pedagogy: >
@@ -279,7 +286,10 @@ entries:
     practice_tip: >
       Take a larger breath than you think you need. Sing the phrase and deliberately exaggerate
       support on the last 3 notes. That over-correction will teach your body where the support
-      needs to be sustained.
+      needs to be sustained. Before singing the phrase, also sing the trouble intervals as an
+      isolated arpeggio (1-3-5-3-1) starting on the first pitch of the phrase — this places
+      the problematic notes in their interval context and reveals whether the arc problem is
+      pitch memory or breath support.
 
   - detector: section_strength
     pedagogy: >

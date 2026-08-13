@@ -692,6 +692,14 @@ class CoachingMoment(BaseModel):
             '"comparative" = comparison with the specific reference recording.'
         ),
     )
+    practice_tip: Optional[str] = Field(
+        None,
+        description=(
+            'Actionable vocal exercise for this highlight type. '
+            'Sourced from RAG playbook practice_tip, optionally enhanced '
+            'by LLM to reference specific lyrics when instructive.'
+        ),
+    )
 
 
 class HighlightsReport(BaseModel):

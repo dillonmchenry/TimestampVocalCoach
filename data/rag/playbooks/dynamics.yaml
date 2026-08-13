@@ -179,7 +179,9 @@ entries:
     practice_tip: >
       Hold a hand on your ribs during these notes. The ribs should stay expanded or
       gently contract throughout the sustain — a sudden inward collapse means support
-      is cutting out. Develop the habit of gentle, sustained outward pressure.
+      is cutting out. Develop the habit of gentle, sustained outward pressure. Also
+      practise messa di voce (soft-loud-soft) on the fading notes: the decrescendo half
+      trains exactly the controlled breath reduction needed to prevent an involuntary fade.
 
   - detector: dynamic_sustain
     pedagogy: >
@@ -232,4 +234,7 @@ entries:
     practice_tip: >
       To reinforce this: practise phrase crescendos with a tuner running. The goal is
       to see the pitch needle stay centred as volume increases. If pitch sharpens, slow
-      the crescendo rate and relax the larynx during the build.
+      the crescendo rate and relax the larynx during the build. The dedicated exercise
+      for this coordination is messa di voce: sustain a single pitch from pp to ff and back
+      to pp in one breath, keeping pitch locked throughout. The full soft-loud-soft arc
+      trains exactly the breath-pitch coupling that makes a crescendo phrase succeed.
