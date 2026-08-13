@@ -75,6 +75,10 @@ section {
   align-items: center;
 }
 
+.picker[hidden] {
+  display: none;
+}
+
 .picker label {
   color: var(--muted);
   font-size: 11px;
@@ -418,7 +422,9 @@ section {
 }
 
 .results h2,
-.results h3 {
+.results h3,
+.result-block h2,
+.result-block h3 {
   margin-top: 0;
   letter-spacing: -0.02em;
   font-weight: 600;
@@ -1192,6 +1198,114 @@ h3 {
 }
 
 
+/* ─── Collapsed upload bar (shown after first analysis completes) ──────── */
+
+.add-performance-bar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--panel-2);
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.add-performance-bar:hover {
+  border-color: var(--accent);
+  background: rgba(59, 111, 212, 0.04);
+}
+
+.add-performance-text {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.add-performance-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--accent);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.add-performance-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* When upload section is collapsed, hide all interactive content */
+.upload--collapsed .mode-toggle,
+.upload--collapsed .profile-toggle,
+.upload--collapsed .mode-panel,
+.upload--collapsed #analysisProgress,
+.upload--collapsed #status {
+  display: none;
+}
+
+/* Show the compact bar when collapsed */
+.upload--collapsed .add-performance-bar {
+  display: flex !important;
+}
+
+/* ─── Multiple result blocks ─────────────────────────────────────────── */
+
+/* The results container is just a transparent stack — no card styling */
+#results-container {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Each result block is its own self-contained card */
+.result-block {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+.result-block__delete {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.result-block__delete:hover {
+  color: #dc2626;
+}
+
 /* ─── Analysis Progress Bar ─────────────────────────────────────────── */
 
 /* Hide upload section UI while analysis is running */
@@ -1202,9 +1316,17 @@ h3 {
   display: none;
 }
 
+/* Remove the outer section chrome while only the progress card is showing */
+.upload--analyzing {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
 .analysis-progress {
-  margin-top: 12px;
-  padding: 28px 24px 32px;
+  margin-top: 0;
+  padding: 45px 24px 45px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-radius: 14px;

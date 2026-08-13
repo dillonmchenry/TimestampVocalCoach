@@ -20,21 +20,26 @@ const status = document.getElementById("status");
 const analysisProgress = document.getElementById("analysisProgress");
 const analysisCancelBtn = document.getElementById("analysisCancelBtn");
 const uploadSection = document.querySelector("section.upload");
-const results = document.getElementById("results");
-const waveformDiv = document.getElementById("waveform");
-const sectionRibbon = document.getElementById("sectionRibbon");
-const timelineDiv = document.getElementById("timeline");
+const resultsContainer = document.getElementById("results-container");
+// Per-active-block DOM references — updated by activateBlock() whenever the active block changes
+let waveformDiv = null;
+let sectionRibbon = null;
+let timelineDiv = null;
 const offsetSummary = document.getElementById("offsetSummary");
-const playPause = document.getElementById("playPause");
-const mixRefVocalBtn = document.getElementById("mixRefVocal");
-const mixInstrumentalBtn = document.getElementById("mixInstrumental");
-const highlightList = document.getElementById("highlightList");
-const highlightFilters = document.getElementById("highlightFilters");
+// Per-active-block playback bar buttons — updated by activateBlock() on each switch
+let playPause = null;
+let mixRefVocalBtn = null;
+let mixInstrumentalBtn = null;
+let highlightList = null;
+let highlightFilters = null;
 const basisFilters = document.getElementById("basisFilters");
-const overviewTiles = document.getElementById("overviewTiles");
-const segmentInfo = document.getElementById("segmentInfo");
+let overviewTiles = null;
+let segmentInfo = null;
 const fastProfile = document.getElementById("fastProfile");
-const backToFullSongBtn = document.getElementById("backToFullSong");
+let backToFullSongBtn = null;
+const addPerformanceBar = document.getElementById("addPerformanceBar");
+const addPerformanceBtn = document.getElementById("addPerformanceBtn");
+const pickerSection = document.querySelector("section.picker");
 
 let pendingFile = null;
 let analysisAbortController = null;
@@ -54,6 +59,15 @@ let playbackSyncAbort = null;
 let focusedSection = null;   // { name, kind, start_s, end_s } in song time, or null
 let fullPeaks = null;        // cached full-recording peaks array for waveform restoration
 let fullAudioUrl = null;     // cached audio URL for waveform restoration
+
+// Per-active-block element reference for the LLM summary panel
+let performanceSummaryEl = null;
+// AbortController that cleans up playback bar click listeners when the active block changes
+let playbackListenersAbort = null;
+
+// All rendered analyses in this session; each entry is a block-state object
+let analyses = [];
+let activeAnalysisIdx = -1;
 
 const MIX_LAYER_VOLUME = 0.85;
 const MIX_SYNC_THRESHOLD_S = 0.08;
@@ -328,6 +342,7 @@ let activeHighlightFilter = null;
 let activeBasisFilter = "all";
 
 function applyHighlightFilter() {
+  if (!highlightList || !timelineDiv) return;
   const cards = highlightList.querySelectorAll("article.card");
   let visible = 0;
   for (const card of cards) {
@@ -385,8 +400,10 @@ function equalizeCardHeights() {
 
 function setHighlightFilter(category) {
   activeHighlightFilter = activeHighlightFilter === category ? null : category;
-  for (const btn of highlightFilters.querySelectorAll(".highlight-filter-badge")) {
-    btn.classList.toggle("active", btn.dataset.filter === activeHighlightFilter);
+  if (highlightFilters) {
+    for (const btn of highlightFilters.querySelectorAll(".highlight-filter-badge")) {
+      btn.classList.toggle("active", btn.dataset.filter === activeHighlightFilter);
+    }
   }
   applyHighlightFilter();
   // Sync the analysis graph to the new filter
@@ -525,7 +542,9 @@ function setAnalyzeLoading(loading) {
  * Also hides the rest of the upload section so the progress bar is the sole focus.
  */
 function showAnalysisProgress(activeStep) {
+  uploadSection.classList.remove("upload--collapsed");
   uploadSection.classList.add("upload--analyzing");
+  if (pickerSection) pickerSection.hidden = true;
   analysisProgress.classList.remove("hidden");
 
   const stepEls = analysisProgress.querySelectorAll(".progress-step");
@@ -635,11 +654,15 @@ analyzeButton.addEventListener("click", async () => {
   } catch (e) {
     if (e.name === "AbortError") {
       hideAnalysisProgress();
+      if (analyses.length > 0) collapseUploadSection();
+      else if (pickerSection) pickerSection.hidden = false;
     } else {
       console.error(e);
       hideAnalysisProgress();
       status.textContent = `Analysis failed: ${e.message}`;
       status.classList.add("error");
+      if (analyses.length > 0) collapseUploadSection();
+      else if (pickerSection) pickerSection.hidden = false;
     }
   } finally {
     setAnalyzeLoading(false);
@@ -767,6 +790,7 @@ function computeStrongestSection(analysis) {
 }
 
 function renderOverviewTiles(overview, analysis) {
+  if (!overviewTiles) return;
   overviewTiles.innerHTML = "";
   if (!overview) {
     overviewTiles.hidden = true;
@@ -844,7 +868,7 @@ function renderOverviewTiles(overview, analysis) {
 }
 
 function renderPerformanceSummary(summary) {
-  const el = document.getElementById("performanceSummary");
+  const el = performanceSummaryEl;
   if (!el) return;
   if (!summary || !summary.narrative) {
     el.hidden = true;
@@ -884,6 +908,7 @@ function renderPerformanceSummary(summary) {
 }
 
 function renderSectionRibbon(reference, analysis) {
+  if (!sectionRibbon) return;
   sectionRibbon.innerHTML = "";
   if (!reference || !Array.isArray(reference.sections) || !reference.sections.length) {
     return;
@@ -931,6 +956,7 @@ function renderSectionRibbon(reference, analysis) {
  * Called at initial render and when restoring from section view.
  */
 function renderFullRegions() {
+  if (!timelineDiv) return;
   timelineDiv.innerHTML = "";
   if (!currentAnalysis) return;
   const totalDur = currentDuration;
@@ -964,6 +990,7 @@ function renderFullRegions() {
  * user-time range.
  */
 function renderSectionRegions(section) {
+  if (!timelineDiv) return;
   timelineDiv.innerHTML = "";
   if (!currentAnalysis) return;
   const offset          = currentAnalysis.global_offset_s ?? 0;
@@ -1004,6 +1031,7 @@ function renderSectionRegions(section) {
  * Render the section ribbon with only the focused section, spanning full width.
  */
 function renderSectionFocusedRibbon(section) {
+  if (!sectionRibbon) return;
   sectionRibbon.innerHTML = "";
   const kindClass = SECTION_KIND_CLASS[section.kind] || "kind-unknown";
   const band = document.createElement("div");
@@ -1030,6 +1058,7 @@ function renderSectionFocusedRibbon(section) {
  * container.  Falls back gracefully for builds that don't use shadow DOM.
  */
 function findWaveSurferScrollEl() {
+  if (!waveformDiv) return null;
   // v7: container → rendererDiv (shadow host) → shadowRoot → .scroll
   const rendererDiv = waveformDiv.firstElementChild;
   if (rendererDiv?.shadowRoot) {
@@ -1190,6 +1219,177 @@ async function clearSectionFocus() {
 
 // ---- End section focus helpers -------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Multi-analysis session management
+// ---------------------------------------------------------------------------
+
+/**
+ * Switch the "active" result block to analyses[idx].
+ * Updates all module-level per-block variables (wavesurfer, currentAnalysis,
+ * waveformDiv, etc.) to point at the chosen block's state and DOM elements.
+ * Pauses the previously active block.
+ */
+function activateBlock(idx) {
+  if (idx < 0 || idx >= analyses.length) return;
+
+  // Pause and save state of the currently active block
+  if (activeAnalysisIdx >= 0 && activeAnalysisIdx !== idx) {
+    const prev = analyses[activeAnalysisIdx];
+    try { prev.wavesurfer?.pause(); } catch (e) { /* ignore */ }
+    prev.mediaEl?.pause();
+    prev.refVocalMedia?.pause();
+    prev.instrumentalMedia?.pause();
+    // Save mutable interaction state back to the block
+    prev.focusedSection  = focusedSection;
+    prev.mixRefVocalOn   = mixRefVocalOn;
+    prev.mixInstrumentalOn = mixInstrumentalOn;
+  }
+
+  // Detach playback sync from the old block before switching
+  detachPlaybackMixSync();
+
+  activeAnalysisIdx = idx;
+  const block = analyses[idx];
+
+  // Update module-level playback state to the new block
+  wavesurfer           = block.wavesurfer;
+  analysisGraph        = block.analysisGraph;
+  currentMedia         = block.mediaEl;
+  currentDuration      = block.analysis.duration_s;
+  currentAnalysis      = block.analysis;
+  currentPlaybackSongId = block.songId;
+  focusedSection       = block.focusedSection;
+  fullPeaks            = block.fullPeaks;
+  fullAudioUrl         = block.fullAudioUrl;
+  refVocalMedia        = block.refVocalMedia;
+  instrumentalMedia    = block.instrumentalMedia;
+  mixRefVocalOn        = block.mixRefVocalOn;
+  mixInstrumentalOn    = block.mixInstrumentalOn;
+
+  // Update per-block DOM element references
+  const container = block.container;
+  waveformDiv        = container.querySelector('[data-role="waveform"]');
+  sectionRibbon      = container.querySelector('[data-role="sectionRibbon"]');
+  timelineDiv        = container.querySelector('[data-role="timeline"]');
+  overviewTiles      = container.querySelector('[data-role="overviewTiles"]');
+  highlightList      = container.querySelector('[data-role="highlightList"]');
+  segmentInfo        = container.querySelector('[data-role="segmentInfo"]');
+  performanceSummaryEl = container.querySelector('[data-role="performanceSummary"]');
+  // Playback bar buttons are now per-block (inside the template)
+  playPause          = container.querySelector('[data-role="playPause"]');
+  mixRefVocalBtn     = container.querySelector('[data-role="mixRefVocal"]');
+  mixInstrumentalBtn = container.querySelector('[data-role="mixInstrumental"]');
+  backToFullSongBtn  = container.querySelector('[data-role="backToFullSong"]');
+  highlightFilters   = container.querySelector('[data-role="highlightFilters"]');
+
+  // Wire click handlers to this block's playback bar
+  wirePlaybackBarListeners();
+
+  // Sync playback bar UI to this block's state
+  const song = allSongs.find(s => s.song_id === block.songId);
+  updateMixToggleUi(song);
+  if (mixRefVocalBtn) {
+    mixRefVocalBtn.classList.toggle("active", mixRefVocalOn);
+    mixRefVocalBtn.setAttribute("aria-pressed", String(mixRefVocalOn));
+  }
+  if (mixInstrumentalBtn) {
+    mixInstrumentalBtn.classList.toggle("active", mixInstrumentalOn);
+    mixInstrumentalBtn.setAttribute("aria-pressed", String(mixInstrumentalOn));
+  }
+  if (backToFullSongBtn) backToFullSongBtn.hidden = (block.focusedSection == null);
+
+  // Re-attach playback sync for the newly active block
+  if (block.wavesurfer || block.mediaEl) {
+    attachPlaybackMixSync();
+  }
+
+  updatePlayPauseIcon();
+
+  // Mark the active block visually
+  document.querySelectorAll(".result-block").forEach((el, i) => {
+    el.classList.toggle("result-block--active", i === idx);
+  });
+}
+
+/**
+ * Permanently remove the analysis block at `idx`, clean up its audio
+ * resources, and reset UI state accordingly.
+ */
+function removeBlock(idx) {
+  const block = analyses[idx];
+  if (!block) return;
+
+  // Stop and destroy audio for this block
+  if (activeAnalysisIdx === idx) detachPlaybackMixSync();
+  try { block.wavesurfer?.pause(); block.wavesurfer?.destroy(); } catch (e) { /* ignore */ }
+  block.mediaEl?.pause();
+  block.refVocalMedia?.pause();
+  block.instrumentalMedia?.pause();
+
+  block.container.remove();
+  analyses.splice(idx, 1);
+
+  if (analyses.length === 0) {
+    // Back to the empty initial state — reset all module-level pointers
+    activeAnalysisIdx    = -1;
+    wavesurfer           = null;
+    analysisGraph        = null;
+    currentMedia         = null;
+    currentAnalysis      = null;
+    currentPlaybackSongId = null;
+    focusedSection       = null;
+    fullPeaks            = null;
+    fullAudioUrl         = null;
+    refVocalMedia        = null;
+    instrumentalMedia    = null;
+    playPause            = null;
+    mixRefVocalBtn       = null;
+    mixInstrumentalBtn   = null;
+    backToFullSongBtn    = null;
+    highlightFilters     = null;
+    highlightList        = null;
+    overviewTiles        = null;
+    segmentInfo          = null;
+    performanceSummaryEl = null;
+    resultsContainer.hidden = true;
+    expandUploadSection();
+  } else {
+    // Pick the block to activate after deletion
+    let newIdx = activeAnalysisIdx;
+    if (activeAnalysisIdx === idx) {
+      newIdx = Math.max(0, idx - 1);
+    } else if (activeAnalysisIdx > idx) {
+      newIdx = activeAnalysisIdx - 1;
+    }
+    activeAnalysisIdx = -1; // force activateBlock to re-run
+    activateBlock(newIdx);
+  }
+}
+
+/** Collapse the upload section to the compact "Add a performance" bar. */
+function collapseUploadSection() {
+  uploadSection.classList.add("upload--collapsed");
+  if (pickerSection) pickerSection.hidden = true;
+}
+
+/** Expand the upload section back to full upload/karaoke interface. */
+function expandUploadSection() {
+  uploadSection.classList.remove("upload--collapsed");
+  if (pickerSection) pickerSection.hidden = false;
+  // Reset pending file so the user starts fresh
+  pendingFile = null;
+  if (fileInput) fileInput.value = "";
+  status.textContent = "";
+  setAnalyzeLoading(false);
+}
+
+// Wire the "Add a performance" compact bar to re-expand the upload section
+addPerformanceBar?.addEventListener("click", () => {
+  expandUploadSection();
+});
+
+// ---------------------------------------------------------------------------
+
 function lyricSnippet(reference, noteIndices) {
   if (!reference || !Array.isArray(reference.notes) || !noteIndices?.length) return "";
   const MAX_WORDS = 8;
@@ -1301,6 +1501,7 @@ function scrollToHighlightCard(momentId) {
 }
 
 function renderCoachingCards(reference, analysis) {
+  if (!highlightList) return;
   highlightList.innerHTML = "";
   activeHighlightFilter = null;
   activeBasisFilter = "all";
@@ -1749,18 +1950,46 @@ function seekAndPlay(userStart) {
 }
 
 async function renderAnalysis(songId, analysis) {
-  results.hidden = false;
-  currentAnalysis = analysis;
-  currentPlaybackSongId = songId;
-  currentDuration = analysis.duration_s;
+  // --- 1. Create a new result block from the template ---
+  const template = document.getElementById("resultBlockTemplate");
+  const blockEl = template.content.cloneNode(true).firstElementChild;
 
-  // Clear any lingering section focus from a previous analysis
+  const blockIdx = analyses.length;
+
+  // --- 2. Register the block state (shell; wavesurfer/graph set below) ---
+  const blockState = {
+    songId,
+    analysis,
+    container: blockEl,
+    wavesurfer: null,
+    analysisGraph: null,
+    mediaEl: null,
+    fullPeaks: null,
+    fullAudioUrl: null,
+    focusedSection: null,
+    refVocalMedia: null,
+    instrumentalMedia: null,
+    mixRefVocalOn: false,
+    mixInstrumentalOn: false,
+  };
+  analyses.push(blockState);
+
+  // --- 3. Append block and reveal results container ---
+  resultsContainer.hidden = false;
+  resultsContainer.appendChild(blockEl);
+
+  // Activate this block: updates all module-level per-block variables so the
+  // render helpers below write into the correct DOM elements.
+  activateBlock(blockIdx);
+
+  // --- 4. Initialise per-block state ---
   focusedSection = null;
   fullPeaks = null;
   fullAudioUrl = null;
   if (backToFullSongBtn) backToFullSongBtn.hidden = true;
+  currentDuration = analysis.duration_s;
 
-  // Show a segment indicator when the user recorded only part of the song.
+  // Segment indicator when only part of the song was recorded (karaoke)
   const song = allSongs.find((s) => s.song_id === songId);
   if (analysis.segment_end_song_s != null && song) {
     segmentInfo.textContent =
@@ -1771,27 +2000,23 @@ async function renderAnalysis(songId, analysis) {
     segmentInfo.textContent = "";
   }
 
+  // --- 5. Set up mix layers for this block ---
   resetMixToggles();
+  // ensureMixMedia() will create fresh Audio elements (refVocalMedia / instrumentalMedia are null
+  // for new blocks, so we get brand-new instances per block).
   prepareMixLayers(songId);
   updateMixToggleUi(allSongs.find((s) => s.song_id === songId));
-  detachPlaybackMixSync();
-  if (wavesurfer) {
-    try {
-      wavesurfer.destroy();
-    } catch (e) {
-      /* ignore */
-    }
-    wavesurfer = null;
-  }
-  if (analysisGraph) {
-    analysisGraph.destroy();
-    analysisGraph = null;
-  }
+  // Save the new mix media back to the block state immediately so activateBlock
+  // can pause them if another block is activated mid-analysis.
+  blockState.refVocalMedia    = refVocalMedia;
+  blockState.instrumentalMedia = instrumentalMedia;
 
+  // --- 6. Build performance audio element ---
   const audioUrl = apiUrl(`/api/songs/${encodeURIComponent(songId)}/performances/${encodeURIComponent(
     analysis.perf_id,
   )}/audio`);
   fullAudioUrl = audioUrl;
+  blockState.fullAudioUrl = audioUrl;
 
   // Dedicated streaming media element: plays via HTTP range requests and is
   // a reliable fallback for the play-from-here actions regardless of whether
@@ -1800,17 +2025,19 @@ async function renderAnalysis(songId, analysis) {
   mediaEl.preload = "auto";
   mediaEl.src = audioUrl;
   currentMedia = mediaEl;
+  blockState.mediaEl = mediaEl;
 
-  // Precomputed peaks from the loudness track avoid a fragile in-browser
-  // decode of the full (40 MB+) performance WAV.
+  // --- 7. Fetch precomputed peaks ---
   const peaks = await fetchPeaks(songId, analysis.perf_id);
-  fullPeaks = peaks; // cached for section view waveform zoom
+  fullPeaks = peaks;
+  blockState.fullPeaks = peaks;
 
-  // Unhide the timeline grid BEFORE WaveSurfer.create so that #waveform
-  // has non-zero dimensions when the renderer measures it.
-  const timelineGrid = document.getElementById("timelineGrid");
+  // Unhide the timeline grid BEFORE WaveSurfer.create so that the waveform
+  // container has non-zero dimensions when the renderer measures it.
+  const timelineGrid = blockEl.querySelector('[data-role="timelineGrid"]');
   if (timelineGrid) timelineGrid.hidden = false;
 
+  // --- 8. Create WaveSurfer for this block ---
   wavesurfer = WaveSurfer.create({
     container: waveformDiv,
     waveColor: "#cec5bb",
@@ -1829,12 +2056,13 @@ async function renderAnalysis(songId, analysis) {
   if (!peaks) {
     wavesurfer.load(audioUrl);
   }
+  blockState.wavesurfer = wavesurfer;
   attachPlaybackMixSync();
 
-  // Wire up the analysis graph (canvas is already visible inside timelineGrid).
-  const graphCanvas     = document.getElementById("analysisGraphCanvas");
-  const graphLabel      = document.getElementById("analysisGraphLabel");
-  const graphTechSelect = document.getElementById("techniqueSelect");
+  // --- 9. Create AnalysisGraph for this block ---
+  const graphCanvas     = blockEl.querySelector('[data-role="analysisGraphCanvas"]');
+  const graphLabel      = blockEl.querySelector('[data-role="analysisGraphLabel"]');
+  const graphTechSelect = blockEl.querySelector('[data-role="techniqueSelect"]');
   if (graphCanvas && graphLabel && graphTechSelect) {
     analysisGraph = new AnalysisGraph(
       graphCanvas,
@@ -1847,11 +2075,10 @@ async function renderAnalysis(songId, analysis) {
     analysisGraph.setAnalysis(analysis, reference);
     analysisGraph.setFilter(activeHighlightFilter);
   }
+  blockState.analysisGraph = analysisGraph;
 
-  // Overview tiles (above the waveform).
+  // --- 10. Render content into this block's DOM elements ---
   renderOverviewTiles(analysis.overview, analysis);
-
-  // Performance summary (LLM narrative + takeaways + trends, if available).
   renderPerformanceSummary(analysis.performance_summary);
 
   // Region markers in song time. NOTE: the Wavesurfer waveform is the
@@ -1867,45 +2094,75 @@ async function renderAnalysis(songId, analysis) {
 
   // Rich coaching cards.
   renderCoachingCards(sectionReference, analysis);
+
+  // --- 11. Make the block interactive: clicking it activates its playback ---
+  // Use a live index lookup so this still works after earlier blocks are deleted.
+  blockEl.addEventListener("pointerdown", () => {
+    const liveIdx = analyses.indexOf(blockState);
+    if (liveIdx !== -1 && activeAnalysisIdx !== liveIdx) activateBlock(liveIdx);
+  }, { capture: true });
+
+  // Delete button — remove this block and clean up its resources
+  const deleteBtn = blockEl.querySelector('[data-role="deleteBlock"]');
+  deleteBtn?.addEventListener("click", (e) => {
+    e.stopPropagation(); // don't trigger the pointerdown activation above
+    const liveIdx = analyses.indexOf(blockState);
+    if (liveIdx !== -1) removeBlock(liveIdx);
+  });
+
+  // --- 12. Collapse the upload section to the compact "Add a performance" bar ---
+  collapseUploadSection();
 }
 
-backToFullSongBtn?.addEventListener("click", () => {
-  clearSectionFocus().catch(console.error);
-});
-
 function updatePlayPauseIcon() {
+  if (!playPause) return;
   const playing = isPerformancePlaying();
   playPause.classList.toggle("is-playing", playing);
   playPause.setAttribute("aria-label", playing ? "Pause" : "Play");
   playPause.title = playing ? "Pause" : "Play";
 }
 
-playPause.addEventListener("click", () => {
-  if (wavesurfer) {
-    try {
-      wavesurfer.playPause();
+/**
+ * Wire click handlers onto the currently active block's playback bar buttons.
+ * Old listeners are cleaned up via AbortController so switching blocks never
+ * accumulates stale handlers.
+ */
+function wirePlaybackBarListeners() {
+  playbackListenersAbort?.abort();
+  playbackListenersAbort = new AbortController();
+  const { signal } = playbackListenersAbort;
+
+  playPause?.addEventListener("click", () => {
+    if (wavesurfer) {
+      try {
+        wavesurfer.playPause();
+        syncMixLayers(getPerformanceTime(), isPerformancePlaying());
+        updatePlayPauseIcon();
+        return;
+      } catch (e) {
+        /* fall through to media element */
+      }
+    }
+    if (currentMedia) {
+      if (currentMedia.paused) currentMedia.play().catch(() => {});
+      else currentMedia.pause();
       syncMixLayers(getPerformanceTime(), isPerformancePlaying());
       updatePlayPauseIcon();
-      return;
-    } catch (e) {
-      /* fall through to media element */
     }
-  }
-  if (currentMedia) {
-    if (currentMedia.paused) currentMedia.play().catch(() => {});
-    else currentMedia.pause();
-    syncMixLayers(getPerformanceTime(), isPerformancePlaying());
-    updatePlayPauseIcon();
-  }
-});
+  }, { signal });
 
-mixRefVocalBtn?.addEventListener("click", () => {
-  setMixToggle("ref", !mixRefVocalOn);
-});
+  mixRefVocalBtn?.addEventListener("click", () => {
+    setMixToggle("ref", !mixRefVocalOn);
+  }, { signal });
 
-mixInstrumentalBtn?.addEventListener("click", () => {
-  setMixToggle("instrumental", !mixInstrumentalOn);
-});
+  mixInstrumentalBtn?.addEventListener("click", () => {
+    setMixToggle("instrumental", !mixInstrumentalOn);
+  }, { signal });
+
+  backToFullSongBtn?.addEventListener("click", () => {
+    clearSectionFocus().catch(console.error);
+  }, { signal });
+}
 
 // ---------------------------------------------------------------------------
 // Sprint 3 stretch: karaoke sing-along mode
@@ -2311,11 +2568,15 @@ async function endKaraokeSession({ analyze }) {
   } catch (e) {
     if (e.name === "AbortError") {
       hideAnalysisProgress();
+      if (analyses.length > 0) collapseUploadSection();
+      else if (pickerSection) pickerSection.hidden = false;
     } else {
       console.error(e);
       hideAnalysisProgress();
       status.textContent = `Analysis failed: ${e.message}`;
       status.classList.add("error");
+      if (analyses.length > 0) collapseUploadSection();
+      else if (pickerSection) pickerSection.hidden = false;
     }
   } finally {
     analysisAbortController = null;

@@ -152,62 +152,81 @@
       </div>
 
       <p id="status" class="status"></p>
+
+      <!-- Compact bar shown after an analysis has been rendered; clicking expands upload again -->
+      <div id="addPerformanceBar" class="add-performance-bar" hidden>
+        <span class="add-performance-text">Add a performance</span>
+        <button type="button" id="addPerformanceBtn" class="add-performance-btn" aria-label="Add another recording">+</button>
+      </div>
     </section>
 
-    <section class="results" id="results" hidden>
-      <h2>Performance Analysis</h2>
-      <p id="segmentInfo" class="segment-info" hidden></p>
+    <!-- Results container: transparent wrapper; per-analysis cards are appended here by JS -->
+    <div id="results-container" hidden></div>
 
-      <div id="performanceSummary" class="performance-summary" hidden></div>
-      <div id="overviewTiles" class="overview-tiles" hidden></div>
+    <!-- Template for each per-analysis result block (cloned by JS on each new analysis) -->
+    <template id="resultBlockTemplate">
+      <section class="result-block">
+        <button data-role="deleteBlock" class="result-block__delete" aria-label="Remove performance">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="2" y1="2" x2="12" y2="12"/>
+            <line x1="12" y1="2" x2="2" y2="12"/>
+          </svg>
+        </button>
+        <h2>Performance Analysis</h2>
+        <p data-role="segmentInfo" class="segment-info" hidden></p>
+        <div data-role="performanceSummary" class="performance-summary" hidden></div>
+        <div data-role="overviewTiles" class="overview-tiles" hidden></div>
 
-      <h2>Coaching highlights</h2>
-      <div class="playback-bar">
-        <div class="playback-controls">
-          <button id="backToFullSong" type="button" class="back-to-full-btn" hidden>&#8592; Back to full song</button>
-          <button id="playPause" type="button" class="play-pause-btn" aria-label="Play" title="Play">
-            <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-            <svg class="icon-pause" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
-          </button>
-          <div id="highlightFilters" class="highlight-filters" hidden>
-            <button type="button" class="badge highlight-filter-badge filter-pitch" data-filter="pitch">Pitch</button>
-            <button type="button" class="badge highlight-filter-badge filter-expression" data-filter="expression">Expression</button>
-            <button type="button" class="badge highlight-filter-badge filter-timing" data-filter="timing">Timing</button>
-            <button type="button" class="badge highlight-filter-badge filter-volume" data-filter="volume">Volume</button>
+        <h2>Coaching highlights</h2>
+        <!-- Playback bar is per-block, sits right above the timeline grid -->
+        <div class="playback-bar">
+          <div class="playback-controls">
+            <button data-role="backToFullSong" type="button" class="back-to-full-btn" hidden>&#8592; Back to full song</button>
+            <button data-role="playPause" type="button" class="play-pause-btn" aria-label="Play" title="Play">
+              <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+              <svg class="icon-pause" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            </button>
+            <div data-role="highlightFilters" class="highlight-filters" hidden>
+              <button type="button" class="badge highlight-filter-badge filter-pitch" data-filter="pitch">Pitch</button>
+              <button type="button" class="badge highlight-filter-badge filter-expression" data-filter="expression">Expression</button>
+              <button type="button" class="badge highlight-filter-badge filter-timing" data-filter="timing">Timing</button>
+              <button type="button" class="badge highlight-filter-badge filter-volume" data-filter="volume">Volume</button>
+            </div>
+          </div>
+          <div class="mix-toggles" role="group" aria-label="Playback mix">
+            <button data-role="mixRefVocal" type="button" class="mix-toggle" aria-pressed="false">Add original vocal</button>
+            <button data-role="mixInstrumental" type="button" class="mix-toggle" aria-pressed="false">Add instrumental</button>
           </div>
         </div>
-        <div class="mix-toggles" role="group" aria-label="Playback mix">
-          <button id="mixRefVocal" type="button" class="mix-toggle" aria-pressed="false">Add original vocal</button>
-          <button id="mixInstrumental" type="button" class="mix-toggle" aria-pressed="false">Add instrumental</button>
-        </div>
-      </div>
-      <div id="timelineGrid" class="timeline-grid" hidden>
-        <!-- Row 1: section ribbon — no label -->
-        <div class="tl-label"></div>
-        <div id="sectionRibbon" class="section-ribbon"></div>
 
-        <!-- Row 2: analysis graph -->
-        <div class="tl-label" id="analysisGraphLabelCell">
-          <span id="analysisGraphLabel" class="analysis-graph-label">Reference Match</span>
-          <select id="techniqueSelect" class="technique-select" hidden></select>
-        </div>
-        <canvas id="analysisGraphCanvas" class="analysis-graph-canvas"></canvas>
+        <div data-role="timelineGrid" class="timeline-grid" hidden>
+          <!-- Row 1: section ribbon — no label -->
+          <div class="tl-label"></div>
+          <div data-role="sectionRibbon" class="section-ribbon"></div>
 
-        <!-- Row 3: waveform -->
-        <div class="tl-label">
-          <span class="tl-row-label">Waveform</span>
-          <span class="tl-row-sublabel">Performance audio</span>
-        </div>
-        <div id="waveform" class="waveform"></div>
+          <!-- Row 2: analysis graph -->
+          <div class="tl-label" data-role="analysisGraphLabelCell">
+            <span data-role="analysisGraphLabel" class="analysis-graph-label">Reference Match</span>
+            <select data-role="techniqueSelect" class="technique-select" hidden></select>
+          </div>
+          <canvas data-role="analysisGraphCanvas" class="analysis-graph-canvas"></canvas>
 
-        <!-- Row 4: highlight regions -->
-        <div class="tl-label">
-          <span class="tl-row-label">Highlights</span>
+          <!-- Row 3: waveform -->
+          <div class="tl-label">
+            <span class="tl-row-label">Waveform</span>
+            <span class="tl-row-sublabel">Performance audio</span>
+          </div>
+          <div data-role="waveform" class="waveform"></div>
+
+          <!-- Row 4: highlight regions -->
+          <div class="tl-label">
+            <span class="tl-row-label">Highlights</span>
+          </div>
+          <div data-role="timeline" class="timeline"></div>
         </div>
-        <div id="timeline" class="timeline"></div>
-      </div>
-      <div id="highlightList" class="highlights"></div>
-    </section>
+        <div data-role="highlightList" class="highlights"></div>
+      </section>
+    </template>
   </main>
 
   <script src="config.js"></script>
