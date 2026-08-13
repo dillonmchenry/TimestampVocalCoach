@@ -1,4 +1,5 @@
 import WaveSurfer from "https://unpkg.com/wavesurfer.js@7.8.6/dist/wavesurfer.esm.js";
+import { AnalysisGraph } from "./analysis-graph.js";
 
 /**
  * Prefix a /api/... path with the configured API base URL.
@@ -10,28 +11,41 @@ function apiUrl(path) {
   return base + path;
 }
 
-const songSelect = document.getElementById("songSelect");
-const songBadges = document.getElementById("songBadges");
+const carouselTrack = document.getElementById("carouselTrack");
+const carouselLeft = document.getElementById("carouselLeft");
+const carouselRight = document.getElementById("carouselRight");
 const dropZone = document.getElementById("dropZone");
 const fileInput = document.getElementById("fileInput");
 const analyzeButton = document.getElementById("analyzeButton");
 const status = document.getElementById("status");
-const results = document.getElementById("results");
-const waveformDiv = document.getElementById("waveform");
-const sectionRibbon = document.getElementById("sectionRibbon");
-const timelineDiv = document.getElementById("timeline");
+const analysisProgress = document.getElementById("analysisProgress");
+const analysisCancelBtn = document.getElementById("analysisCancelBtn");
+const uploadSection = document.querySelector("section.upload");
+const resultsContainer = document.getElementById("results-container");
+// Per-active-block DOM references — updated by activateBlock() whenever the active block changes
+let waveformDiv = null;
+let sectionRibbon = null;
+let timelineDiv = null;
 const offsetSummary = document.getElementById("offsetSummary");
-const playPause = document.getElementById("playPause");
-const mixRefVocalBtn = document.getElementById("mixRefVocal");
-const mixInstrumentalBtn = document.getElementById("mixInstrumental");
-const highlightList = document.getElementById("highlightList");
-const highlightFilters = document.getElementById("highlightFilters");
+// Per-active-block playback bar buttons — updated by activateBlock() on each switch
+let playPause = null;
+let mixRefVocalBtn = null;
+let mixInstrumentalBtn = null;
+let highlightList = null;
+let highlightFilters = null;
 const basisFilters = document.getElementById("basisFilters");
-const overviewTiles = document.getElementById("overviewTiles");
-const fastProfile = document.getElementById("fastProfile");
+let overviewTiles = null;
+let overviewHeading = null;
+let segmentInfo = null;
+let backToFullSongBtn = null;
+const addPerformanceBar = document.getElementById("addPerformanceBar");
+const addPerformanceBtn = document.getElementById("addPerformanceBtn");
+const pickerSection = document.querySelector("section.picker");
 
 let pendingFile = null;
+let analysisAbortController = null;
 let wavesurfer = null;
+let analysisGraph = null;
 let currentMedia = null;
 let currentDuration = 0;
 let currentAnalysis = null;
@@ -41,6 +55,20 @@ let mixInstrumentalOn = false;
 let refVocalMedia = null;
 let instrumentalMedia = null;
 let playbackSyncAbort = null;
+
+// Section focus state
+let focusedSection = null;   // { name, kind, start_s, end_s } in song time, or null
+let fullPeaks = null;        // cached full-recording peaks array for waveform restoration
+let fullAudioUrl = null;     // cached audio URL for waveform restoration
+
+// Per-active-block element reference for the LLM summary panel
+let performanceSummaryEl = null;
+// AbortController that cleans up playback bar click listeners when the active block changes
+let playbackListenersAbort = null;
+
+// All rendered analyses in this session; each entry is a block-state object
+let analyses = [];
+let activeAnalysisIdx = -1;
 
 const MIX_LAYER_VOLUME = 0.85;
 const MIX_SYNC_THRESHOLD_S = 0.08;
@@ -265,6 +293,25 @@ const PITCH_GOOD_TYPES = new Set([
   "section_improvement",
 ]);
 
+// Card types that do NOT show the "Show coaching & comparison" disclosure section.
+// Mirrors _NO_TRY_THIS_TYPES in highlights.py. Affirming cards (positive reinforcement)
+// and timing cards (practice strategies, not vocal exercises) are excluded because the
+// expanded section adds nothing useful — there is no corrective drill and no meaningful
+// audio comparison to make.
+const NO_DISCLOSURE_TYPES = new Set([
+  // Timing cards
+  "late_entrance", "timing_consistency", "rushed_phrase",
+  "dragged_phrase", "rhythmic_precision", "section_delta",
+  // Affirming / positive-reinforcement cards
+  "best_pitch_phrase", "section_strength", "best_overall_section",
+  "clean_attack", "steady_sustain", "consistent_vibrato",
+  "straight_tone_control", "clean_onset", "dynamic_sustain",
+  "controlled_crescendo", "soft_passage_control",
+  "vibrato_with_support", "expressive_stability",
+  "high_note_control", "section_improvement", "dynamic_surge",
+  "expressive_match", "expressive_moment",
+]);
+
 function cardCategoryClass(moment) {
   const cat = MOMENT_TYPE_CATEGORY[moment.type] || "pitch";
   if (cat === "pitch") {
@@ -296,6 +343,7 @@ let activeHighlightFilter = null;
 let activeBasisFilter = "all";
 
 function applyHighlightFilter() {
+  if (!highlightList || !timelineDiv) return;
   const cards = highlightList.querySelectorAll("article.card");
   let visible = 0;
   for (const card of cards) {
@@ -327,14 +375,40 @@ function applyHighlightFilter() {
   } else if (empty) {
     empty.remove();
   }
+  equalizeCardHeights();
+}
+
+/**
+ * Measure the tallest visible collapsed card and apply that as min-height to
+ * all collapsed cards so the disclosure links stay on the same horizontal
+ * plane.  Uses align-items: flex-start on the parent, so expanded cards grow
+ * freely beyond the min-height without stretching their siblings.
+ */
+function equalizeCardHeights() {
+  if (!highlightList) return;
+  // Target the inner .card-collapsed panel (not the outer .card) so the
+  // disclosure link anchors to the bottom of a fixed-height area. Expanded
+  // cards grow by pushing .card-expanded *below* this area, not by shrinking it.
+  const panels = Array.from(highlightList.querySelectorAll("article.card:not(.hidden) .card-collapsed"));
+  // Clear first so we measure natural heights in the next frame.
+  panels.forEach(p => p.style.minHeight = "");
+  requestAnimationFrame(() => {
+    if (!panels.length) return;
+    const maxH = Math.max(...panels.map(p => p.offsetHeight));
+    if (maxH > 0) panels.forEach(p => p.style.minHeight = maxH + "px");
+  });
 }
 
 function setHighlightFilter(category) {
   activeHighlightFilter = activeHighlightFilter === category ? null : category;
-  for (const btn of highlightFilters.querySelectorAll(".highlight-filter-badge")) {
-    btn.classList.toggle("active", btn.dataset.filter === activeHighlightFilter);
+  if (highlightFilters) {
+    for (const btn of highlightFilters.querySelectorAll(".highlight-filter-badge")) {
+      btn.classList.toggle("active", btn.dataset.filter === activeHighlightFilter);
+    }
   }
   applyHighlightFilter();
+  // Sync the analysis graph to the new filter
+  if (analysisGraph) analysisGraph.setFilter(activeHighlightFilter);
 }
 
 function setBasisFilter(basis) {
@@ -379,6 +453,7 @@ const SECTION_KIND_CLASS = {
 const LAST_SONG_KEY = "vocalCoach.lastSongId";
 
 let allSongs = [];
+let selectedSongId = "";
 
 async function loadSongs() {
   status.textContent = "Loading songs…";
@@ -388,48 +463,21 @@ async function loadSongs() {
     const data = await r.json();
     allSongs = data.songs || [];
     if (!allSongs.length) {
-      songSelect.innerHTML = "";
-      const opt = document.createElement("option");
-      opt.textContent = "(no songs found — run scripts/import_ultrastar.py)";
-      songSelect.appendChild(opt);
-      songSelect.disabled = true;
+      carouselTrack.textContent = "No songs found — run scripts/import_ultrastar.py";
       status.textContent = "No songs available.";
       return;
     }
-    populateSongSelect(allSongs);
     // Restore last selection from localStorage if it still exists.
     const remembered = localStorage.getItem(LAST_SONG_KEY);
-    if (remembered && allSongs.some((s) => s.song_id === remembered)) {
-      songSelect.value = remembered;
-    }
-    songSelect.disabled = false;
-    songSelect.addEventListener("change", () => {
-      currentReference = null;
-      currentReferenceSongId = null;
-      const song = songSelect.selectedOptions[0]?._song;
-      if (song) localStorage.setItem(LAST_SONG_KEY, song.song_id);
-      updateSongBadges(song);
-    });
-    updateSongBadges(songSelect.selectedOptions[0]?._song);
+    const initialId =
+      remembered && allSongs.some((s) => s.song_id === remembered)
+        ? remembered
+        : allSongs[0].song_id;
+    renderCarousel(allSongs, initialId);
     status.textContent = "";
   } catch (e) {
     status.textContent = `Failed to load songs: ${e.message}`;
     status.classList.add("error");
-  }
-}
-
-function populateSongSelect(songs) {
-  const remembered = songSelect.value;
-  songSelect.innerHTML = "";
-  for (const s of songs) {
-    const opt = document.createElement("option");
-    opt.value = s.song_id;
-    opt.textContent = `${s.title} — ${s.artist || "Unknown artist"}`;
-    opt._song = s;
-    songSelect.appendChild(opt);
-  }
-  if (remembered && songs.some((s) => s.song_id === remembered)) {
-    songSelect.value = remembered;
   }
 }
 
@@ -440,21 +488,145 @@ function fmtDuration(secs) {
   return `${m}:${s}`;
 }
 
-function updateSongBadges(song) {
-  songBadges.innerHTML = "";
-  if (!song) return;
-  const badges = [
-    { label: song.language || "English", kind: "lang" },
-    { label: song.genre || "Pop", kind: "genre" },
-    { label: fmtDuration(song.duration_s), kind: "duration" },
-  ];
-  for (const b of badges) {
-    const span = document.createElement("span");
-    span.className = `badge badge-${b.kind}`;
-    span.textContent = b.label;
-    songBadges.appendChild(span);
+// Placeholder gradient pairs keyed by first letter of song_id, cycling through a palette.
+const PLACEHOLDER_GRADIENTS = [
+  ["#4a5568", "#2d3748"],
+  ["#4c6a52", "#2d4a34"],
+  ["#6a4c52", "#4a2d34"],
+  ["#4c4a6a", "#2d2d4a"],
+  ["#6a5c3a", "#4a3e22"],
+  ["#3a5c6a", "#224a52"],
+  ["#6a3a52", "#4a2238"],
+  ["#3a6a5c", "#224a42"],
+];
+
+function selectCardById(songId, { animate = true } = {}) {
+  selectedSongId = songId;
+  const song = allSongs.find((s) => s.song_id === songId);
+  if (song) localStorage.setItem(LAST_SONG_KEY, songId);
+
+  let selectedCard = null;
+  carouselTrack.querySelectorAll(".song-card").forEach((card) => {
+    const isSelected = card.dataset.songId === songId;
+    card.classList.toggle("selected", isSelected);
+    if (isSelected) selectedCard = card;
+  });
+
+  // Scroll so the selected card is centered in the track viewport.
+  if (selectedCard) {
+    const trackRect = carouselTrack.getBoundingClientRect();
+    const cardRect = selectedCard.getBoundingClientRect();
+    const targetScroll =
+      carouselTrack.scrollLeft +
+      (cardRect.left - trackRect.left) -
+      (trackRect.width - cardRect.width) / 2;
+    carouselTrack.scrollTo({
+      left: Math.max(0, targetScroll),
+      behavior: animate ? "smooth" : "instant",
+    });
   }
+
+  // Reset reference cache when song changes.
+  currentReference = null;
+  currentReferenceSongId = null;
 }
+
+function renderCarousel(songs, initialId) {
+  carouselTrack.innerHTML = "";
+
+  songs.forEach((song, idx) => {
+    const card = document.createElement("div");
+    card.className = "song-card";
+    card.dataset.songId = song.song_id;
+
+    // Cover image or placeholder.
+    if (song.cover_url) {
+      const img = document.createElement("img");
+      img.className = "song-card__cover";
+      img.src = apiUrl(song.cover_url);
+      img.alt = `${song.title} cover`;
+      img.onerror = () => img.replaceWith(makeCoverPlaceholder(song, idx));
+      card.appendChild(img);
+    } else {
+      card.appendChild(makeCoverPlaceholder(song, idx));
+    }
+
+    // Checkmark badge (shown when selected).
+    const check = document.createElement("div");
+    check.className = "song-card__check";
+    check.innerHTML =
+      '<svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>';
+    card.appendChild(check);
+
+    // Title + artist.
+    const info = document.createElement("div");
+    info.className = "song-card__info";
+    const title = document.createElement("div");
+    title.className = "song-card__title";
+    title.textContent = song.title;
+    const artist = document.createElement("div");
+    artist.className = "song-card__artist";
+    artist.textContent = song.artist || "Unknown artist";
+    info.appendChild(title);
+    info.appendChild(artist);
+    card.appendChild(info);
+
+    // Tags: language, first genre tag, duration.
+    const tags = document.createElement("div");
+    tags.className = "song-card__tags";
+    const tagDefs = [
+      { label: song.language || "English", kind: "lang" },
+      { label: (song.genre_tags && song.genre_tags[0]) || "Pop", kind: "genre" },
+      { label: fmtDuration(song.duration_s), kind: "duration" },
+    ];
+    for (const t of tagDefs) {
+      const span = document.createElement("span");
+      span.className = `song-tag song-tag--${t.kind}`;
+      span.textContent = t.label;
+      tags.appendChild(span);
+    }
+    card.appendChild(tags);
+
+    card.addEventListener("click", () => selectCardById(song.song_id));
+    carouselTrack.appendChild(card);
+  });
+
+  // Set initial selection without animation so the card is already centered on load.
+  selectCardById(initialId, { animate: false });
+  updateCarouselArrows();
+}
+
+function makeCoverPlaceholder(song, idx) {
+  const div = document.createElement("div");
+  div.className = "song-card__cover-placeholder";
+  const [a, b] = PLACEHOLDER_GRADIENTS[idx % PLACEHOLDER_GRADIENTS.length];
+  div.style.setProperty("--placeholder-a", a);
+  div.style.setProperty("--placeholder-b", b);
+  // Two-letter initials from title.
+  const words = song.title.trim().split(/\s+/);
+  div.textContent = words.length > 1
+    ? (words[0][0] + words[1][0]).toUpperCase()
+    : song.title.slice(0, 2).toUpperCase();
+  return div;
+}
+
+function updateCarouselArrows() {
+  if (!carouselTrack) return;
+  const atStart = carouselTrack.scrollLeft <= 4;
+  const atEnd =
+    carouselTrack.scrollLeft + carouselTrack.clientWidth >=
+    carouselTrack.scrollWidth - 4;
+  carouselLeft.disabled = atStart;
+  carouselRight.disabled = atEnd;
+}
+
+carouselLeft.addEventListener("click", () => {
+  carouselTrack.scrollBy({ left: -180, behavior: "smooth" });
+});
+carouselRight.addEventListener("click", () => {
+  carouselTrack.scrollBy({ left: 180, behavior: "smooth" });
+});
+carouselTrack.addEventListener("scroll", updateCarouselArrows);
 
 function setAnalyzeLoading(loading) {
   analyzeButton.disabled = loading || !pendingFile;
@@ -462,6 +634,60 @@ function setAnalyzeLoading(loading) {
   const label = analyzeButton.querySelector(".analyze-label");
   if (label) label.textContent = loading ? "Analyzing…" : "Analyze";
 }
+
+/**
+ * Show the analysis progress bar and advance it to the given step index (0–4).
+ * Pass 5 to mark all steps as completed (used on job completion before hiding).
+ * Also hides the rest of the upload section so the progress bar is the sole focus.
+ */
+function showAnalysisProgress(activeStep) {
+  uploadSection.classList.remove("upload--collapsed");
+  uploadSection.classList.add("upload--analyzing");
+  if (pickerSection) pickerSection.hidden = true;
+  analysisProgress.classList.remove("hidden");
+
+  const stepEls = analysisProgress.querySelectorAll(".progress-step");
+  const connectorFills = analysisProgress.querySelectorAll(".step-connector-fill");
+
+  stepEls.forEach((el, i) => {
+    const circle = el.querySelector(".step-circle");
+    el.classList.remove("is-active", "is-completed");
+    if (i < activeStep) {
+      circle.dataset.state = "completed";
+      el.classList.add("is-completed");
+    } else if (i === activeStep) {
+      circle.dataset.state = "active";
+      el.classList.add("is-active");
+    } else {
+      circle.dataset.state = "pending";
+    }
+  });
+
+  // Connector i (between step i and step i+1) fills when step i is completed.
+  connectorFills.forEach((fill, i) => {
+    fill.classList.toggle("filled", activeStep > i);
+  });
+}
+
+/** Hide the progress bar, restore the upload section, and reset all step states. */
+function hideAnalysisProgress() {
+  uploadSection.classList.remove("upload--analyzing");
+  analysisProgress.classList.add("hidden");
+  analysisProgress.querySelectorAll(".step-circle").forEach((c) => {
+    c.dataset.state = "pending";
+  });
+  analysisProgress.querySelectorAll(".progress-step").forEach((el) => {
+    el.classList.remove("is-active", "is-completed");
+  });
+  analysisProgress.querySelectorAll(".step-connector-fill").forEach((f) => {
+    f.classList.remove("filled");
+  });
+}
+
+analysisCancelBtn.addEventListener("click", () => {
+  analysisAbortController?.abort();
+  // hideAnalysisProgress() is called by the AbortError catch in the polling loop
+});
 
 function setPendingFile(file) {
   pendingFile = file;
@@ -492,10 +718,14 @@ fileInput.addEventListener("change", (e) => {
 
 analyzeButton.addEventListener("click", async () => {
   if (!pendingFile) return;
-  const songId = songSelect.value;
+  const songId = selectedSongId;
   if (!songId) return;
 
+  analysisAbortController = new AbortController();
+  const { signal } = analysisAbortController;
+
   setAnalyzeLoading(true);
+  showAnalysisProgress(0);
   status.classList.remove("error");
   status.textContent = "";
 
@@ -513,29 +743,60 @@ analyzeButton.addEventListener("click", async () => {
       throw new Error(`HTTP ${r.status}: ${detail.slice(0, 200)}`);
     }
     const { job_id } = await r.json();
-    status.textContent = "Analyzing… (this may take up to a minute)";
-    const analysis = await pollJob(job_id);
+    const analysis = await pollJob(job_id, signal);
+    // Flash all steps complete before transitioning to results
+    showAnalysisProgress(5);
+    await new Promise((res) => setTimeout(res, 600));
+    hideAnalysisProgress();
     status.textContent = `Done. Performance ID: ${analysis.perf_id}`;
     await renderAnalysis(songId, analysis);
   } catch (e) {
-    console.error(e);
-    status.textContent = `Analysis failed: ${e.message}`;
-    status.classList.add("error");
+    if (e.name === "AbortError") {
+      hideAnalysisProgress();
+      if (analyses.length > 0) collapseUploadSection();
+      else if (pickerSection) pickerSection.hidden = false;
+    } else {
+      console.error(e);
+      hideAnalysisProgress();
+      status.textContent = `Analysis failed: ${e.message}`;
+      status.classList.add("error");
+      if (analyses.length > 0) collapseUploadSection();
+      else if (pickerSection) pickerSection.hidden = false;
+    }
   } finally {
     setAnalyzeLoading(false);
+    analysisAbortController = null;
   }
 });
 
 /**
+ * Sleep for `ms` milliseconds, but resolve immediately if `signal` is aborted.
+ * Throws a DOMException("AbortError") when the signal fires.
+ */
+function sleepOrAbort(ms, signal) {
+  return new Promise((resolve, reject) => {
+    if (signal?.aborted) { reject(new DOMException("cancelled", "AbortError")); return; }
+    const timer = setTimeout(resolve, ms);
+    signal?.addEventListener("abort", () => {
+      clearTimeout(timer);
+      reject(new DOMException("cancelled", "AbortError"));
+    }, { once: true });
+  });
+}
+
+/**
  * Poll GET /api/jobs/{job_id} every 2 s until the job reaches "done" or
  * "error", then return the analysis result or throw.
+ * Updates the analysis progress bar on each poll via job.step (0–4).
+ * Respects an optional AbortSignal for user-initiated cancellation.
  */
-async function pollJob(jobId) {
+async function pollJob(jobId, signal) {
   while (true) {
-    await new Promise((res) => setTimeout(res, 2000));
-    const r = await fetch(apiUrl(`/api/jobs/${encodeURIComponent(jobId)}`));
+    await sleepOrAbort(2000, signal);
+    const r = await fetch(apiUrl(`/api/jobs/${encodeURIComponent(jobId)}`), { signal });
     if (!r.ok) throw new Error(`Job poll failed: HTTP ${r.status}`);
     const job = await r.json();
+    if (job.step != null) showAnalysisProgress(job.step);
     if (job.status === "done") return job.result;
     if (job.status === "error") throw new Error(`Analysis error: ${job.error}`);
     // "pending" or "running" — keep polling
@@ -628,84 +889,194 @@ function computeStrongestSection(analysis) {
 }
 
 function renderOverviewTiles(overview, analysis) {
+  if (!overviewTiles) return;
   overviewTiles.innerHTML = "";
   if (!overview) {
     overviewTiles.hidden = true;
+    if (overviewHeading) overviewHeading.hidden = true;
     return;
   }
   overviewTiles.hidden = false;
+  if (overviewHeading) overviewHeading.hidden = false;
 
-  const tiles = [];
+  // Mimic score circle
   if (overview.mimic_score != null) {
-    tiles.push({
-      label: "Mimic score",
-      value: `${overview.mimic_score.toFixed(0)}`,
-      sub: "/ 100",
-      kind: "headline",
-    });
+    overviewTiles.appendChild(_buildMimicTile(overview.mimic_score));
   }
+
+  // Pitch card
   if (overview.pct_in_tune != null) {
-    tiles.push({
-      label: "In tune",
-      value: `${(overview.pct_in_tune * 100).toFixed(0)}%`,
-      sub: `${overview.note_count} notes scored`,
-    });
-  }
-  if (overview.median_cents != null) {
     const med = overview.median_cents;
-    const direction = med < -3 ? "flat" : med > 3 ? "sharp" : "centered";
-    tiles.push({
-      label: "Median pitch",
-      value: `${med >= 0 ? "+" : ""}${med.toFixed(0)}c`,
-      sub: direction,
-    });
+    const pills = [];
+    if (med != null && Math.abs(med) >= 3) {
+      const isSharp = med > 0;
+      pills.push({
+        text: `${isSharp ? "Slightly sharp" : "Slightly flat"} ${isSharp ? "+" : ""}${med.toFixed(0)} cents`,
+        cls: isSharp ? "tile-pill--sharp" : "tile-pill--flat",
+      });
+    }
+    if (overview.octave_shift_semitones) {
+      const semis = overview.octave_shift_semitones;
+      pills.push({ text: `Octave shift: ${semis > 0 ? "+" : ""}${semis} semitones` });
+    }
+    overviewTiles.appendChild(_buildCard({
+      iconClass: "tile-card-icon--pitch",
+      iconSvg: _iconPitch(),
+      name: "Pitch",
+      value: `${(overview.pct_in_tune * 100).toFixed(0)}% in tune`,
+      sub: `${overview.note_count} notes scored`,
+      pills,
+    }));
   }
-  if (overview.octave_shift_semitones) {
-    const semis = overview.octave_shift_semitones;
-    tiles.push({
-      label: "Octave shift",
-      value: `${semis > 0 ? "+" : ""}${semis} semitones`,
-      sub: semis > 0 ? "you sang higher" : "you sang lower",
-    });
-  }
+
+  // Technique card
   if (overview.technique_match_rate != null) {
-    tiles.push({
-      label: "Technique match",
-      value: `${(overview.technique_match_rate * 100).toFixed(0)}%`,
-      sub: "vs reference",
-    });
+    const pct = overview.technique_match_rate * 100;
+    const sub = pct >= 70 ? "Close to the reference"
+      : pct >= 40 ? "Some variation from reference"
+      : "Far from reference";
+    overviewTiles.appendChild(_buildCard({
+      iconClass: "tile-card-icon--tech",
+      iconSvg: _iconTech(),
+      name: "Technique",
+      value: `${pct.toFixed(0)}% match`,
+      sub,
+    }));
   }
-  const strongestSection =
-    overview.strongest_section ?? computeStrongestSection(analysis);
-  if (strongestSection) {
-    tiles.push({
-      label: "Strongest section",
-      value: strongestSection,
-      sub: "pitch · expression · timing",
-    });
-  }
+
+  // Timing card
   if (overview.arrival_offset_ms_mean != null) {
     const ms = overview.arrival_offset_ms_mean;
-    tiles.push({
-      label: "Avg timing",
+    const absMs = Math.abs(ms);
+    const direction = ms >= 0 ? "behind the beat" : "ahead of the beat";
+    const sub = absMs < 30 ? "Very tight timing" : absMs < 80 ? "Just " + direction : direction;
+    overviewTiles.appendChild(_buildCard({
+      iconClass: "tile-card-icon--timing",
+      iconSvg: _iconTiming(),
+      name: "Timing",
       value: `${ms >= 0 ? "+" : ""}${ms.toFixed(0)} ms`,
-      sub: ms >= 0 ? "behind beat" : "ahead of beat",
-    });
+      sub,
+    }));
   }
-  for (const tile of tiles) {
-    const card = document.createElement("div");
-    card.className = `tile ${tile.kind || ""}`;
-    card.innerHTML = `
-      <span class="tile-label">${tile.label}</span>
-      <span class="tile-value">${tile.value}</span>
-      <span class="tile-sub">${tile.sub || ""}</span>
-    `;
-    overviewTiles.appendChild(card);
+
+  // Strongest section card
+  const strongestSection = overview.strongest_section ?? computeStrongestSection(analysis);
+  if (strongestSection) {
+    const tags = _strongestSectionTags(strongestSection, analysis);
+    overviewTiles.appendChild(_buildCard({
+      iconClass: "tile-card-icon--section",
+      iconSvg: _iconSection(),
+      name: "Strongest Section",
+      value: strongestSection,
+      sub: "",
+      pills: tags.map(t => ({ text: t })),
+    }));
   }
 }
 
+function _buildMimicTile(score) {
+  const tier = score <= 25 ? "Beginner"
+    : score <= 50 ? "Developing"
+    : score <= 75 ? "Intermediate"
+    : score <= 90 ? "Advanced"
+    : "Expert";
+  const r = 44;
+  const cx = 56;
+  const cy = 56;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - score / 100);
+  const tile = document.createElement("div");
+  tile.className = "tile-mimic";
+  tile.innerHTML = `
+    <span class="tile-card-name">Mimic Score</span>
+    <svg width="112" height="112" viewBox="0 0 112 112">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="8"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--accent)" stroke-width="8"
+        stroke-dasharray="${circ.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
+        stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
+      <text x="${cx}" y="${cy - 6}" text-anchor="middle" dominant-baseline="middle"
+        font-size="28" font-weight="700" fill="var(--accent)" font-family="inherit">${score.toFixed(0)}</text>
+      <text x="${cx}" y="${cy + 18}" text-anchor="middle" dominant-baseline="middle"
+        font-size="11" fill="var(--muted)" font-family="inherit">/ 100</text>
+    </svg>
+    <span class="tile-mimic-label">${tier}</span>
+  `;
+  return tile;
+}
+
+function _buildCard({ iconClass, iconSvg, name, value, sub, pills }) {
+  const pillsHtml = pills && pills.length
+    ? `<div class="tile-card-pills">${pills.map(p => `<span class="tile-pill ${p.cls || ""}">${p.text}</span>`).join("")}</div>`
+    : "";
+  const card = document.createElement("div");
+  card.className = "tile-card";
+  card.innerHTML = `
+    <div class="tile-card-header">
+      <div class="tile-card-icon ${iconClass}">${iconSvg}</div>
+      <span class="tile-card-name">${name}</span>
+    </div>
+    <div class="tile-card-value">${value}</div>
+    ${sub ? `<div class="tile-card-sub">${sub}</div>` : ""}
+    ${pillsHtml}
+  `;
+  return card;
+}
+
+function _iconPitch() {
+  return `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--bad)" stroke-width="2" stroke-linecap="round"><path d="M2 10 Q5 4 8 10 Q11 16 14 10"/></svg>`;
+}
+
+function _iconTech() {
+  return `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--good)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,9 6,13 14,4"/></svg>`;
+}
+
+function _iconTiming() {
+  return `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><polyline points="8,4 8,8 11,10"/></svg>`;
+}
+
+function _iconSection() {
+  return `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="8,1.5 10.2,6 15,6.7 11.5,10.1 12.4,15 8,12.6 3.6,15 4.5,10.1 1,6.7 5.8,6"/></svg>`;
+}
+
+function _strongestSectionTags(sectionName, analysis) {
+  if (!analysis) return ["Pitch", "Expression", "Timing"];
+  const section = (analysis.sections || []).find(s => s.name === sectionName);
+  if (!section) return ["Pitch", "Expression", "Timing"];
+
+  const notes = analysis.notes || [];
+  const techniques = analysis.techniques || [];
+  const scores = [];
+
+  if (section.pct_in_tune != null) {
+    scores.push({ label: "Pitch", score: section.pct_in_tune });
+  }
+
+  const secNoteIndices = new Set();
+  for (const n of notes) {
+    const mid = 0.5 * (n.start_s + n.end_s);
+    if (mid >= section.start_s && mid < section.end_s) secNoteIndices.add(n.note_index);
+  }
+  let exprCount = 0;
+  for (const t of techniques) {
+    const hasExpr = (t.matched && t.matched.length) || (t.user_added && t.user_added.length);
+    if (secNoteIndices.has(t.note_index) && hasExpr) exprCount++;
+  }
+  scores.push({ label: "Expression", score: exprCount / Math.max(1, secNoteIndices.size) });
+
+  if (section.arrival_offset_ms_mean != null) {
+    scores.push({ label: "Timing", score: Math.max(0, 1 - Math.abs(section.arrival_offset_ms_mean) / 200) });
+  }
+
+  if (section.rms_delta_db != null) {
+    scores.push({ label: "Volume", score: Math.max(0, 1 - Math.abs(section.rms_delta_db) / 4) });
+  }
+
+  scores.sort((a, b) => b.score - a.score);
+  return scores.slice(0, 3).map(s => s.label);
+}
+
 function renderPerformanceSummary(summary) {
-  const el = document.getElementById("performanceSummary");
+  const el = performanceSummaryEl;
   if (!el) return;
   if (!summary || !summary.narrative) {
     el.hidden = true;
@@ -745,19 +1116,26 @@ function renderPerformanceSummary(summary) {
 }
 
 function renderSectionRibbon(reference, analysis) {
+  if (!sectionRibbon) return;
   sectionRibbon.innerHTML = "";
   if (!reference || !Array.isArray(reference.sections) || !reference.sections.length) {
     return;
   }
   const totalDur = currentDuration;
   const offset = analysis.global_offset_s || 0;
+  // For partial recordings, only show sections within the recorded segment.
+  const segmentEnd = analysis.segment_end_song_s ?? Infinity;
   const trendByName = {};
   for (const trend of analysis.sections || []) {
     trendByName[trend.name] = trend;
   }
   for (const section of reference.sections) {
+    // Skip sections that start entirely after the recording ended.
+    if (section.start_s >= segmentEnd) continue;
+    // Clamp the section end to the recording boundary.
+    const clampedEnd = Math.min(section.end_s, segmentEnd);
     const userStart = section.start_s + offset;
-    const userEnd = section.end_s + offset;
+    const userEnd = clampedEnd + offset;
     const left = (userStart / totalDur) * 100;
     const width = ((userEnd - userStart) / totalDur) * 100;
     const trend = trendByName[section.name];
@@ -773,11 +1151,454 @@ function renderSectionRibbon(reference, analysis) {
     band.title = `${section.name}${section.kind ? ` (${section.kind})` : ""}${pctLabel}`;
     band.innerHTML = `<span class="section-band-label">${section.name}</span>`;
     band.addEventListener("click", () => {
-      seekAndPlay(userStart);
+      setSectionFocus(section).catch(console.error);
     });
     sectionRibbon.appendChild(band);
   }
 }
+
+// ---- Section focus helpers -----------------------------------------------
+
+/**
+ * Render ALL highlight regions across the full recording into timelineDiv.
+ * Called at initial render and when restoring from section view.
+ */
+function renderFullRegions() {
+  if (!timelineDiv) return;
+  timelineDiv.innerHTML = "";
+  if (!currentAnalysis) return;
+  const totalDur = currentDuration;
+  const offset   = currentAnalysis.global_offset_s ?? 0;
+  for (const moment of currentAnalysis.highlights?.moments ?? []) {
+    if (
+      currentAnalysis.duration_s > 0 &&
+      (moment.end_s - moment.start_s) / currentAnalysis.duration_s > 0.25
+    ) continue;
+    const userStart = moment.start_s + offset;
+    const userEnd   = moment.end_s   + offset;
+    const left  = (userStart / totalDur) * 100;
+    const width = ((userEnd - userStart) / totalDur) * 100;
+    const region = document.createElement("div");
+    region.className = `region ${regionCategoryClass(moment)}`;
+    region.style.left  = `${Math.max(0, left)}%`;
+    region.style.width = `${Math.max(1, width)}%`;
+    region.title = `${moment.title}\n${moment.summary}`;
+    region.dataset.momentId = momentDomId(moment);
+    region.dataset.category = momentCategoryKey(moment);
+    region.addEventListener("click", () => {
+      seekAndPlay(userStart);
+      scrollToHighlightCard(region.dataset.momentId);
+    });
+    timelineDiv.appendChild(region);
+  }
+}
+
+/**
+ * Render highlight regions filtered and positioned relative to a section's
+ * user-time range.
+ */
+function renderSectionRegions(section) {
+  if (!timelineDiv) return;
+  timelineDiv.innerHTML = "";
+  if (!currentAnalysis) return;
+  const offset          = currentAnalysis.global_offset_s ?? 0;
+  const userSecStart    = section.start_s + offset;
+  const userSecEnd      = section.end_s   + offset;
+  const sectionDuration = userSecEnd - userSecStart;
+  if (sectionDuration <= 0) return;
+
+  for (const moment of currentAnalysis.highlights?.moments ?? []) {
+    if (
+      currentAnalysis.duration_s > 0 &&
+      (moment.end_s - moment.start_s) / currentAnalysis.duration_s > 0.25
+    ) continue;
+    const userStart = moment.start_s + offset;
+    const userEnd   = moment.end_s   + offset;
+    // Only show moments that overlap this section
+    if (userEnd <= userSecStart || userStart >= userSecEnd) continue;
+    const relStart = Math.max(0, userStart - userSecStart);
+    const relEnd   = Math.min(sectionDuration, userEnd - userSecStart);
+    const left  = (relStart / sectionDuration) * 100;
+    const width = ((relEnd - relStart) / sectionDuration) * 100;
+    const region = document.createElement("div");
+    region.className = `region ${regionCategoryClass(moment)}`;
+    region.style.left  = `${Math.max(0, left)}%`;
+    region.style.width = `${Math.max(1, width)}%`;
+    region.title = `${moment.title}\n${moment.summary}`;
+    region.dataset.momentId = momentDomId(moment);
+    region.dataset.category = momentCategoryKey(moment);
+    region.addEventListener("click", () => {
+      seekAndPlay(userStart);
+      scrollToHighlightCard(region.dataset.momentId);
+    });
+    timelineDiv.appendChild(region);
+  }
+}
+
+/**
+ * Render the section ribbon with only the focused section, spanning full width.
+ */
+function renderSectionFocusedRibbon(section) {
+  if (!sectionRibbon) return;
+  sectionRibbon.innerHTML = "";
+  const kindClass = SECTION_KIND_CLASS[section.kind] || "kind-unknown";
+  const band = document.createElement("div");
+  band.className = `section-band ${kindClass}`;
+  band.style.left  = "0%";
+  band.style.width = "100%";
+  band.title = section.name;
+  band.innerHTML = `<span class="section-band-label">${section.name}</span>`;
+  band.title = "Back to full song";
+  band.addEventListener("click", () => clearSectionFocus().catch(console.error));
+  sectionRibbon.appendChild(band);
+}
+
+/**
+ * Recreate WaveSurfer zoomed to the given section.
+ * Uses the full peaks array + zoom so all existing playback wiring continues
+ * to work correctly (the same currentMedia element is reused).
+ */
+/**
+ * Find the scrollable element inside the WaveSurfer renderer.
+ *
+ * WaveSurfer v7 renders into a child <div> whose internals live inside a
+ * shadow root.  We must traverse that shadow root to reach the .scroll
+ * container.  Falls back gracefully for builds that don't use shadow DOM.
+ */
+function findWaveSurferScrollEl() {
+  if (!waveformDiv) return null;
+  // v7: container → rendererDiv (shadow host) → shadowRoot → .scroll
+  const rendererDiv = waveformDiv.firstElementChild;
+  if (rendererDiv?.shadowRoot) {
+    return (
+      rendererDiv.shadowRoot.querySelector(".scroll") ||
+      rendererDiv.shadowRoot.firstElementChild
+    );
+  }
+  // Non-shadow-DOM fallback
+  return (
+    waveformDiv.querySelector(".scroll") ||
+    waveformDiv.firstElementChild
+  );
+}
+
+function buildSectionWaveform(section) {
+  detachPlaybackMixSync();
+  if (wavesurfer) {
+    try { wavesurfer.destroy(); } catch (e) { /* ignore */ }
+    wavesurfer = null;
+  }
+
+  const offset          = currentAnalysis?.global_offset_s ?? 0;
+  const userSecStart    = section.start_s + offset;
+  const sectionDuration = Math.max(1, section.end_s - section.start_s);
+
+  // Compute zoom before creation — WaveSurfer v7's zoom() method silently
+  // no-ops when peaks are used (it guards on decodedData), so we must pass
+  // minPxPerSec as a constructor option so the peaks render at the right width.
+  const containerWidth = waveformDiv.clientWidth || 800;
+  const minPxPerSec    = containerWidth / sectionDuration;
+
+  wavesurfer = WaveSurfer.create({
+    container:     waveformDiv,
+    waveColor:     "#cec5bb",
+    progressColor: "#3b6fd4",
+    height:        128,
+    normalize:     true,
+    media:         currentMedia,
+    autoCenter:    false,
+    autoScroll:    false,
+    minPxPerSec:   minPxPerSec,
+    ...(fullPeaks ? { peaks: [fullPeaks], duration: currentDuration } : {}),
+  });
+
+  wavesurfer.on("error", (err) => {
+    console.error("WaveSurfer error:", err);
+  });
+
+  // Once rendered, scroll the shadow-DOM scroll container to the section
+  // start and lock it so the user can't scroll away.
+  const applyScroll = () => {
+    const scrollEl = findWaveSurferScrollEl();
+    if (scrollEl) {
+      scrollEl.scrollLeft = Math.round(userSecStart * minPxPerSec);
+      scrollEl.style.overflow = "hidden";
+    }
+  };
+  wavesurfer.on("ready", applyScroll);
+  // Belt-and-suspenders: also apply after two animation frames in case the
+  // ready event fired before our listener was registered.
+  requestAnimationFrame(() => requestAnimationFrame(applyScroll));
+
+  if (!fullPeaks && fullAudioUrl) wavesurfer.load(fullAudioUrl);
+
+  attachPlaybackMixSync();
+}
+
+/**
+ * Recreate WaveSurfer with the full audio at the normal (fit-to-container) zoom.
+ * Used when restoring from section view.
+ */
+function buildFullWaveform() {
+  detachPlaybackMixSync();
+  if (wavesurfer) {
+    try { wavesurfer.destroy(); } catch (e) { /* ignore */ }
+    wavesurfer = null;
+  }
+
+  wavesurfer = WaveSurfer.create({
+    container:     waveformDiv,
+    waveColor:     "#cec5bb",
+    progressColor: "#3b6fd4",
+    height:        128,
+    normalize:     true,
+    media:         currentMedia,
+    ...(fullPeaks ? { peaks: [fullPeaks], duration: currentDuration } : {}),
+  });
+
+  wavesurfer.on("error", (err) => {
+    console.error("WaveSurfer error:", err);
+    status.textContent = `Waveform failed to render (${err}). Playback may still work.`;
+    status.classList.add("error");
+  });
+
+  if (!fullPeaks && fullAudioUrl) wavesurfer.load(fullAudioUrl);
+
+  attachPlaybackMixSync();
+}
+
+/**
+ * Enter section view: zoom all timeline components to the selected section
+ * and filter coaching cards to that section only.
+ */
+async function setSectionFocus(section) {
+  // If already focused on this exact section, no-op
+  if (focusedSection && focusedSection.name === section.name) return;
+
+  focusedSection = section;
+
+  // 1. Show the back button in the playback controls bar
+  if (backToFullSongBtn) backToFullSongBtn.hidden = false;
+
+  // 2. Update section ribbon to show only focused section spanning full width
+  renderSectionFocusedRibbon(section);
+
+  // 3. Scope analysis graph to section song-time range
+  if (analysisGraph) analysisGraph.setTimeRange(section.start_s, section.end_s);
+
+  // 4. Recreate waveform zoomed to section
+  buildSectionWaveform(section);
+
+  // 5. Scope highlight regions to section
+  renderSectionRegions(section);
+
+  // 6. Filter coaching cards to section
+  const reference = await getReferenceAnnotation(currentPlaybackSongId).catch(() => null);
+  renderCoachingCards(reference ?? currentReference, currentAnalysis);
+}
+
+/**
+ * Leave section view: restore all timeline components to the full recording.
+ */
+async function clearSectionFocus() {
+  focusedSection = null;
+
+  // Hide the back button
+  if (backToFullSongBtn) backToFullSongBtn.hidden = true;
+
+  // Restore full analysis graph range
+  if (analysisGraph) analysisGraph.setTimeRange(null, null);
+
+  // Restore section ribbon
+  if (currentReference && currentAnalysis) {
+    renderSectionRibbon(currentReference, currentAnalysis);
+  }
+
+  // Restore full waveform (zoom reset)
+  buildFullWaveform();
+
+  // Restore all highlight regions
+  renderFullRegions();
+
+  // Restore all coaching cards
+  const reference = await getReferenceAnnotation(currentPlaybackSongId).catch(() => null);
+  renderCoachingCards(reference ?? currentReference, currentAnalysis);
+}
+
+// ---- End section focus helpers -------------------------------------------
+
+// ---------------------------------------------------------------------------
+// Multi-analysis session management
+// ---------------------------------------------------------------------------
+
+/**
+ * Switch the "active" result block to analyses[idx].
+ * Updates all module-level per-block variables (wavesurfer, currentAnalysis,
+ * waveformDiv, etc.) to point at the chosen block's state and DOM elements.
+ * Pauses the previously active block.
+ */
+function activateBlock(idx) {
+  if (idx < 0 || idx >= analyses.length) return;
+
+  // Pause and save state of the currently active block
+  if (activeAnalysisIdx >= 0 && activeAnalysisIdx !== idx) {
+    const prev = analyses[activeAnalysisIdx];
+    try { prev.wavesurfer?.pause(); } catch (e) { /* ignore */ }
+    prev.mediaEl?.pause();
+    prev.refVocalMedia?.pause();
+    prev.instrumentalMedia?.pause();
+    // Save mutable interaction state back to the block
+    prev.focusedSection  = focusedSection;
+    prev.mixRefVocalOn   = mixRefVocalOn;
+    prev.mixInstrumentalOn = mixInstrumentalOn;
+  }
+
+  // Detach playback sync from the old block before switching
+  detachPlaybackMixSync();
+
+  activeAnalysisIdx = idx;
+  const block = analyses[idx];
+
+  // Update module-level playback state to the new block
+  wavesurfer           = block.wavesurfer;
+  analysisGraph        = block.analysisGraph;
+  currentMedia         = block.mediaEl;
+  currentDuration      = block.analysis.duration_s;
+  currentAnalysis      = block.analysis;
+  currentPlaybackSongId = block.songId;
+  focusedSection       = block.focusedSection;
+  fullPeaks            = block.fullPeaks;
+  fullAudioUrl         = block.fullAudioUrl;
+  refVocalMedia        = block.refVocalMedia;
+  instrumentalMedia    = block.instrumentalMedia;
+  mixRefVocalOn        = block.mixRefVocalOn;
+  mixInstrumentalOn    = block.mixInstrumentalOn;
+
+  // Update per-block DOM element references
+  const container = block.container;
+  waveformDiv        = container.querySelector('[data-role="waveform"]');
+  sectionRibbon      = container.querySelector('[data-role="sectionRibbon"]');
+  timelineDiv        = container.querySelector('[data-role="timeline"]');
+  overviewTiles      = container.querySelector('[data-role="overviewTiles"]');
+  overviewHeading    = container.querySelector('[data-role="overviewHeading"]');
+  highlightList      = container.querySelector('[data-role="highlightList"]');
+  segmentInfo        = container.querySelector('[data-role="segmentInfo"]');
+  performanceSummaryEl = container.querySelector('[data-role="performanceSummary"]');
+  // Playback bar buttons are now per-block (inside the template)
+  playPause          = container.querySelector('[data-role="playPause"]');
+  mixRefVocalBtn     = container.querySelector('[data-role="mixRefVocal"]');
+  mixInstrumentalBtn = container.querySelector('[data-role="mixInstrumental"]');
+  backToFullSongBtn  = container.querySelector('[data-role="backToFullSong"]');
+  highlightFilters   = container.querySelector('[data-role="highlightFilters"]');
+
+  // Wire click handlers to this block's playback bar
+  wirePlaybackBarListeners();
+
+  // Sync playback bar UI to this block's state
+  const song = allSongs.find(s => s.song_id === block.songId);
+  updateMixToggleUi(song);
+  if (mixRefVocalBtn) {
+    mixRefVocalBtn.classList.toggle("active", mixRefVocalOn);
+    mixRefVocalBtn.setAttribute("aria-pressed", String(mixRefVocalOn));
+  }
+  if (mixInstrumentalBtn) {
+    mixInstrumentalBtn.classList.toggle("active", mixInstrumentalOn);
+    mixInstrumentalBtn.setAttribute("aria-pressed", String(mixInstrumentalOn));
+  }
+  if (backToFullSongBtn) backToFullSongBtn.hidden = (block.focusedSection == null);
+
+  // Re-attach playback sync for the newly active block
+  if (block.wavesurfer || block.mediaEl) {
+    attachPlaybackMixSync();
+  }
+
+  updatePlayPauseIcon();
+
+  // Mark the active block visually
+  document.querySelectorAll(".result-block").forEach((el, i) => {
+    el.classList.toggle("result-block--active", i === idx);
+  });
+}
+
+/**
+ * Permanently remove the analysis block at `idx`, clean up its audio
+ * resources, and reset UI state accordingly.
+ */
+function removeBlock(idx) {
+  const block = analyses[idx];
+  if (!block) return;
+
+  // Stop and destroy audio for this block
+  if (activeAnalysisIdx === idx) detachPlaybackMixSync();
+  try { block.wavesurfer?.pause(); block.wavesurfer?.destroy(); } catch (e) { /* ignore */ }
+  block.mediaEl?.pause();
+  block.refVocalMedia?.pause();
+  block.instrumentalMedia?.pause();
+
+  block.container.remove();
+  analyses.splice(idx, 1);
+
+  if (analyses.length === 0) {
+    // Back to the empty initial state — reset all module-level pointers
+    activeAnalysisIdx    = -1;
+    wavesurfer           = null;
+    analysisGraph        = null;
+    currentMedia         = null;
+    currentAnalysis      = null;
+    currentPlaybackSongId = null;
+    focusedSection       = null;
+    fullPeaks            = null;
+    fullAudioUrl         = null;
+    refVocalMedia        = null;
+    instrumentalMedia    = null;
+    playPause            = null;
+    mixRefVocalBtn       = null;
+    mixInstrumentalBtn   = null;
+    backToFullSongBtn    = null;
+    highlightFilters     = null;
+    highlightList        = null;
+    overviewTiles        = null;
+    overviewHeading      = null;
+    segmentInfo          = null;
+    performanceSummaryEl = null;
+    resultsContainer.hidden = true;
+    expandUploadSection();
+  } else {
+    // Pick the block to activate after deletion
+    let newIdx = activeAnalysisIdx;
+    if (activeAnalysisIdx === idx) {
+      newIdx = Math.max(0, idx - 1);
+    } else if (activeAnalysisIdx > idx) {
+      newIdx = activeAnalysisIdx - 1;
+    }
+    activeAnalysisIdx = -1; // force activateBlock to re-run
+    activateBlock(newIdx);
+  }
+}
+
+/** Collapse the upload section to the compact "Add a performance" bar. */
+function collapseUploadSection() {
+  uploadSection.classList.add("upload--collapsed");
+  if (pickerSection) pickerSection.hidden = true;
+}
+
+/** Expand the upload section back to full upload/karaoke interface. */
+function expandUploadSection() {
+  uploadSection.classList.remove("upload--collapsed");
+  if (pickerSection) pickerSection.hidden = false;
+  // Reset pending file so the user starts fresh
+  pendingFile = null;
+  if (fileInput) fileInput.value = "";
+  status.textContent = "";
+  setAnalyzeLoading(false);
+}
+
+// Wire the "Add a performance" compact bar to re-expand the upload section
+addPerformanceBar?.addEventListener("click", () => {
+  expandUploadSection();
+});
+
+// ---------------------------------------------------------------------------
 
 function lyricSnippet(reference, noteIndices) {
   if (!reference || !Array.isArray(reference.notes) || !noteIndices?.length) return "";
@@ -890,6 +1711,7 @@ function scrollToHighlightCard(momentId) {
 }
 
 function renderCoachingCards(reference, analysis) {
+  if (!highlightList) return;
   highlightList.innerHTML = "";
   activeHighlightFilter = null;
   activeBasisFilter = "all";
@@ -905,10 +1727,20 @@ function renderCoachingCards(reference, analysis) {
       btn.classList.toggle("active", btn.dataset.basis === "all");
     }
   }
-  if (!analysis.highlights?.moments?.length) {
+  // Build the working moments list, filtering to section if in section view.
+  let moments = analysis.highlights?.moments ?? [];
+  if (focusedSection) {
+    const secStart = focusedSection.start_s;
+    const secEnd   = focusedSection.end_s;
+    moments = moments.filter(m => m.end_s > secStart && m.start_s < secEnd);
+  }
+
+  if (!moments.length) {
     const empty = document.createElement("div");
     empty.className = "empty-cards";
-    empty.textContent = "No coaching moments — try another take.";
+    empty.textContent = focusedSection
+      ? `No coaching moments in ${focusedSection.name}.`
+      : "No coaching moments — try another take.";
     highlightList.appendChild(empty);
     return;
   }
@@ -917,7 +1749,7 @@ function renderCoachingCards(reference, analysis) {
   if (highlightFilters) highlightFilters.hidden = false;
   if (basisFilters) basisFilters.hidden = false;
 
-  for (const moment of analysis.highlights.moments) {
+  for (const moment of moments) {
     // Skip low-confidence cards defensively (should already be filtered server-side).
     if (moment.confidence === "low") continue;
     // Skip moments that span more than 25% of the song — too broad for a
@@ -942,36 +1774,94 @@ function renderCoachingCards(reference, analysis) {
       ? `<p class="card-section">${moment.section_names.join(" · ")}</p>`
       : "";
     const lyricEl = lyric ? `<blockquote class="card-lyric">“${lyric}”</blockquote>` : "";
-    const basisLabel = `<span class="card-basis-label basis-${basis}">${BASIS_DISPLAY[basis] || basis}</span>`;
     const evidenceBadge =
       moment.confidence === "medium"
         ? `<span class="evidence-badge">Limited evidence</span>`
         : "";
 
-    card.innerHTML = `
-      <header class="card-header">
-        <h5>${cardHeadingText(moment)}${basisLabel}</h5>
-      </header>
-      <p class="card-title">${moment.title}</p>
-      <p class="card-summary">${moment.summary}</p>
-      ${sectionTag}
-      ${lyricEl}
-      ${evidenceBadge}
-      <div class="card-footer">
-        <div class="card-stat">
-          <span class="card-stat-value">${keyStatFor(moment)}</span>
-          <span class="card-stat-meta">${fmtTime(userStart)}–${fmtTime(userEnd)}</span>
+
+    const tryThisEl = moment.practice_tip
+      ? `<div class="card-try-this">
+           <h6 class="card-try-this-label">Try this</h6>
+           <p class="card-try-this-text">${moment.practice_tip}</p>
+         </div>`
+      : "";
+
+    const hasDisclosure = !NO_DISCLOSURE_TYPES.has(moment.type);
+
+    // V2: corrective cards are collapsed by default with a disclosure link.
+    // Affirming and timing cards show all content immediately (no disclosure).
+    card.className = `card ${hasDisclosure ? "collapsed" : ""} ${moment.type} ${cardCategoryClass(moment)} ${scopeClass}${confidenceClass}`.trim();
+
+    const songStart = moment.start_s;
+    const songEnd = moment.end_s;
+
+    const disclosureFooter = hasDisclosure ? `
+        <hr class="card-divider" />
+        <a class="card-disclosure" role="button" tabindex="0">Show coaching &amp; comparison</a>` : "";
+
+    const expandedSection = hasDisclosure ? `
+      <div class="card-expanded">
+        ${lyricEl}
+        ${tryThisEl}
+        <div class="card-actions">
+          <button class="card-play-take" type="button">&#9654; Play your take</button>
+          <button class="card-play-ref" type="button">&#9654; Play reference</button>
         </div>
-        <button class="card-play" type="button">Play from here</button>
+      </div>` : "";
+
+    card.innerHTML = `
+      <div class="card-collapsed">
+        <header class="card-header">
+          <h5>${cardHeadingText(moment)}</h5>
+          <span class="card-stat-meta">${fmtTime(userStart)}&ndash;${fmtTime(userEnd)}</span>
+        </header>
+        <p class="card-title">${moment.title}</p>
+        <p class="card-summary">${moment.summary}</p>
+        ${sectionTag}
+        ${evidenceBadge}
+        ${disclosureFooter}
       </div>
+      ${expandedSection}
     `;
-    card.querySelector(".card-play").addEventListener("click", (e) => {
-      e.stopPropagation();
-      seekAndPlay(userStart);
-      scrollToHighlightCard(card.dataset.momentId);
-    });
+
+    if (hasDisclosure) {
+      const disclosureLink = card.querySelector(".card-disclosure");
+      const expandedEl = card.querySelector(".card-expanded");
+
+      disclosureLink.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const isExpanded = expandedEl.classList.contains("open");
+        expandedEl.classList.toggle("open", !isExpanded);
+        disclosureLink.textContent = isExpanded
+          ? "Show coaching & comparison"
+          : "Hide coaching & comparison";
+        card.classList.toggle("collapsed", isExpanded);
+        if (isExpanded) {
+          // Re-equalize heights after the collapse animation (0.28s) finishes.
+          setTimeout(equalizeCardHeights, 300);
+        }
+      });
+      disclosureLink.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          disclosureLink.click();
+        }
+      });
+
+      card.querySelector(".card-play-take").addEventListener("click", (e) => {
+        e.stopPropagation();
+        playRanged(userStart, userEnd);
+      });
+
+      card.querySelector(".card-play-ref").addEventListener("click", (e) => {
+        e.stopPropagation();
+        playReferenceRanged(songStart, songEnd);
+      });
+    }
+
     card.addEventListener("click", () => {
-      seekAndPlay(userStart);
+      playRanged(userStart, userEnd);
       scrollToHighlightCard(card.dataset.momentId);
     });
     highlightList.appendChild(card);
@@ -979,8 +1869,81 @@ function renderCoachingCards(reference, analysis) {
   applyHighlightFilter();
 }
 
+/**
+ * Seek the user's performance to userStart and stop playback at userEnd.
+ * Uses WaveSurfer when available; falls back to the raw media element.
+ */
+function playRanged(userStart, userEnd) {
+  const t = Math.max(0, userStart);
+
+  function attachStop(media) {
+    const stopListener = () => {
+      if (media.currentTime >= userEnd) {
+        media.pause();
+        media.removeEventListener("timeupdate", stopListener);
+      }
+    };
+    media.addEventListener("timeupdate", stopListener);
+  }
+
+  if (wavesurfer) {
+    try {
+      wavesurfer.setTime(t);
+      const media = wavesurfer.getMediaElement
+        ? wavesurfer.getMediaElement()
+        : wavesurfer.media;
+      if (media) attachStop(media);
+      const p = wavesurfer.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+      syncMixLayers(t, true);
+      return;
+    } catch (e) {
+      console.warn("WaveSurfer ranged play failed, using media element:", e);
+    }
+  }
+  if (currentMedia) {
+    try {
+      currentMedia.currentTime = t;
+      attachStop(currentMedia);
+      currentMedia.play().catch(() => {});
+      syncMixLayers(t, true);
+    } catch (e) {
+      console.warn("Media ranged play failed:", e);
+    }
+  }
+}
+
+/**
+ * Play the reference vocal audio from songStart to songEnd (song time, no offset)
+ * then stop. Pauses the user performance while the snippet plays.
+ */
+function playReferenceRanged(songStart, songEnd) {
+  ensureMixMedia();
+  if (!refVocalMedia.src) {
+    console.warn("Reference audio not loaded yet");
+    return;
+  }
+  // Pause the user performance while reference snippet plays.
+  if (wavesurfer && wavesurfer.isPlaying()) wavesurfer.pause();
+  else currentMedia?.pause();
+  pauseMixLayers();
+
+  refVocalMedia.currentTime = Math.max(0, songStart);
+  const stopRef = () => {
+    if (refVocalMedia.currentTime >= songEnd) {
+      refVocalMedia.pause();
+      refVocalMedia.removeEventListener("timeupdate", stopRef);
+    }
+  };
+  refVocalMedia.addEventListener("timeupdate", stopRef);
+  refVocalMedia.play().catch((e) => {
+    console.warn("Reference ranged play failed:", e);
+    refVocalMedia.removeEventListener("timeupdate", stopRef);
+  });
+}
+
 function currentStarsProfile() {
-  return fastProfile && fastProfile.checked ? "fast" : "full";
+  return "fast";
 }
 
 // Build a normalized peak envelope from the per-frame RMS (dB) loudness track
@@ -1142,11 +2105,30 @@ function attachPlaybackMixSync() {
     for (const ev of ["play", "pause", "timeupdate", "seeked", "ended"]) {
       currentMedia.addEventListener(ev, sync, { signal });
     }
+    // Keep the play/pause icon in sync with actual media state
+    currentMedia.addEventListener("play",  updatePlayPauseIcon, { signal });
+    currentMedia.addEventListener("pause", updatePlayPauseIcon, { signal });
+    currentMedia.addEventListener("ended", updatePlayPauseIcon, { signal });
   }
   if (wavesurfer) {
     for (const ev of ["play", "pause", "timeupdate", "seeking", "interaction"]) {
       wavesurfer.on(ev, sync);
     }
+    // Drive the graph playhead loop from WaveSurfer events
+    wavesurfer.on("play",  () => {
+      if (analysisGraph) analysisGraph.startPlayheadLoop(getPerformanceTime);
+    });
+    wavesurfer.on("pause", () => {
+      if (analysisGraph) {
+        analysisGraph.stopPlayheadLoop();
+        analysisGraph.setPlayheadUserTime(getPerformanceTime());
+      }
+    });
+    wavesurfer.on("seeking", () => {
+      if (analysisGraph) {
+        analysisGraph.setPlayheadUserTime(getPerformanceTime());
+      }
+    });
   }
 }
 
@@ -1178,26 +2160,73 @@ function seekAndPlay(userStart) {
 }
 
 async function renderAnalysis(songId, analysis) {
-  results.hidden = false;
-  currentAnalysis = analysis;
-  currentPlaybackSongId = songId;
+  // --- 1. Create a new result block from the template ---
+  const template = document.getElementById("resultBlockTemplate");
+  const blockEl = template.content.cloneNode(true).firstElementChild;
+
+  const blockIdx = analyses.length;
+
+  // --- 2. Register the block state (shell; wavesurfer/graph set below) ---
+  const blockState = {
+    songId,
+    analysis,
+    container: blockEl,
+    wavesurfer: null,
+    analysisGraph: null,
+    mediaEl: null,
+    fullPeaks: null,
+    fullAudioUrl: null,
+    focusedSection: null,
+    refVocalMedia: null,
+    instrumentalMedia: null,
+    mixRefVocalOn: false,
+    mixInstrumentalOn: false,
+  };
+  analyses.push(blockState);
+
+  // --- 3. Append block and reveal results container ---
+  resultsContainer.hidden = false;
+  resultsContainer.appendChild(blockEl);
+
+  // Activate this block: updates all module-level per-block variables so the
+  // render helpers below write into the correct DOM elements.
+  activateBlock(blockIdx);
+
+  // --- 4. Initialise per-block state ---
+  focusedSection = null;
+  fullPeaks = null;
+  fullAudioUrl = null;
+  if (backToFullSongBtn) backToFullSongBtn.hidden = true;
   currentDuration = analysis.duration_s;
-  resetMixToggles();
-  prepareMixLayers(songId);
-  updateMixToggleUi(allSongs.find((s) => s.song_id === songId));
-  detachPlaybackMixSync();
-  if (wavesurfer) {
-    try {
-      wavesurfer.destroy();
-    } catch (e) {
-      /* ignore */
-    }
-    wavesurfer = null;
+
+  // Segment indicator when only part of the song was recorded (karaoke)
+  const song = allSongs.find((s) => s.song_id === songId);
+  if (analysis.segment_end_song_s != null && song) {
+    segmentInfo.textContent =
+      `Analyzed ${fmtMmSs(0)}\u2013${fmtMmSs(analysis.segment_end_song_s)} of ${fmtMmSs(song.duration_s)}`;
+    segmentInfo.hidden = false;
+  } else {
+    segmentInfo.hidden = true;
+    segmentInfo.textContent = "";
   }
 
+  // --- 5. Set up mix layers for this block ---
+  resetMixToggles();
+  // ensureMixMedia() will create fresh Audio elements (refVocalMedia / instrumentalMedia are null
+  // for new blocks, so we get brand-new instances per block).
+  prepareMixLayers(songId);
+  updateMixToggleUi(allSongs.find((s) => s.song_id === songId));
+  // Save the new mix media back to the block state immediately so activateBlock
+  // can pause them if another block is activated mid-analysis.
+  blockState.refVocalMedia    = refVocalMedia;
+  blockState.instrumentalMedia = instrumentalMedia;
+
+  // --- 6. Build performance audio element ---
   const audioUrl = apiUrl(`/api/songs/${encodeURIComponent(songId)}/performances/${encodeURIComponent(
     analysis.perf_id,
   )}/audio`);
+  fullAudioUrl = audioUrl;
+  blockState.fullAudioUrl = audioUrl;
 
   // Dedicated streaming media element: plays via HTTP range requests and is
   // a reliable fallback for the play-from-here actions regardless of whether
@@ -1206,11 +2235,19 @@ async function renderAnalysis(songId, analysis) {
   mediaEl.preload = "auto";
   mediaEl.src = audioUrl;
   currentMedia = mediaEl;
+  blockState.mediaEl = mediaEl;
 
-  // Precomputed peaks from the loudness track avoid a fragile in-browser
-  // decode of the full (40 MB+) performance WAV.
+  // --- 7. Fetch precomputed peaks ---
   const peaks = await fetchPeaks(songId, analysis.perf_id);
+  fullPeaks = peaks;
+  blockState.fullPeaks = peaks;
 
+  // Unhide the timeline grid BEFORE WaveSurfer.create so that the waveform
+  // container has non-zero dimensions when the renderer measures it.
+  const timelineGrid = blockEl.querySelector('[data-role="timelineGrid"]');
+  if (timelineGrid) timelineGrid.hidden = false;
+
+  // --- 8. Create WaveSurfer for this block ---
   wavesurfer = WaveSurfer.create({
     container: waveformDiv,
     waveColor: "#cec5bb",
@@ -1229,72 +2266,113 @@ async function renderAnalysis(songId, analysis) {
   if (!peaks) {
     wavesurfer.load(audioUrl);
   }
+  blockState.wavesurfer = wavesurfer;
   attachPlaybackMixSync();
 
-  // Overview tiles (above the waveform).
-  renderOverviewTiles(analysis.overview, analysis);
+  // --- 9. Create AnalysisGraph for this block ---
+  const graphCanvas     = blockEl.querySelector('[data-role="analysisGraphCanvas"]');
+  const graphLabel      = blockEl.querySelector('[data-role="analysisGraphLabel"]');
+  const graphTechSelect = blockEl.querySelector('[data-role="techniqueSelect"]');
+  if (graphCanvas && graphLabel && graphTechSelect) {
+    analysisGraph = new AnalysisGraph(
+      graphCanvas,
+      graphLabel,
+      graphTechSelect,
+      apiUrl,
+      seekAndPlay,
+    );
+    const reference = await getReferenceAnnotation(songId);
+    analysisGraph.setAnalysis(analysis, reference);
+    analysisGraph.setFilter(activeHighlightFilter);
+  }
+  blockState.analysisGraph = analysisGraph;
 
-  // Performance summary (LLM narrative + takeaways + trends, if available).
+  // --- 10. Render content into this block's DOM elements ---
+  renderOverviewTiles(analysis.overview, analysis);
   renderPerformanceSummary(analysis.performance_summary);
 
   // Region markers in song time. NOTE: the Wavesurfer waveform is the
   // user vocal in *user* time; we shift song-time regions back to user
   // time using the analysis.global_offset_s.
-  timelineDiv.innerHTML = "";
-  const totalDur = currentDuration;
-  for (const moment of analysis.highlights.moments) {
-    // Skip song-wide trends (>25% of duration) — same filter as cards.
-    if (analysis.duration_s > 0 && (moment.end_s - moment.start_s) / analysis.duration_s > 0.25) continue;
-    const userStart = moment.start_s + analysis.global_offset_s;
-    const userEnd = moment.end_s + analysis.global_offset_s;
-    const left = (userStart / totalDur) * 100;
-    const width = ((userEnd - userStart) / totalDur) * 100;
-    const region = document.createElement("div");
-    region.className = `region ${regionCategoryClass(moment)}`;
-    region.style.left = `${Math.max(0, left)}%`;
-    region.style.width = `${Math.max(1, width)}%`;
-    region.title = `${moment.title}\n${moment.summary}`;
-    region.dataset.momentId = momentDomId(moment);
-    region.dataset.category = momentCategoryKey(moment);
-    region.addEventListener("click", () => {
-      seekAndPlay(userStart);
-      scrollToHighlightCard(region.dataset.momentId);
-    });
-    timelineDiv.appendChild(region);
-  }
+  renderFullRegions();
 
   // Section ribbon (verses/choruses/...) under the waveform.
-  const reference = await getReferenceAnnotation(songId);
-  renderSectionRibbon(reference, analysis);
+  // getReferenceAnnotation caches the result; this is effectively free if
+  // we already fetched it above for the analysis graph.
+  const sectionReference = await getReferenceAnnotation(songId);
+  renderSectionRibbon(sectionReference, analysis);
 
   // Rich coaching cards.
-  renderCoachingCards(reference, analysis);
+  renderCoachingCards(sectionReference, analysis);
+
+  // --- 11. Make the block interactive: clicking it activates its playback ---
+  // Use a live index lookup so this still works after earlier blocks are deleted.
+  blockEl.addEventListener("pointerdown", () => {
+    const liveIdx = analyses.indexOf(blockState);
+    if (liveIdx !== -1 && activeAnalysisIdx !== liveIdx) activateBlock(liveIdx);
+  }, { capture: true });
+
+  // Delete button — remove this block and clean up its resources
+  const deleteBtn = blockEl.querySelector('[data-role="deleteBlock"]');
+  deleteBtn?.addEventListener("click", (e) => {
+    e.stopPropagation(); // don't trigger the pointerdown activation above
+    const liveIdx = analyses.indexOf(blockState);
+    if (liveIdx !== -1) removeBlock(liveIdx);
+  });
+
+  // --- 12. Collapse the upload section to the compact "Add a performance" bar ---
+  collapseUploadSection();
 }
 
-playPause.addEventListener("click", () => {
-  if (wavesurfer) {
-    try {
-      wavesurfer.playPause();
-      syncMixLayers(getPerformanceTime(), isPerformancePlaying());
-      return;
-    } catch (e) {
-      /* fall through to media element */
+function updatePlayPauseIcon() {
+  if (!playPause) return;
+  const playing = isPerformancePlaying();
+  playPause.classList.toggle("is-playing", playing);
+  playPause.setAttribute("aria-label", playing ? "Pause" : "Play");
+  playPause.title = playing ? "Pause" : "Play";
+}
+
+/**
+ * Wire click handlers onto the currently active block's playback bar buttons.
+ * Old listeners are cleaned up via AbortController so switching blocks never
+ * accumulates stale handlers.
+ */
+function wirePlaybackBarListeners() {
+  playbackListenersAbort?.abort();
+  playbackListenersAbort = new AbortController();
+  const { signal } = playbackListenersAbort;
+
+  playPause?.addEventListener("click", () => {
+    if (wavesurfer) {
+      try {
+        wavesurfer.playPause();
+        syncMixLayers(getPerformanceTime(), isPerformancePlaying());
+        updatePlayPauseIcon();
+        return;
+      } catch (e) {
+        /* fall through to media element */
+      }
     }
-  }
-  if (currentMedia) {
-    if (currentMedia.paused) currentMedia.play().catch(() => {});
-    else currentMedia.pause();
-    syncMixLayers(getPerformanceTime(), isPerformancePlaying());
-  }
-});
+    if (currentMedia) {
+      if (currentMedia.paused) currentMedia.play().catch(() => {});
+      else currentMedia.pause();
+      syncMixLayers(getPerformanceTime(), isPerformancePlaying());
+      updatePlayPauseIcon();
+    }
+  }, { signal });
 
-mixRefVocalBtn?.addEventListener("click", () => {
-  setMixToggle("ref", !mixRefVocalOn);
-});
+  mixRefVocalBtn?.addEventListener("click", () => {
+    setMixToggle("ref", !mixRefVocalOn);
+  }, { signal });
 
-mixInstrumentalBtn?.addEventListener("click", () => {
-  setMixToggle("instrumental", !mixInstrumentalOn);
-});
+  mixInstrumentalBtn?.addEventListener("click", () => {
+    setMixToggle("instrumental", !mixInstrumentalOn);
+  }, { signal });
+
+  backToFullSongBtn?.addEventListener("click", () => {
+    clearSectionFocus().catch(console.error);
+  }, { signal });
+}
 
 // ---------------------------------------------------------------------------
 // Sprint 3 stretch: karaoke sing-along mode
@@ -1311,6 +2389,7 @@ const karaokeTime = document.getElementById("karaokeTime");
 const karaokeLyrics = document.getElementById("karaokeLyrics");
 const karaokeAudio = document.getElementById("karaokeAudio");
 const karaokeViz = document.getElementById("karaokeViz");
+const karaokeRefVocalBtn = document.getElementById("karaokeRefVocal");
 
 let karaokeScriptNode = null;   // ScriptProcessorNode used for WAV capture
 let karaokePcmBuffers = [];     // Float32Array chunks collected during recording
@@ -1319,6 +2398,12 @@ let karaokeStream = null;
 let karaokeRafHandle = null;
 let karaokeStartTs = 0;
 let karaokeWordRows = [];
+let karaokeLinesArr = [];       // grouped line-level entries for vertical display
+let karaokeLastScrollFocusIdx = -1; // tracks which line we last scrolled to
+
+// Reference vocal playback during karaoke.
+let karaokeRefVocalMedia = null;
+let karaokeRefVocalOn = false;
 
 // Web Audio API handles for the live mic waveform.
 let karaokeAudioCtx = null;
@@ -1356,9 +2441,21 @@ function _wavEncode(buffers, sampleRate) {
   return new Blob([ab], { type: "audio/wav" });
 }
 
-// Rolling-window constants (seconds).
-const LYRIC_PAST_S = 1.0;    // keep just-sung words visible for this long after they end
-const LYRIC_FUTURE_S = 3.5;  // show this much of upcoming lyrics ahead of current time
+// A timing gap larger than this triggers a line break — but only once the
+// current line has reached LYRIC_MIN_WORDS real words, so short entries like
+// "Yesterday" (a single lyric_word that is just one token) don't get stranded.
+const LYRIC_LINE_GAP_S = 0.8;
+// A gap this long always forces a new line regardless of word count
+// (covers true section rests / instrumentals).
+const LYRIC_HARD_GAP_S = 5.0;
+// Minimum real space-separated word tokens before a normal gap can break.
+const LYRIC_MIN_WORDS = 4;
+// Maximum real word tokens before forcing a break regardless of timing.
+// Now that phrase_break_before handles primary line splits, this is only
+// a last resort for unusually long phrases (e.g. rap-heavy or ad-lib sections).
+const LYRIC_MAX_WORDS = 12;
+// How far above the container top the active line is positioned (px).
+const LYRIC_SCROLL_OFFSET_PX = 80;
 
 function setMode(mode) {
   const isUpload = mode === "upload";
@@ -1371,7 +2468,7 @@ function setMode(mode) {
 modeUploadBtn.addEventListener("click", () => setMode("upload"));
 modeKaraokeBtn.addEventListener("click", async () => {
   setMode("karaoke");
-  const songId = songSelect.value;
+  const songId = selectedSongId;
   if (!songId) return;
   const reference = await getReferenceAnnotation(songId);
   buildKaraokeLyrics(reference);
@@ -1380,10 +2477,17 @@ modeKaraokeBtn.addEventListener("click", async () => {
 function buildKaraokeLyrics(reference) {
   karaokeLyrics.innerHTML = "";
   karaokeWordRows = [];
+  karaokeLinesArr = [];
+  karaokeLastScrollFocusIdx = -1;
   if (!reference || !Array.isArray(reference.notes)) {
     karaokeLyrics.innerHTML = `<p class="hint">Lyrics will appear here once a reference annotation is available.</p>`;
     return;
   }
+
+  // Deduplicate notes into unique words by word_index.
+  // phrase_break_before is True on the first note of each word that
+  // immediately follows an UltraStar phrase-break marker (``-``).  We keep
+  // that flag so the line-grouping step below can use it as a hard break.
   const wordsMap = new Map();
   for (const note of reference.notes) {
     const wordIdx = note.word_index;
@@ -1393,6 +2497,7 @@ function buildKaraokeLyrics(reference) {
         word: (note.lyric_word || "").trim(),
         start_s: note.start_s,
         end_s: note.end_s,
+        phrase_break_before: !!note.phrase_break_before,
       });
     } else {
       const entry = wordsMap.get(wordIdx);
@@ -1401,17 +2506,77 @@ function buildKaraokeLyrics(reference) {
   }
   const words = [...wordsMap.values()].filter((w) => w.word);
   words.sort((a, b) => a.start_s - b.start_s);
-  for (const w of words) {
-    const span = document.createElement("span");
-    span.className = "karaoke-word";
-    span.textContent = w.word + " ";
-    span.dataset.start = w.start_s;
-    span.dataset.end = w.end_s;
-    // Initially show only the first window so the preview doesn't dump all lyrics.
-    span.style.display = w.start_s <= LYRIC_FUTURE_S ? "" : "none";
-    karaokeLyrics.appendChild(span);
-    karaokeWordRows.push({ span, start_s: w.start_s, end_s: w.end_s });
+
+  // Count actual space-separated tokens in the accumulated line (used for
+  // the LYRIC_MAX_WORDS hard cap so no single line becomes too long).
+  const tokenCount = (line) =>
+    line.reduce((n, w) => n + w.word.trim().split(/\s+/).length, 0);
+
+  // Group words into display lines.
+  // Primary rule: break whenever a word has phrase_break_before = true
+  // (derived directly from the UltraStar "-" phrase-break markers in the
+  // chart — the most reliable signal available).
+  // Fallback rules for songs without that data or very long phrases:
+  //   • hard gap >= LYRIC_HARD_GAP_S always breaks,
+  //   • soft gap >= LYRIC_LINE_GAP_S breaks once LYRIC_MIN_WORDS are met,
+  //   • LYRIC_MAX_WORDS forces a break regardless of timing.
+  const rawLines = [];
+  let currentLine = [];
+  for (let i = 0; i < words.length; i++) {
+    const w = words[i];
+    const prev = i > 0 ? words[i - 1] : null;
+    const gap = prev ? w.start_s - prev.end_s : 0;
+    if (currentLine.length > 0) {
+      const tokens = tokenCount(currentLine);
+      const phraseBreak = !!w.phrase_break_before;
+      const hardBreak   = gap >= LYRIC_HARD_GAP_S;
+      const softBreak   = gap >= LYRIC_LINE_GAP_S && tokens >= LYRIC_MIN_WORDS;
+      const maxBreak    = tokens >= LYRIC_MAX_WORDS;
+      if (phraseBreak || hardBreak || softBreak || maxBreak) {
+        rawLines.push(currentLine);
+        currentLine = [];
+      }
+    }
+    currentLine.push(w);
   }
+  if (currentLine.length > 0) rawLines.push(currentLine);
+
+  // Top spacer lets the first line scroll to the visual center of the container.
+  const topSpacer = document.createElement("div");
+  topSpacer.className = "karaoke-lyric-spacer";
+  topSpacer.style.height = `${LYRIC_SCROLL_OFFSET_PX}px`;
+  karaokeLyrics.appendChild(topSpacer);
+
+  // Build DOM: one .karaoke-line per group.
+  for (const lineWords of rawLines) {
+    const lineDiv = document.createElement("div");
+    lineDiv.className = "karaoke-line upcoming";
+
+    const wordItems = [];
+    for (const w of lineWords) {
+      const span = document.createElement("span");
+      span.className = "karaoke-word";
+      span.textContent = w.word + " ";
+      lineDiv.appendChild(span);
+      const item = { span, start_s: w.start_s, end_s: w.end_s };
+      wordItems.push(item);
+      karaokeWordRows.push(item);
+    }
+
+    karaokeLyrics.appendChild(lineDiv);
+    karaokeLinesArr.push({
+      div: lineDiv,
+      words: wordItems,
+      start_s: lineWords[0].start_s,
+      end_s: lineWords[lineWords.length - 1].end_s,
+    });
+  }
+
+  // Bottom spacer so the last line can also be scrolled to the visual center.
+  const botSpacer = document.createElement("div");
+  botSpacer.className = "karaoke-lyric-spacer";
+  botSpacer.style.height = `${LYRIC_SCROLL_OFFSET_PX + 160}px`;
+  karaokeLyrics.appendChild(botSpacer);
 }
 
 function fmtMmSs(t) {
@@ -1474,23 +2639,50 @@ function _drawKaraokeWaveform() {
 }
 
 function applyKaraokeLyricsAtTime(t) {
-  let activeIdx = -1;
-  for (let i = 0; i < karaokeWordRows.length; i++) {
-    const row = karaokeWordRows[i];
-    if (t >= row.start_s && t < row.end_s) {
-      activeIdx = i;
-      break;
+  if (karaokeLinesArr.length === 0) return;
+
+  // Find which line is actively being sung.
+  let activeLineIdx = -1;
+  for (let i = 0; i < karaokeLinesArr.length; i++) {
+    const ln = karaokeLinesArr[i];
+    if (t >= ln.start_s && t < ln.end_s) { activeLineIdx = i; break; }
+  }
+
+  // During gaps between lines, pivot around the last completed line so the
+  // next upcoming line stays visible rather than the display going blank.
+  let focusIdx = activeLineIdx;
+  if (focusIdx === -1) {
+    for (let i = karaokeLinesArr.length - 1; i >= 0; i--) {
+      if (karaokeLinesArr[i].end_s <= t) { focusIdx = i; break; }
     }
   }
 
-  const windowStart = t - LYRIC_PAST_S;
-  const windowEnd = t + LYRIC_FUTURE_S;
-  for (let i = 0; i < karaokeWordRows.length; i++) {
-    const row = karaokeWordRows[i];
-    const inWindow = row.end_s >= windowStart && row.start_s <= windowEnd;
-    row.span.style.display = inWindow ? "" : "none";
-    row.span.classList.toggle("active", i === activeIdx);
-    row.span.classList.toggle("sung", i < activeIdx && inWindow);
+  // Apply sung / active / upcoming classes to every line.
+  // No display toggling — all lines stay in the DOM; the container scrolls.
+  for (let i = 0; i < karaokeLinesArr.length; i++) {
+    const ln = karaokeLinesArr[i];
+    const isActive = i === activeLineIdx;
+    const isSung   = activeLineIdx !== -1 ? i < activeLineIdx : i <= focusIdx;
+    const isUpcoming = !isActive && !isSung;
+
+    ln.div.classList.toggle("active",   isActive);
+    ln.div.classList.toggle("sung",     isSung);
+    ln.div.classList.toggle("upcoming", isUpcoming);
+  }
+
+  // Smooth-scroll the container so the active (or focus) line sits just below
+  // the top padding. Only trigger scrollTo when the focus line changes to
+  // avoid fighting the browser's inertia scroll.
+  if (focusIdx !== karaokeLastScrollFocusIdx) {
+    karaokeLastScrollFocusIdx = focusIdx;
+    if (focusIdx >= 0) {
+      const targetLine = karaokeLinesArr[focusIdx].div;
+      const containerRect = karaokeLyrics.getBoundingClientRect();
+      const lineRect = targetLine.getBoundingClientRect();
+      const currentScroll = karaokeLyrics.scrollTop;
+      const targetScroll = lineRect.top - containerRect.top + currentScroll - LYRIC_SCROLL_OFFSET_PX;
+      karaokeLyrics.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+    }
   }
 }
 
@@ -1499,11 +2691,22 @@ function updateKaraokeHighlight() {
   karaokeTime.textContent = fmtMmSs(t);
   _drawKaraokeWaveform();
   applyKaraokeLyricsAtTime(t);
+
+  // Keep reference vocal in sync with the instrumental.
+  if (karaokeRefVocalOn && karaokeRefVocalMedia && !karaokeRefVocalMedia.paused) {
+    const drift = Math.abs(karaokeRefVocalMedia.currentTime - karaokeAudio.currentTime);
+    if (drift > MIX_SYNC_THRESHOLD_S) {
+      karaokeRefVocalMedia.currentTime = karaokeAudio.currentTime;
+    }
+  }
+
   karaokeRafHandle = requestAnimationFrame(updateKaraokeHighlight);
 }
 
 function resetKaraokeLyricsView() {
   karaokeTime.textContent = "0:00";
+  karaokeLastScrollFocusIdx = -1;
+  karaokeLyrics.scrollTop = 0;
   applyKaraokeLyricsAtTime(0);
 }
 
@@ -1514,6 +2717,10 @@ function _handleKaraokeEnded() {
 async function endKaraokeSession({ analyze }) {
   karaokeAudio.removeEventListener("ended", _handleKaraokeEnded);
   if (!karaokeScriptNode) return;
+
+  // Capture duration before tearing anything down.
+  const recordingDuration = (performance.now() - karaokeStartTs) / 1000;
+
   // Stop capturing PCM — disconnect before closing AudioContext.
   karaokeScriptNode.disconnect();
   karaokeScriptNode = null;
@@ -1526,6 +2733,16 @@ async function endKaraokeSession({ analyze }) {
   karaokeStopBtn.disabled = true;
   karaokeCancelBtn.disabled = true;
   cancelAnimationFrame(karaokeRafHandle);
+
+  // Stop reference vocal playback and reset toggle.
+  if (karaokeRefVocalMedia) {
+    karaokeRefVocalMedia.pause();
+    karaokeRefVocalMedia = null;
+  }
+  karaokeRefVocalOn = false;
+  karaokeRefVocalBtn.classList.remove("active");
+  karaokeRefVocalBtn.setAttribute("aria-pressed", "false");
+
   if (karaokeStream) {
     karaokeStream.getTracks().forEach((t) => t.stop());
     karaokeStream = null;
@@ -1545,12 +2762,19 @@ async function endKaraokeSession({ analyze }) {
     return;
   }
 
-  const songId = songSelect.value;
+  const songId = selectedSongId;
   if (!songId) return;
-  status.textContent = "Analyzing karaoke take…";
+
+  analysisAbortController = new AbortController();
+  const { signal } = analysisAbortController;
+
+  showAnalysisProgress(0);
+  status.textContent = "";
+  status.classList.remove("error");
   const fd = new FormData();
   fd.append("file", wavBlob, "recording.wav");
   fd.append("stars_profile", currentStarsProfile());
+  fd.append("recording_duration_s", recordingDuration.toFixed(3));
   try {
     const r = await fetch(
       apiUrl(`/api/songs/${encodeURIComponent(songId)}/analyze`),
@@ -1561,19 +2785,33 @@ async function endKaraokeSession({ analyze }) {
       throw new Error(`HTTP ${r.status}: ${detail.slice(0, 200)}`);
     }
     const { job_id } = await r.json();
-    status.textContent = "Analyzing… (this may take up to a minute)";
-    const analysis = await pollJob(job_id);
+    const analysis = await pollJob(job_id, signal);
+    // Flash all steps complete before transitioning to results
+    showAnalysisProgress(5);
+    await new Promise((res) => setTimeout(res, 600));
+    hideAnalysisProgress();
     status.textContent = `Done. Performance ID: ${analysis.perf_id}`;
     await renderAnalysis(songId, analysis);
   } catch (e) {
-    console.error(e);
-    status.textContent = `Analysis failed: ${e.message}`;
-    status.classList.add("error");
+    if (e.name === "AbortError") {
+      hideAnalysisProgress();
+      if (analyses.length > 0) collapseUploadSection();
+      else if (pickerSection) pickerSection.hidden = false;
+    } else {
+      console.error(e);
+      hideAnalysisProgress();
+      status.textContent = `Analysis failed: ${e.message}`;
+      status.classList.add("error");
+      if (analyses.length > 0) collapseUploadSection();
+      else if (pickerSection) pickerSection.hidden = false;
+    }
+  } finally {
+    analysisAbortController = null;
   }
 }
 
 karaokeRecordBtn.addEventListener("click", async () => {
-  const songId = songSelect.value;
+  const songId = selectedSongId;
   if (!songId) return;
   if (!navigator.mediaDevices) {
     status.textContent = "Browser does not support microphone access.";
@@ -1619,6 +2857,12 @@ karaokeRecordBtn.addEventListener("click", async () => {
     /* autoplay restrictions may block; the user can click the visible controls */
   });
 
+  // Preload reference vocal so the toggle can start it instantly.
+  karaokeRefVocalMedia = new Audio();
+  karaokeRefVocalMedia.preload = "auto";
+  karaokeRefVocalMedia.src = apiUrl(`/api/songs/${encodeURIComponent(songId)}/audio/reference`);
+  karaokeRefVocalMedia.volume = MIX_LAYER_VOLUME;
+
   karaokeStartTs = performance.now();
   karaokeRecordBtn.disabled = true;
   karaokeStopBtn.disabled = false;
@@ -1632,5 +2876,19 @@ karaokeRecordBtn.addEventListener("click", async () => {
 karaokeStopBtn.addEventListener("click", () => endKaraokeSession({ analyze: true }));
 
 karaokeCancelBtn.addEventListener("click", () => endKaraokeSession({ analyze: false }));
+
+karaokeRefVocalBtn.addEventListener("click", () => {
+  // Only active during a recording session.
+  if (!karaokeRefVocalMedia) return;
+  karaokeRefVocalOn = !karaokeRefVocalOn;
+  karaokeRefVocalBtn.classList.toggle("active", karaokeRefVocalOn);
+  karaokeRefVocalBtn.setAttribute("aria-pressed", String(karaokeRefVocalOn));
+  if (karaokeRefVocalOn) {
+    karaokeRefVocalMedia.currentTime = karaokeAudio.currentTime;
+    karaokeRefVocalMedia.play().catch(() => {});
+  } else {
+    karaokeRefVocalMedia.pause();
+  }
+});
 
 loadSongs();

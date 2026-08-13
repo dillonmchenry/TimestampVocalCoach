@@ -51,6 +51,14 @@ class ReferenceNote(BaseModel):
         default_factory=list,
         description="Phonemes that fall inside this note (slur-aware)",
     )
+    phrase_break_before: bool = Field(
+        default=False,
+        description=(
+            "True if this note is the first note of a word that immediately "
+            "follows an UltraStar phrase-break marker (``-``).  Used by the "
+            "karaoke display to force a line break at real phrase boundaries."
+        ),
+    )
 
     @property
     def duration_s(self) -> float:
@@ -692,6 +700,14 @@ class CoachingMoment(BaseModel):
             '"comparative" = comparison with the specific reference recording.'
         ),
     )
+    practice_tip: Optional[str] = Field(
+        None,
+        description=(
+            'Actionable vocal exercise for this highlight type. '
+            'Sourced from RAG playbook practice_tip, optionally enhanced '
+            'by LLM to reference specific lyrics when instructive.'
+        ),
+    )
 
 
 class HighlightsReport(BaseModel):
@@ -872,6 +888,14 @@ class PerformanceAnalysis(BaseModel):
         description=(
             'Sprint 3 Phase B: LLM-generated narrative + actionable takeaways + '
             'observed cross-highlight trends. None when LLM is unavailable or disabled.'
+        ),
+    )
+    segment_end_song_s: Optional[float] = Field(
+        None,
+        description=(
+            'Song-time (seconds) at which this analysis ends. None when the full song '
+            'was recorded. Set for karaoke sessions where the user stopped early — '
+            'the frontend uses this to filter the section ribbon and show a segment label.'
         ),
     )
     analysis_version: str = Field("v6", description='Schema version tag for migrations')

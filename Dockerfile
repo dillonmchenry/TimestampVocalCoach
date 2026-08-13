@@ -5,9 +5,11 @@
 #   - "runtime" variant (~4.5 GB) vs "devel" (~9 GB) -- we don't need nvcc
 #
 # Build-time prerequisites (files that must exist before `docker build`):
-#   - rmvpe/model.pt          (~368 MB, gitignored -- download from verstar/STARS on HF)
 #   - data/student_v6/        (tracked in git, already present)
 #   - ../NanoPitch/           (sibling repo, cloned locally)
+#
+# Note: rmvpe/model.pt is no longer required -- the fast profile now reuses
+# the NanoPitch F0 already computed for pitch coaching.
 #
 # Build:
 #   docker build -t secondpass:latest .
@@ -57,11 +59,6 @@ RUN pip install --no-cache-dir \
 # Model weights (large, rarely change -- own layer for cache efficiency)
 # ---------------------------------------------------------------------------
 
-# RMVPE pitch encoder (~368 MB).
-# This file is gitignored. Run scripts/fetch_rmvpe.py or download manually:
-#   huggingface-cli download verstar/STARS rmvpe/model.pt --local-dir .
-COPY rmvpe/model.pt ./rmvpe/model.pt
-
 # STARS student checkpoint (~7 MB, tracked in git)
 COPY data/student_v6/ ./data/student_v6/
 
@@ -91,15 +88,12 @@ COPY data/songs/ ./data/songs/
 COPY data/rag/ ./data/rag/
 
 # ---------------------------------------------------------------------------
-# Wire RMVPE into the path that STARS's checkpoint loader expects.
+# Wire STARS phone set into the path its loader expects.
 #
-# setup_stars_runtime.py also tries to link the 700 MB bilingual teacher;
-# we skip that here since production uses stars_profile=fast (student only).
-# The student runner only needs rmvpe/model.pt, which we link below.
+# Production uses stars_profile=fast (student only), so the 700 MB bilingual
+# teacher checkpoint and RMVPE weights are not needed here.
 # ---------------------------------------------------------------------------
-RUN mkdir -p third_party/stars/checkpoints/rmvpe \
-    && ln -sf /app/rmvpe/model.pt /app/third_party/stars/checkpoints/rmvpe/model.pt \
-    && mkdir -p third_party/stars/data/processed/bilingual \
+RUN mkdir -p third_party/stars/data/processed/bilingual \
     && cp third_party/stars/chinese_and_english_phone_set.json \
           third_party/stars/data/processed/bilingual/phone_set.json
 

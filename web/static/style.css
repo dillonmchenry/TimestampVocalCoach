@@ -31,7 +31,6 @@ body {
 
 header {
   padding: 32px 32px 16px;
-  border-bottom: 1px solid var(--border);
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(8px);
 }
@@ -70,13 +69,16 @@ section {
 }
 
 .picker {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 12px 16px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
-.picker label {
+.picker[hidden] {
+  display: none;
+}
+
+.picker-label {
   color: var(--muted);
   font-size: 11px;
   font-weight: 600;
@@ -84,35 +86,7 @@ section {
   letter-spacing: 0.08em;
 }
 
-#songSelect {
-  appearance: none;
-  -webkit-appearance: none;
-  background-color: var(--panel-2);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M3 4.5 6 7.5 9 4.5'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 2.5rem 8px 10px;
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-#songSelect:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(59, 111, 212, 0.12);
-}
-
-.badges {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
+/* ---------- Generic pill badge (used by highlight filters and other UI) ---------- */
 
 .badge {
   font-size: 11px;
@@ -125,9 +99,186 @@ section {
   color: var(--muted);
 }
 
-.badge-lang     { color: var(--expr); border-color: rgba(124, 58, 237, 0.3); background: rgba(124, 58, 237, 0.06); }
-.badge-genre    { color: var(--accent); border-color: rgba(59, 111, 212, 0.3); background: rgba(59, 111, 212, 0.06); }
-.badge-duration { font-variant-numeric: tabular-nums; }
+/* ---------- Carousel wrapper + arrows ---------- */
+
+.carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 2px 8px;
+  flex: 1;
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-arrow {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  z-index: 1;
+  padding: 0;
+}
+
+.carousel-arrow:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 111, 212, 0.1);
+}
+
+.carousel-arrow--left  { margin-right: 8px; }
+.carousel-arrow--right { margin-left: 8px; }
+
+.carousel-arrow[disabled] {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ---------- Song cards ---------- */
+
+.song-card {
+  flex-shrink: 0;
+  width: 230px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.song-card:hover {
+  border-color: rgba(59, 111, 212, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.song-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 111, 212, 0.14), 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.song-card__check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.song-card.selected .song-card__check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.song-card__check svg {
+  width: 12px;
+  height: 12px;
+  stroke: #fff;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.song-card__cover {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+  border-radius: 10px 10px 0 0;
+}
+
+.song-card__cover-placeholder {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(135deg, var(--placeholder-a, #4a5568) 0%, var(--placeholder-b, #2d3748) 100%);
+  letter-spacing: -0.02em;
+}
+
+.song-card__info {
+  padding: 10px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.song-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-card__artist {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 10px 10px;
+}
+
+.song-tag {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.song-tag--lang     { color: var(--expr); border-color: rgba(124, 58, 237, 0.3); background: rgba(124, 58, 237, 0.06); }
+.song-tag--genre    { color: var(--accent); border-color: rgba(59, 111, 212, 0.3); background: rgba(59, 111, 212, 0.06); }
+.song-tag--duration { font-variant-numeric: tabular-nums; }
 
 /* ---------- Mode toggle + karaoke ---------- */
 
@@ -167,20 +318,6 @@ section {
 .mode-panel { display: block; }
 .mode-panel[hidden] { display: none; }
 
-.profile-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-  font-size: 13px;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.profile-toggle input {
-  accent-color: var(--accent);
-  cursor: pointer;
-}
 
 .karaoke-controls {
   display: flex;
@@ -206,36 +343,68 @@ section {
   border: 1px solid var(--border);
 }
 
-/* Rolling lyric window */
+/* Vertical lyric display */
 .karaoke-lyrics {
   background: var(--panel-2);
   border-radius: 12px;
   border: 1px solid var(--border);
-  padding: 20px 24px;
+  padding: 0 24px;
   margin-top: 12px;
-  min-height: 80px;
-  overflow: hidden;
+  height: 280px;
+  overflow-y: scroll;
+  scrollbar-width: none;       /* Firefox */
+  scroll-behavior: smooth;
+  position: relative;
   font-size: 22px;
   font-weight: 300;
-  line-height: 1.65;
+  line-height: 1.6;
   letter-spacing: 0.01em;
+}
+
+.karaoke-lyrics::-webkit-scrollbar {
+  display: none;               /* Chrome / Safari */
+}
+
+/* Spacer divs at top/bottom let the first and last lines reach center-ish */
+.karaoke-lyric-spacer {
+  flex-shrink: 0;
+}
+
+.karaoke-line {
+  width: 100%;
   text-align: center;
+  padding: 8px 0;
+  transition: opacity 0.35s ease, color 0.35s ease, font-size 0.35s ease;
+  font-size: 1em;
+  font-weight: 300;
+  color: var(--muted);
+  opacity: 0.4;
+}
+
+.karaoke-line.active {
+  opacity: 1;
+  color: var(--text);
+  font-size: 1.14em;
+  font-weight: 600;
+}
+
+.karaoke-line.upcoming {
+  opacity: 0.4;
+  color: var(--muted);
+  font-size: 1em;
+  font-weight: 300;
+}
+
+.karaoke-line.sung {
+  opacity: 0.15;
+  color: var(--muted);
+  font-size: 1em;
+  font-weight: 300;
 }
 
 .karaoke-word {
   display: inline;
   margin-right: 6px;
-  color: var(--muted);
-  transition: color 0.15s ease, transform 0.15s ease, opacity 0.25s ease;
-}
-
-.karaoke-word.sung { color: rgba(120, 113, 108, 0.4); }
-
-.karaoke-word.active {
-  color: var(--accent);
-  font-weight: 600;
-  transform: scale(1.06);
-  text-shadow: 0 0 18px rgba(59, 111, 212, 0.3);
 }
 
 #karaokeAudio {
@@ -376,12 +545,20 @@ section {
   color: var(--muted);
 }
 
+.segment-info {
+  font-size: 12px;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
 .status.error {
   color: var(--bad);
 }
 
 .results h2,
-.results h3 {
+.results h3,
+.result-block h2,
+.result-block h3 {
   margin-top: 0;
   letter-spacing: -0.02em;
   font-weight: 600;
@@ -401,7 +578,6 @@ h3 {
 }
 
 .timeline {
-  margin-top: 10px;
   position: relative;
   height: 28px;
   background: var(--panel-2);
@@ -444,9 +620,10 @@ h3 {
 
 .playback-bar {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 12px 16px;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
   margin-bottom: 10px;
 }
 
@@ -459,13 +636,44 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  min-width: 0;
 }
+
+/* ---------- Play / Pause icon button ---------- */
+
+.play-pause-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.play-pause-btn:hover {
+  background: var(--border);
+}
+
+.play-pause-btn .icon-pause { display: none; }
+.play-pause-btn.is-playing .icon-play  { display: none; }
+.play-pause-btn.is-playing .icon-pause { display: block; }
+
+/* ---------- Mix toggles (right-justified) ---------- */
 
 .mix-toggles {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .mix-toggle {
@@ -517,53 +725,171 @@ h3 {
 
 /* ---------- Overview stat tiles ---------- */
 
+.overview-heading {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin: 0 0 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.overview-heading .info-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1.5px solid var(--muted);
+  font-size: 9px;
+  font-style: normal;
+  font-weight: 700;
+  color: var(--muted);
+  cursor: default;
+  flex-shrink: 0;
+}
+
 .overview-tiles {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-template-columns: 170px repeat(4, 1fr);
   gap: 10px;
   margin-bottom: 18px;
 }
 
-.tile {
+/* --- Mimic score circle tile --- */
+
+.tile-mimic {
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  padding: 14px 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.tile-mimic svg {
+  display: block;
+}
+
+.tile-mimic-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 0.02em;
+}
+
+/* --- Category stat cards --- */
+
+.tile-card {
   background: var(--panel-2);
   border: 1px solid var(--border);
   border-radius: 11px;
   padding: 12px 14px;
   display: flex;
   flex-direction: column;
-  gap: 3px;
-  min-height: 72px;
+  gap: 4px;
 }
 
-.tile.headline {
-  background: linear-gradient(135deg, rgba(59, 111, 212, 0.10), rgba(59, 111, 212, 0.02));
-  border-color: rgba(59, 111, 212, 0.35);
+.tile-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 
-.tile-label {
+.tile-card-icon {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.tile-card-icon svg {
+  display: block;
+}
+
+.tile-card-icon--pitch   { background: rgba(185, 28, 28, 0.12); }
+.tile-card-icon--tech    { background: rgba(21, 128, 61, 0.12); }
+.tile-card-icon--timing  { background: rgba(59, 111, 212, 0.12); }
+.tile-card-icon--section { background: rgba(59, 111, 212, 0.12); }
+
+.tile-card-name {
   font-size: 10px;
-  font-weight: 600;
+  font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.09em;
   color: var(--muted);
 }
 
-.tile-value {
-  font-size: 22px;
-  font-weight: 600;
+.tile-card-value {
+  font-size: 19px;
+  font-weight: 700;
   letter-spacing: -0.02em;
   color: var(--text);
   font-variant-numeric: tabular-nums;
+  line-height: 1.15;
 }
 
-.tile.headline .tile-value {
-  font-size: 30px;
-  color: var(--accent);
-}
-
-.tile-sub {
+.tile-card-sub {
   font-size: 11px;
   color: var(--muted);
+  line-height: 1.3;
+}
+
+.tile-card-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 12px;
+}
+
+.tile-pill {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 20px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.tile-pill--sharp { border-color: rgba(180, 83, 9, 0.4); color: var(--warn); background: rgba(180, 83, 9, 0.06); }
+.tile-pill--flat  { border-color: rgba(59, 111, 212, 0.4); color: var(--accent); background: rgba(59, 111, 212, 0.06); }
+
+/* --- Responsive: stack circle above 2×2 grid on narrow screens --- */
+
+@media (max-width: 700px) {
+  .overview-tiles {
+    grid-template-columns: 1fr 1fr;
+  }
+  .tile-mimic {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    justify-content: center;
+    gap: 16px;
+    padding: 14px 20px;
+  }
+}
+
+@media (max-width: 420px) {
+  .overview-tiles {
+    grid-template-columns: 1fr;
+  }
+  .tile-mimic {
+    grid-column: unset;
+    flex-direction: column;
+  }
 }
 
 /* ---------- Section ribbon ---------- */
@@ -571,7 +897,6 @@ h3 {
 .section-ribbon {
   position: relative;
   height: 22px;
-  margin-top: 8px;
   background: rgba(0, 0, 0, 0.04);
   border-radius: 6px;
   overflow: hidden;
@@ -693,7 +1018,8 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 12px 0;
+  /* Align with the timeline content column (label column is 80px wide) */
+  padding-left: 32px;
 }
 
 .highlight-filter-badge {
@@ -742,10 +1068,12 @@ h3 {
   padding: 4px 4px 16px;
   display: flex;
   flex-direction: row;
+  align-items: flex-start;
   gap: 12px;
   overflow-x: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
+  min-height: 500px;
 }
 
 .highlights::-webkit-scrollbar { height: 6px; }
@@ -758,7 +1086,7 @@ h3 {
 }
 
 .card {
-  flex: 0 0 320px;
+  flex: 0 0 280px;
   background: var(--panel);
   border: 1px solid var(--border);
   border-left: 4px solid var(--accent);
@@ -767,7 +1095,6 @@ h3 {
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 8px;
   transition: transform 0.12s ease, box-shadow 0.15s ease;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -850,7 +1177,11 @@ h3 {
 
 .card-header {
   margin: 0;
-  padding: 5px 0 10px;
+  padding: 5px 0 4px;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .card-header h5 {
@@ -859,6 +1190,16 @@ h3 {
   font-weight: 600;
   line-height: 1.3;
   letter-spacing: 0.01em;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+/* Timestamp in the header (right-aligned) */
+.card-header .card-stat-meta {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 
 /* h5 accent matches left border by category */
@@ -916,15 +1257,6 @@ h3 {
   font-variant-numeric: tabular-nums;
 }
 
-.card-stat-value {
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.card-stat-meta {
-  font-size: 11px;
-  color: var(--muted);
-}
 
 .card-play {
   background: var(--accent);
@@ -940,6 +1272,125 @@ h3 {
 }
 
 .card-play:hover { filter: brightness(1.08); }
+
+/* ---------- V2 Card: collapsed / expanded progressive disclosure ---------- */
+
+.card-collapsed {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 0 0 auto; /* never shrink — keeps disclosure link stationary on expand */
+}
+
+.card-expanded {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  padding-top: 0;
+  transition: max-height 0.28s ease, opacity 0.18s ease, padding-top 0.28s ease;
+}
+
+.card-expanded.open {
+  max-height: 600px; /* generous upper bound; actual content is ~200-300px */
+  opacity: 1;
+  padding-top: 12px;
+}
+
+.card-divider {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin-top: auto; /* push divider (and disclosure link) to the card bottom */
+}
+
+.card-disclosure {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--accent);
+  cursor: pointer;
+  text-decoration: none;
+  padding: 2px 0;
+  transition: opacity 0.1s ease;
+  user-select: none;
+}
+
+.card-disclosure:hover { opacity: 0.72; text-decoration: underline; }
+
+/* Collapsed state: clip the card to only show the collapsed portion */
+.card.collapsed { cursor: default; }
+.card.collapsed .card-collapsed { cursor: default; }
+
+/* ---------- Try This section ---------- */
+
+.card-try-this {
+  background: rgba(59, 111, 212, 0.05);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-try-this-label {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.card-try-this-text {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* ---------- Card dual play buttons ---------- */
+
+.card-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.card-play-take,
+.card-play-ref {
+  flex: 1;
+  min-width: 0;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: 7px;
+  padding: 5px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background 0.1s ease, color 0.1s ease;
+}
+
+.card-play-take:hover,
+.card-play-ref:hover {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.card-play-ref {
+  color: var(--expr);
+  border-color: var(--expr);
+}
+
+.card-play-ref:hover {
+  background: var(--expr);
+  color: #ffffff;
+}
 
 /* ---------- Basis filter row (above category badges) ---------- */
 
@@ -998,30 +1449,504 @@ h3 {
   margin-bottom: 4px;
 }
 
-/* ---------- Card basis label (Technique / Style tag) ---------- */
 
-.card-basis-label {
-  display: inline-block;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
+/* ─── Collapsed upload bar (shown after first analysis completes) ──────── */
+
+.add-performance-bar {
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--panel-2);
+  border: 1.5px dashed var(--border);
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.add-performance-bar:hover {
+  border-color: var(--accent);
+  background: rgba(59, 111, 212, 0.04);
+}
+
+.add-performance-text {
+  font-size: 11px;
+  font-weight: 600;
   text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 999px;
-  margin-left: 6px;
-  vertical-align: middle;
-  border: 1px solid transparent;
+  letter-spacing: 0.08em;
+  color: var(--muted);
 }
 
-.card-basis-label.basis-absolute {
-  background: rgba(59, 111, 212, 0.10);
+.add-performance-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
   color: var(--accent);
-  border-color: rgba(59, 111, 212, 0.25);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  flex-shrink: 0;
 }
 
-.card-basis-label.basis-comparative {
-  background: rgba(124, 58, 237, 0.10);
-  color: var(--expr);
-  border-color: rgba(124, 58, 237, 0.25);
+.add-performance-btn:hover {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+}
+
+/* When upload section is collapsed, hide all interactive content */
+.upload--collapsed .mode-toggle,
+.upload--collapsed .mode-panel,
+.upload--collapsed #analysisProgress,
+.upload--collapsed #status {
+  display: none;
+}
+
+/* Show the compact bar when collapsed */
+.upload--collapsed .add-performance-bar {
+  display: flex !important;
+}
+
+/* ─── Multiple result blocks ─────────────────────────────────────────── */
+
+/* The results container is just a transparent stack — no card styling */
+#results-container {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Each result block is its own self-contained card */
+.result-block {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 20px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  position: relative;
+}
+
+.result-block__delete {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 24px;
+  height: 24px;
+  border: none;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color 0.15s;
+}
+
+.result-block__delete:hover {
+  color: #dc2626;
+}
+
+/* ─── Analysis Progress Bar ─────────────────────────────────────────── */
+
+/* Hide upload section UI while analysis is running */
+.upload--analyzing .mode-toggle,
+.upload--analyzing #uploadPanel,
+.upload--analyzing #karaokePanel {
+  display: none;
+}
+
+/* Remove the outer section chrome while only the progress card is showing */
+.upload--analyzing {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.analysis-progress {
+  margin-top: 0;
+  padding: 45px 24px 45px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  animation: apFadeIn 0.25s ease;
+}
+
+/* Cancel (×) button */
+.analysis-cancel-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.analysis-cancel-btn:hover {
+  background: var(--panel-2);
+  color: var(--text);
+}
+.analysis-cancel-btn svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+}
+
+@keyframes apFadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.analysis-progress-icon {
+  width: 60px;
+  height: 41px;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.analysis-progress-heading {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+  text-align: center;
+}
+
+.analysis-progress-subtitle {
+  margin-bottom: 10px;
+  font-size: 12px;
+  color: var(--muted);
+  text-align: center;
+  max-width: 420px;
+  line-height: 1.5;
+}
+
+/* Track: row of step nodes and connectors */
+.progress-track {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+  max-width: 650px;
+  margin-top: 18px;
+}
+
+/* Individual step (circle + label stacked) */
+.progress-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  width: 80px;
+}
+
+/* Connector line between steps */
+.step-connector {
+  flex: 1;
+  height: 36px;          /* matches circle diameter for vertical centering */
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+}
+
+.step-connector::before {
+  content: '';
+  display: block;
+  width: 100%;
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+  position: relative;
+}
+
+/* Filled (blue) portion of connector */
+.step-connector-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 1px;
+  transition: width 0.5s ease;
+}
+
+/* Replace the ::before approach with a positioned wrapper */
+.step-connector {
+  position: relative;
+}
+
+.step-connector::before {
+  content: '';
+  position: absolute;
+  left: 2px;
+  right: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  background: var(--border);
+  border-radius: 1px;
+}
+
+.step-connector-fill {
+  position: absolute;
+  left: 2px;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 2px;
+  width: 0%;
+  background: var(--accent);
+  border-radius: 1px;
+  transition: width 0.5s ease;
+}
+
+.step-connector-fill.filled {
+  width: calc(100%);
+}
+
+/* Circle node */
+.step-circle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 2px solid var(--border);
+  background: var(--panel);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: border-color 0.3s ease, background 0.3s ease;
+  flex-shrink: 0;
+}
+
+/* Pending state: gray border, empty */
+.step-circle[data-state="pending"] {
+  border-color: var(--border);
+  background: var(--panel);
+}
+
+/* Active state: blue border, pulsing dot */
+.step-circle[data-state="active"] {
+  border-color: var(--accent);
+  background: var(--panel);
+}
+
+/* Completed state: filled blue, white checkmark */
+.step-circle[data-state="completed"] {
+  border-color: var(--accent);
+  background: var(--accent);
+}
+
+/* Checkmark SVG — hidden until completed */
+.step-check {
+  width: 20px;
+  height: 20px;
+  display: none;
+  flex-shrink: 0;
+}
+
+.step-circle[data-state="completed"] .step-check {
+  display: block;
+}
+
+/* Pulsing dot — shown only when active */
+.step-pulse-dot {
+  display: none;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: stepPulse 1.2s ease-in-out infinite;
+}
+
+.step-circle[data-state="active"] .step-pulse-dot {
+  display: block;
+}
+
+@keyframes stepPulse {
+  0%, 100% { transform: scale(1);   opacity: 1; }
+  50%       { transform: scale(1.5); opacity: 0.6; }
+}
+
+/* Step labels */
+.step-label {
+  font-size: 11px;
+  color: var(--muted);
+  text-align: center;
+  line-height: 1.4;
+  white-space: normal;
+}
+
+.progress-step[data-step] .step-label {
+  transition: color 0.3s ease;
+}
+
+/* Active step label slightly darker */
+.progress-step.is-active .step-label {
+  color: var(--accent);
+}
+
+/* Completed step label back to muted */
+.progress-step.is-completed .step-label {
+  color: var(--muted);
+}
+
+/* Waveform icon animation — only runs while the bar is visible */
+#analysisProgress:not([hidden]) .analysis-progress-icon rect {
+  transform-box: fill-box;
+  transform-origin: center center;
+  animation: waveBarPulse 1.4s ease-in-out infinite;
+}
+
+/* Stagger each bar so the pulse travels left to right */
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(1) { animation-delay: 0s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(2) { animation-delay: 0.12s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(3) { animation-delay: 0.24s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(4) { animation-delay: 0.36s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(5) { animation-delay: 0.48s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(6) { animation-delay: 0.60s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(7) { animation-delay: 0.72s; }
+#analysisProgress:not([hidden]) .analysis-progress-icon rect:nth-child(8) { animation-delay: 0.84s; }
+
+@keyframes waveBarPulse {
+  0%, 100% { transform: scaleY(1); }
+  50%       { transform: scaleY(0.2); }
+}
+
+/* ---------- Timeline grid (section ribbon / graph / waveform / highlights) ---------- */
+
+.timeline-grid {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 6px 0;
+  margin-top: 8px;
+}
+
+/* Label cells (left column) */
+.tl-label {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 0 10px 0 0;
+  gap: 2px;
+  min-width: 0;
+}
+
+.tl-row-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.tl-row-sublabel {
+  font-size: 9px;
+  color: var(--muted);
+  opacity: 0.65;
+  line-height: 1.3;
+}
+
+/* Analysis graph label (reused inside .tl-label) */
+.analysis-graph-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+/* Technique dropdown inside the label cell */
+.technique-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-color: var(--panel-2);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M3 4.5 6 7.5 9 4.5'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 4px center;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 16px 3px 6px;
+  font-size: 10px;
+  font-family: inherit;
+  color: var(--text);
+  outline: none;
+  cursor: pointer;
+  width: 100%;
+  transition: border-color 0.12s ease;
+}
+
+.technique-select:focus {
+  border-color: var(--expr);
+}
+
+/* ---------- Back-to-full-song button (shown inside playback controls bar) ---------- */
+
+.back-to-full-btn[hidden] { display: none; }
+
+.back-to-full-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  /* Subtle right separator to visually separate it from Play/Pause */
+  margin-right: 4px;
+  padding-right: 16px;
+  border-right-width: 1px;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.back-to-full-btn:hover {
+  background: var(--border);
+  border-color: var(--muted);
+}
+
+/* Canvas sits directly in the grid — no wrapper container */
+.analysis-graph-canvas {
+  display: block;
+  width: 100%;
+  height: 175px;
+  cursor: pointer;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  min-width: 0;
 }
 

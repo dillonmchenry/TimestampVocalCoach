@@ -40,7 +40,9 @@ from fastapi.staticfiles import StaticFiles
 
 import time
 
-from vocal_coach.align_v2 import measure_song
+import numpy as np
+
+from vocal_coach.align_v2 import estimate_global_offset_s, measure_song
 from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH
 from vocal_coach.feedback import generate_performance_summary, rewrite_card_summaries
 from vocal_coach.highlights import select_highlights
@@ -194,6 +196,8 @@ def _resolve_torch_device(requested: str = "cuda") -> str:
 @app.get("/api/songs")
 def list_songs():
     """Return a list of installed songs."""
+    import json as _json
+
     if not SONGS_ROOT.is_dir():
         return JSONResponse({"songs": []})
     out = []
@@ -204,6 +208,24 @@ def list_songs():
             manifest = load_manifest(song_dir)
         except Exception:
             continue
+
+        # Load genre_tags from vocal_profile.json if available.
+        genre_tags: list[str] = []
+        vp_path = song_dir / manifest.vocal_profile_path if manifest.vocal_profile_path else None
+        if vp_path and vp_path.is_file():
+            try:
+                vp_data = _json.loads(vp_path.read_text(encoding="utf-8"))
+                genre_tags = vp_data.get("genre_tags", [])
+            except Exception:
+                pass
+
+        # Check for a cover image (jpg or png).
+        cover_url: str | None = None
+        for ext in ("jpg", "jpeg", "png", "webp"):
+            if (song_dir / f"cover.{ext}").is_file():
+                cover_url = f"/api/songs/{manifest.song_id}/cover"
+                break
+
         out.append(
             {
                 "song_id": manifest.song_id,
@@ -211,6 +233,8 @@ def list_songs():
                 "artist": manifest.artist,
                 "language": manifest.language,
                 "duration_s": manifest.duration_s,
+                "genre_tags": genre_tags,
+                "cover_url": cover_url,
                 "has_instrumental": manifest.instrumental_path is not None,
                 "has_reference_pitch": manifest.reference_pitch_path is not None,
                 "has_reference_stars": manifest.reference_stars_path is not None,
@@ -218,6 +242,18 @@ def list_songs():
             }
         )
     return {"songs": out}
+
+
+@app.get("/api/songs/{song_id}/cover")
+def get_song_cover(song_id: str):
+    """Serve the cover image for a song (cover.jpg / cover.png / etc.)."""
+    song_dir = _song_dir(song_id)
+    for ext in ("jpg", "jpeg", "png", "webp"):
+        cover_path = song_dir / f"cover.{ext}"
+        if cover_path.is_file():
+            mime = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "webp": "image/webp"}.get(ext, "image/jpeg")
+            return FileResponse(str(cover_path), media_type=mime)
+    raise HTTPException(status_code=404, detail="No cover image found for this song.")
 
 
 @app.get("/api/songs/{song_id}/manifest")
@@ -275,46 +311,24 @@ def _run_analysis_job(
     stars_profile: str,
     skip_user_stars: bool,
     torch_device: str,
+    recording_duration_s: Optional[float] = None,
 ) -> None:
     """Background worker: runs the full pipeline and writes results to _jobs."""
     _jobs[job_id]["status"] = "running"
     try:
+        # Step 0 — Preparing audio
+        _jobs[job_id]["step"] = 0
         manifest = load_manifest(song_dir)
         reference = load_reference(song_dir)
 
-        # 1. NanoPitch
+        # Step 1 — Tracking pitch and volume
+        _jobs[job_id]["step"] = 1
         pitch_path = perf_dir / "pitch.json"
         pitch_user = extract_f0(user_audio, device=torch_device)
         pitch_user.sample_id = f"{manifest.song_id}__{perf_id}"
         write_pitch_track(pitch_user, pitch_path)
 
-        # 2. STARS on user vocal (unless explicitly skipped)
-        stars_user: StarsTrack | None = None
-        stars_path = perf_dir / "stars.json"
-        if not skip_user_stars:
-            try:
-                meta_path = _stars_metadata_for_perf(song_dir, perf_dir, user_audio)
-                stars_user = run_stars_with_profile(
-                    profile=stars_profile,
-                    metadata_path=meta_path,
-                    save_dir=perf_dir / "stars_out",
-                    sample_id=f"{manifest.song_id}__{perf_id}",
-                    stars_dir=DEFAULT_STARS_DIR,
-                )
-                write_stars_track(stars_user, stars_path)
-            except Exception as exc:
-                stars_user = None
-                (perf_dir / "stars_error.txt").write_text(str(exc), encoding="utf-8")
-
-        # 3. Reference artifacts (precomputed by build_song.py)
-        stars_ref_path = song_dir / (manifest.reference_stars_path or "reference/stars.json")
-        stars_ref = _maybe_load(stars_ref_path, StarsTrack)
-        pitch_ref_path = song_dir / (manifest.reference_pitch_path or "reference/pitch.json")
-        pitch_ref = _maybe_load(pitch_ref_path, PitchTrack)
-        loudness_ref_path = song_dir / (manifest.reference_loudness_path or "reference/loudness.json")
-        loudness_ref = _maybe_load(loudness_ref_path, LoudnessTrack)
-
-        # 4. Loudness on the user vocal (best-effort)
+        # Loudness on the user vocal (best-effort, grouped with pitch under step 1)
         loudness_user: LoudnessTrack | None = None
         loudness_user_path = perf_dir / "loudness.json"
         try:
@@ -323,10 +337,67 @@ def _run_analysis_job(
         except Exception:
             pass
 
-        # 5. Align + section trends + highlights + overview
+        # Step 2 — Comparing notes and techniques
+        _jobs[job_id]["step"] = 2
+
+        # Reference artifacts (precomputed by build_song.py)
+        stars_ref_path = song_dir / (manifest.reference_stars_path or "reference/stars.json")
+        stars_ref = _maybe_load(stars_ref_path, StarsTrack)
+        pitch_ref_path = song_dir / (manifest.reference_pitch_path or "reference/pitch.json")
+        pitch_ref = _maybe_load(pitch_ref_path, PitchTrack)
+        loudness_ref_path = song_dir / (manifest.reference_loudness_path or "reference/loudness.json")
+        loudness_ref = _maybe_load(loudness_ref_path, LoudnessTrack)
+
+        # STARS on user vocal (unless explicitly skipped)
+        stars_user: StarsTrack | None = None
+        stars_path = perf_dir / "stars.json"
+        if not skip_user_stars:
+            try:
+                meta_path = _stars_metadata_for_perf(song_dir, perf_dir, user_audio)
+                # Reuse the NanoPitch F0 already computed in Step 1 so the
+                # student model skips its own RMVPE pass (~190 MB model load).
+                _nanopitch_f0 = np.array(
+                    [f.f0_hz for f in pitch_user.frames], dtype=np.float32
+                )
+                stars_user = run_stars_with_profile(
+                    profile=stars_profile,
+                    metadata_path=meta_path,
+                    save_dir=perf_dir / "stars_out",
+                    sample_id=f"{manifest.song_id}__{perf_id}",
+                    stars_dir=DEFAULT_STARS_DIR,
+                    nanopitch_f0=_nanopitch_f0,
+                )
+                write_stars_track(stars_user, stars_path)
+            except Exception as exc:
+                stars_user = None
+                (perf_dir / "stars_error.txt").write_text(str(exc), encoding="utf-8")
+
         cfg = CoachingConfig.load(CONFIG_PATH)
+
+        # For karaoke partial recordings, estimate the global offset first so we
+        # can convert recording_duration_s (user time) into song time and filter
+        # the reference to only the notes the user actually sang.
+        segment_end_song_s: Optional[float] = None
+        analysis_reference = reference
+        if (
+            recording_duration_s is not None
+            and recording_duration_s < reference.duration_s - 2.0
+        ):
+            early_offset = estimate_global_offset_s(reference, pitch_user, config=cfg)
+            # song_time = user_time - offset  →  segment_end = duration - offset
+            seg_end = recording_duration_s - early_offset
+            if seg_end > 5.0:
+                segment_end_song_s = round(seg_end, 3)
+                # Shallow-copy the reference with filtered notes and sections.
+                filtered_notes = [n for n in reference.notes if n.start_s < seg_end]
+                filtered_sections = [s for s in reference.sections if s.start_s < seg_end]
+                analysis_reference = reference.model_copy(update={
+                    "notes": filtered_notes,
+                    "sections": filtered_sections,
+                })
+
         notes, techniques, offset, octave_shift = measure_song(
-            reference,
+            analysis_reference,
             pitch_user=pitch_user,
             pitch_ref=pitch_ref,
             stars_ref=stars_ref,
@@ -335,13 +406,15 @@ def _run_analysis_job(
             loudness_ref=loudness_ref,
             config=cfg,
         )
-        section_trends = compute_section_trends(reference, notes, techniques)
+        section_trends = compute_section_trends(analysis_reference, notes, techniques)
 
+        # Step 3 — Selecting coaching highlights
+        _jobs[job_id]["step"] = 3
         _vp_path = song_dir / (manifest.vocal_profile_path or "vocal_profile.json")
         vocal_profile = load_vocal_profile(_vp_path)
 
         highlights = select_highlights(
-            reference,
+            analysis_reference,
             notes,
             techniques,
             config=cfg,
@@ -349,6 +422,8 @@ def _run_analysis_job(
             vocal_profile=vocal_profile,
         )
 
+        # Step 4 — Preparing your feedback
+        _jobs[job_id]["step"] = 4
         overview = compute_overview(
             notes,
             techniques,
@@ -370,7 +445,7 @@ def _run_analysis_job(
                 llm=_llm_client,
                 rag=_rag_store,
                 vocal_profile=vocal_profile,
-                reference=reference,
+                reference=analysis_reference,
                 song_title=manifest.title,
                 artist=manifest.artist,
                 max_tokens=cfg.llm.card_rewrite_max_tokens,
@@ -389,11 +464,15 @@ def _run_analysis_job(
         else:
             _perf_summary = None
 
+        # For partial recordings, duration_s reflects the recording length so
+        # the frontend timeline scales to the recorded portion only.
+        perf_duration_s = recording_duration_s if recording_duration_s is not None else manifest.duration_s
+
         analysis = PerformanceAnalysis(
             song_id=manifest.song_id,
             perf_id=perf_id,
             reference_sample_id=reference.sample_id,
-            duration_s=manifest.duration_s,
+            duration_s=perf_duration_s,
             global_offset_s=offset,
             octave_shift_semitones=octave_shift,
             pitch_user_path=str(pitch_path.relative_to(song_dir)).replace("\\", "/"),
@@ -418,6 +497,7 @@ def _run_analysis_job(
             sections=section_trends,
             overview=overview,
             performance_summary=_perf_summary,
+            segment_end_song_s=segment_end_song_s,
         )
         out_path = perf_dir / "analysis.json"
         out_path.write_text(analysis.model_dump_json(indent=2), encoding="utf-8")
@@ -508,6 +588,7 @@ async def analyze(
     skip_user_stars: bool = Form(False),
     device: str = Form("cuda"),
     stars_profile: str = Form(STARS_PROFILE_FAST),
+    recording_duration_s: Optional[float] = Form(None),
 ):
     """Upload a performance and start analysis in the background.
 
@@ -542,12 +623,21 @@ async def analyze(
 
     torch_device = _resolve_torch_device(device)
     job_id = uuid.uuid4().hex[:8]
-    _jobs[job_id] = {"status": "pending", "result": None, "error": None}
+    _jobs[job_id] = {"status": "pending", "step": None, "result": None, "error": None}
 
     thread = threading.Thread(
         target=_run_analysis_job,
-        args=(job_id, song_dir, perf_id, perf_dir, user_audio,
-              stars_profile, skip_user_stars, torch_device),
+        kwargs=dict(
+            job_id=job_id,
+            song_dir=song_dir,
+            perf_id=perf_id,
+            perf_dir=perf_dir,
+            user_audio=user_audio,
+            stars_profile=stars_profile,
+            skip_user_stars=skip_user_stars,
+            torch_device=torch_device,
+            recording_duration_s=recording_duration_s,
+        ),
         daemon=True,
     )
     thread.start()
@@ -561,6 +651,7 @@ def get_job(job_id: str):
 
     Response shape:
       {"status": "pending"|"running"|"done"|"error",
+       "step": int|null,       -- 0-4 progress index, null until running
        "job_id": str,
        "perf_id": str|null,
        "song_id": str|null,
@@ -573,6 +664,7 @@ def get_job(job_id: str):
     return JSONResponse({
         "job_id": job_id,
         "status": job["status"],
+        "step": job.get("step"),
         "perf_id": job.get("perf_id"),
         "song_id": job.get("song_id"),
         "result": job.get("result"),
@@ -610,6 +702,48 @@ def get_perf_pitch(song_id: str, perf_id: str):
         raise HTTPException(status_code=404, detail="Pitch track not found")
     return JSONResponse(
         content=PitchTrack.model_validate_json(path.read_text(encoding="utf-8")).model_dump()
+    )
+
+
+@app.get("/api/songs/{song_id}/reference/pitch")
+def get_reference_pitch(song_id: str):
+    """Return the precomputed reference pitch track for a song."""
+    song_dir = _song_dir(song_id)
+    manifest = load_manifest(song_dir)
+    rel = manifest.reference_pitch_path or "reference/pitch.json"
+    path = song_dir / rel
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Reference pitch track not found")
+    return JSONResponse(
+        content=PitchTrack.model_validate_json(path.read_text(encoding="utf-8")).model_dump()
+    )
+
+
+@app.get("/api/songs/{song_id}/reference/loudness")
+def get_reference_loudness(song_id: str):
+    """Return the precomputed reference loudness track for a song."""
+    song_dir = _song_dir(song_id)
+    manifest = load_manifest(song_dir)
+    rel = manifest.reference_loudness_path or "reference/loudness.json"
+    path = song_dir / rel
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Reference loudness track not found")
+    return JSONResponse(
+        content=LoudnessTrack.model_validate_json(path.read_text(encoding="utf-8")).model_dump()
+    )
+
+
+@app.get("/api/songs/{song_id}/reference/stars")
+def get_reference_stars(song_id: str):
+    """Return the precomputed reference STARS track for a song."""
+    song_dir = _song_dir(song_id)
+    manifest = load_manifest(song_dir)
+    rel = manifest.reference_stars_path or "reference/stars.json"
+    path = song_dir / rel
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="Reference STARS track not found")
+    return JSONResponse(
+        content=StarsTrack.model_validate_json(path.read_text(encoding="utf-8")).model_dump()
     )
 
 

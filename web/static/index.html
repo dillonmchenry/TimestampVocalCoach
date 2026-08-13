@@ -17,11 +17,14 @@
 
   <main>
     <section class="picker">
-      <label for="songSelect">Song</label>
-      <select id="songSelect" disabled>
-        <option>Loading…</option>
-      </select>
-      <div id="songBadges" class="badges"></div>
+      <span class="picker-label">CHOOSE A SONG</span>
+      <div class="carousel-wrapper">
+        <button class="carousel-arrow carousel-arrow--left" id="carouselLeft" aria-label="Scroll left">&#8249;</button>
+        <div class="carousel-track" id="carouselTrack">
+          <!-- song cards injected by JS -->
+        </div>
+        <button class="carousel-arrow carousel-arrow--right" id="carouselRight" aria-label="Scroll right">&#8250;</button>
+      </div>
     </section>
 
     <section class="upload">
@@ -30,10 +33,6 @@
         <button id="modeKaraoke" class="mode-btn" type="button">Sing along (karaoke)</button>
       </div>
 
-      <label class="profile-toggle">
-        <input id="fastProfile" type="checkbox" checked />
-        <span>Fast feedback (student model)</span>
-      </label>
 
       <div id="uploadPanel" class="mode-panel">
         <div id="dropZone" class="drop-zone">
@@ -58,6 +57,17 @@
           <button id="karaokeStop" class="browse" type="button" disabled>Stop &amp; analyze</button>
           <button id="karaokeCancel" class="browse browse-secondary" type="button" disabled>Cancel</button>
           <span id="karaokeTime" class="karaoke-time">0:00</span>
+          <div class="mix-toggles" role="group" aria-label="Karaoke mix" style="margin-left: auto;">
+            <button
+              id="karaokeRefVocal"
+              type="button"
+              class="mix-toggle"
+              aria-pressed="false"
+              title="Play reference vocals alongside the instrumental"
+            >
+              Original vocal
+            </button>
+          </div>
         </div>
         <p class="hint">
           Plays the instrumental. Sing along — your mic is recorded and sent through the
@@ -68,51 +78,155 @@
         <audio id="karaokeAudio" controls hidden></audio>
       </div>
 
-      <p id="status" class="status"></p>
-    </section>
-
-    <section class="results" id="results" hidden>
-      <h2>Performance Analysis</h2>
-
-      <div id="performanceSummary" class="performance-summary" hidden></div>
-      <div id="overviewTiles" class="overview-tiles" hidden></div>
-
-      <h2>Coaching highlights</h2>
-      <div class="caption playback-bar">
-        <div class="playback-controls">
-          <button id="playPause" type="button">Play / Pause</button>
-          <div class="mix-toggles" role="group" aria-label="Playback mix">
-            <button
-              id="mixRefVocal"
-              type="button"
-              class="mix-toggle"
-              aria-pressed="false"
-            >
-              Add original vocal
-            </button>
-            <button
-              id="mixInstrumental"
-              type="button"
-              class="mix-toggle"
-              aria-pressed="false"
-            >
-              Add instrumental
-            </button>
+      <div id="analysisProgress" class="analysis-progress hidden">
+        <button type="button" id="analysisCancelBtn" class="analysis-cancel-btn" aria-label="Cancel analysis">
+          <svg viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <line x1="3" y1="3" x2="13" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <line x1="13" y1="3" x2="3" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
+        <svg class="analysis-progress-icon" viewBox="0 0 76 52" fill="none" aria-hidden="true" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0"  y="18" width="6" height="16" rx="3" fill="var(--accent)"/>
+          <rect x="10" y="10" width="6" height="32" rx="3" fill="var(--accent)"/>
+          <rect x="20" y="4"  width="6" height="44" rx="3" fill="var(--accent)"/>
+          <rect x="30" y="0"  width="6" height="52" rx="3" fill="var(--accent)"/>
+          <rect x="40" y="4"  width="6" height="44" rx="3" fill="var(--accent)"/>
+          <rect x="50" y="10" width="6" height="32" rx="3" fill="var(--accent)"/>
+          <rect x="60" y="18" width="6" height="16" rx="3" fill="var(--accent)"/>
+          <rect x="70" y="22" width="6" height="8"  rx="3" fill="var(--accent)"/>
+        </svg>
+        <h3 class="analysis-progress-heading">Analyzing your performance</h3>
+        <p class="analysis-progress-subtitle">Your performance is being compared with the reference track to find coaching feedback.</p>
+        <div class="progress-track">
+          <div class="progress-step" data-step="0">
+            <div class="step-circle" data-state="pending">
+              <svg class="step-check" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polyline points="5,11 9,15 17,7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="step-pulse-dot"></span>
+            </div>
+            <span class="step-label">Preparing<br>audio</span>
+          </div>
+          <div class="step-connector"><div class="step-connector-fill"></div></div>
+          <div class="progress-step" data-step="1">
+            <div class="step-circle" data-state="pending">
+              <svg class="step-check" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polyline points="5,11 9,15 17,7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="step-pulse-dot"></span>
+            </div>
+            <span class="step-label">Tracking pitch<br>and volume</span>
+          </div>
+          <div class="step-connector"><div class="step-connector-fill"></div></div>
+          <div class="progress-step" data-step="2">
+            <div class="step-circle" data-state="pending">
+              <svg class="step-check" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polyline points="5,11 9,15 17,7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="step-pulse-dot"></span>
+            </div>
+            <span class="step-label">Comparing notes<br>and techniques</span>
+          </div>
+          <div class="step-connector"><div class="step-connector-fill"></div></div>
+          <div class="progress-step" data-step="3">
+            <div class="step-circle" data-state="pending">
+              <svg class="step-check" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polyline points="5,11 9,15 17,7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="step-pulse-dot"></span>
+            </div>
+            <span class="step-label">Selecting coaching<br>highlights</span>
+          </div>
+          <div class="step-connector"><div class="step-connector-fill"></div></div>
+          <div class="progress-step" data-step="4">
+            <div class="step-circle" data-state="pending">
+              <svg class="step-check" viewBox="0 0 22 22" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <polyline points="5,11 9,15 17,7" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <span class="step-pulse-dot"></span>
+            </div>
+            <span class="step-label">Preparing your<br>feedback</span>
           </div>
         </div>
       </div>
-      <div id="waveform" class="waveform"></div>
-      <div id="sectionRibbon" class="section-ribbon"></div>
-      <div id="timeline" class="timeline"></div>
-      
-      <div id="highlightFilters" class="highlight-filters" hidden>
-        <button type="button" class="badge highlight-filter-badge filter-pitch" data-filter="pitch">Pitch</button>
-        <button type="button" class="badge highlight-filter-badge filter-expression" data-filter="expression">Expression</button>
-        <button type="button" class="badge highlight-filter-badge filter-timing" data-filter="timing">Timing</button>
-        <button type="button" class="badge highlight-filter-badge filter-volume" data-filter="volume">Volume</button>
+
+      <p id="status" class="status"></p>
+
+      <!-- Compact bar shown after an analysis has been rendered; clicking expands upload again -->
+      <div id="addPerformanceBar" class="add-performance-bar" hidden>
+        <span class="add-performance-text">Add a performance</span>
+        <button type="button" id="addPerformanceBtn" class="add-performance-btn" aria-label="Add another recording">+</button>
       </div>
-      <div id="highlightList" class="highlights"></div>
     </section>
+
+    <!-- Results container: transparent wrapper; per-analysis cards are appended here by JS -->
+    <div id="results-container" hidden></div>
+
+    <!-- Template for each per-analysis result block (cloned by JS on each new analysis) -->
+    <template id="resultBlockTemplate">
+      <section class="result-block">
+        <button data-role="deleteBlock" class="result-block__delete" aria-label="Remove performance">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <line x1="2" y1="2" x2="12" y2="12"/>
+            <line x1="12" y1="2" x2="2" y2="12"/>
+          </svg>
+        </button>
+        <h2>Performance Analysis</h2>
+        <p data-role="segmentInfo" class="segment-info" hidden></p>
+        <div data-role="performanceSummary" class="performance-summary" hidden></div>
+        <h3 data-role="overviewHeading" class="overview-heading" hidden>Performance at a glance</h3>
+        <div data-role="overviewTiles" class="overview-tiles" hidden></div>
+
+        <h2>Coaching highlights</h2>
+        <!-- Playback bar is per-block, sits right above the timeline grid -->
+        <div class="playback-bar">
+          <div class="playback-controls">
+            <button data-role="backToFullSong" type="button" class="back-to-full-btn" hidden>&#8592; Back to full song</button>
+            <button data-role="playPause" type="button" class="play-pause-btn" aria-label="Play" title="Play">
+              <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+              <svg class="icon-pause" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+            </button>
+            <div data-role="highlightFilters" class="highlight-filters" hidden>
+              <button type="button" class="badge highlight-filter-badge filter-pitch" data-filter="pitch">Pitch</button>
+              <button type="button" class="badge highlight-filter-badge filter-expression" data-filter="expression">Expression</button>
+              <button type="button" class="badge highlight-filter-badge filter-timing" data-filter="timing">Timing</button>
+              <button type="button" class="badge highlight-filter-badge filter-volume" data-filter="volume">Volume</button>
+            </div>
+          </div>
+          <div class="mix-toggles" role="group" aria-label="Playback mix">
+            <button data-role="mixRefVocal" type="button" class="mix-toggle" aria-pressed="false">Add original vocal</button>
+            <button data-role="mixInstrumental" type="button" class="mix-toggle" aria-pressed="false">Add instrumental</button>
+          </div>
+        </div>
+
+        <div data-role="timelineGrid" class="timeline-grid" hidden>
+          <!-- Row 1: section ribbon — no label -->
+          <div class="tl-label"></div>
+          <div data-role="sectionRibbon" class="section-ribbon"></div>
+
+          <!-- Row 2: analysis graph -->
+          <div class="tl-label" data-role="analysisGraphLabelCell">
+            <span data-role="analysisGraphLabel" class="analysis-graph-label">Reference Match</span>
+            <select data-role="techniqueSelect" class="technique-select" hidden></select>
+          </div>
+          <canvas data-role="analysisGraphCanvas" class="analysis-graph-canvas"></canvas>
+
+          <!-- Row 3: waveform -->
+          <div class="tl-label">
+            <span class="tl-row-label">Waveform</span>
+            <span class="tl-row-sublabel">Performance audio</span>
+          </div>
+          <div data-role="waveform" class="waveform"></div>
+
+          <!-- Row 4: highlight regions -->
+          <div class="tl-label">
+            <span class="tl-row-label">Highlights</span>
+          </div>
+          <div data-role="timeline" class="timeline"></div>
+        </div>
+        <div data-role="highlightList" class="highlights"></div>
+      </section>
+    </template>
   </main>
 
   <script src="config.js"></script>

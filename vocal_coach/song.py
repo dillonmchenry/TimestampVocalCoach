@@ -170,12 +170,17 @@ def _notes_for_word(
     chart_notes: list[UltraStarNote],
     word_index: int,
     word_phones: list[str],
+    *,
+    phrase_break_before: bool = False,
 ) -> list[ReferenceNote]:
     """Produce ``ReferenceNote`` entries for one word.
 
     Phonemes are evenly distributed across the word's notes (so a 3-phone
     word sung over 2 notes gets [phones[0], phones[1:]]). STARS will refine
     the actual timings later.
+
+    ``phrase_break_before`` is forwarded to the **first** note of the word so
+    the karaoke display can force a line break at real phrase boundaries.
     """
     out: list[ReferenceNote] = []
     n = len(note_indices)
@@ -194,6 +199,7 @@ def _notes_for_word(
     else:
         chunks = [[] for _ in range(n)]
 
+    first_note_in_word = True
     for slot, note_idx in enumerate(note_indices):
         chart_note = chart_notes[note_idx]
         if chart_note.is_freestyle or chart_note.is_rap:
@@ -210,8 +216,10 @@ def _notes_for_word(
                 lyric_word=word,
                 word_index=word_index,
                 phonemes=chunks[slot] if slot < len(chunks) else [],
+                phrase_break_before=phrase_break_before if first_note_in_word else False,
             )
         )
+        first_note_in_word = False
     return out
 
 
@@ -252,8 +260,18 @@ def reference_from_ultrastar(
             flat_ph2word.append(word_idx)
             ph_durs.append(slice_dur)
 
+        # Detect whether this word immediately follows a phrase-break marker.
+        # chart.notes[note_indices[0]] is the first syllable of the word; if
+        # it was parsed right after a ``-`` line its phrase_break_before flag
+        # is True.
+        first_chart_note = chart.notes[note_indices[0]]
         word_notes = _notes_for_word(
-            word_text, note_indices, chart.notes, word_idx, phones
+            word_text,
+            note_indices,
+            chart.notes,
+            word_idx,
+            phones,
+            phrase_break_before=first_chart_note.phrase_break_before,
         )
         notes.extend(word_notes)
 
