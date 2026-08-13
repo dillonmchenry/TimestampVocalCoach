@@ -34,6 +34,7 @@ const basisFilters = document.getElementById("basisFilters");
 const overviewTiles = document.getElementById("overviewTiles");
 const segmentInfo = document.getElementById("segmentInfo");
 const fastProfile = document.getElementById("fastProfile");
+const backToFullSongBtn = document.getElementById("backToFullSong");
 
 let pendingFile = null;
 let analysisAbortController = null;
@@ -48,6 +49,11 @@ let mixInstrumentalOn = false;
 let refVocalMedia = null;
 let instrumentalMedia = null;
 let playbackSyncAbort = null;
+
+// Section focus state
+let focusedSection = null;   // { name, kind, start_s, end_s } in song time, or null
+let fullPeaks = null;        // cached full-recording peaks array for waveform restoration
+let fullAudioUrl = null;     // cached audio URL for waveform restoration
 
 const MIX_LAYER_VOLUME = 0.85;
 const MIX_SYNC_THRESHOLD_S = 0.08;
@@ -912,11 +918,275 @@ function renderSectionRibbon(reference, analysis) {
     band.title = `${section.name}${section.kind ? ` (${section.kind})` : ""}${pctLabel}`;
     band.innerHTML = `<span class="section-band-label">${section.name}</span>`;
     band.addEventListener("click", () => {
-      seekAndPlay(userStart);
+      setSectionFocus(section).catch(console.error);
     });
     sectionRibbon.appendChild(band);
   }
 }
+
+// ---- Section focus helpers -----------------------------------------------
+
+/**
+ * Render ALL highlight regions across the full recording into timelineDiv.
+ * Called at initial render and when restoring from section view.
+ */
+function renderFullRegions() {
+  timelineDiv.innerHTML = "";
+  if (!currentAnalysis) return;
+  const totalDur = currentDuration;
+  const offset   = currentAnalysis.global_offset_s ?? 0;
+  for (const moment of currentAnalysis.highlights?.moments ?? []) {
+    if (
+      currentAnalysis.duration_s > 0 &&
+      (moment.end_s - moment.start_s) / currentAnalysis.duration_s > 0.25
+    ) continue;
+    const userStart = moment.start_s + offset;
+    const userEnd   = moment.end_s   + offset;
+    const left  = (userStart / totalDur) * 100;
+    const width = ((userEnd - userStart) / totalDur) * 100;
+    const region = document.createElement("div");
+    region.className = `region ${regionCategoryClass(moment)}`;
+    region.style.left  = `${Math.max(0, left)}%`;
+    region.style.width = `${Math.max(1, width)}%`;
+    region.title = `${moment.title}\n${moment.summary}`;
+    region.dataset.momentId = momentDomId(moment);
+    region.dataset.category = momentCategoryKey(moment);
+    region.addEventListener("click", () => {
+      seekAndPlay(userStart);
+      scrollToHighlightCard(region.dataset.momentId);
+    });
+    timelineDiv.appendChild(region);
+  }
+}
+
+/**
+ * Render highlight regions filtered and positioned relative to a section's
+ * user-time range.
+ */
+function renderSectionRegions(section) {
+  timelineDiv.innerHTML = "";
+  if (!currentAnalysis) return;
+  const offset          = currentAnalysis.global_offset_s ?? 0;
+  const userSecStart    = section.start_s + offset;
+  const userSecEnd      = section.end_s   + offset;
+  const sectionDuration = userSecEnd - userSecStart;
+  if (sectionDuration <= 0) return;
+
+  for (const moment of currentAnalysis.highlights?.moments ?? []) {
+    if (
+      currentAnalysis.duration_s > 0 &&
+      (moment.end_s - moment.start_s) / currentAnalysis.duration_s > 0.25
+    ) continue;
+    const userStart = moment.start_s + offset;
+    const userEnd   = moment.end_s   + offset;
+    // Only show moments that overlap this section
+    if (userEnd <= userSecStart || userStart >= userSecEnd) continue;
+    const relStart = Math.max(0, userStart - userSecStart);
+    const relEnd   = Math.min(sectionDuration, userEnd - userSecStart);
+    const left  = (relStart / sectionDuration) * 100;
+    const width = ((relEnd - relStart) / sectionDuration) * 100;
+    const region = document.createElement("div");
+    region.className = `region ${regionCategoryClass(moment)}`;
+    region.style.left  = `${Math.max(0, left)}%`;
+    region.style.width = `${Math.max(1, width)}%`;
+    region.title = `${moment.title}\n${moment.summary}`;
+    region.dataset.momentId = momentDomId(moment);
+    region.dataset.category = momentCategoryKey(moment);
+    region.addEventListener("click", () => {
+      seekAndPlay(userStart);
+      scrollToHighlightCard(region.dataset.momentId);
+    });
+    timelineDiv.appendChild(region);
+  }
+}
+
+/**
+ * Render the section ribbon with only the focused section, spanning full width.
+ */
+function renderSectionFocusedRibbon(section) {
+  sectionRibbon.innerHTML = "";
+  const kindClass = SECTION_KIND_CLASS[section.kind] || "kind-unknown";
+  const band = document.createElement("div");
+  band.className = `section-band ${kindClass}`;
+  band.style.left  = "0%";
+  band.style.width = "100%";
+  band.title = section.name;
+  band.innerHTML = `<span class="section-band-label">${section.name}</span>`;
+  sectionRibbon.appendChild(band);
+}
+
+/**
+ * Recreate WaveSurfer zoomed to the given section.
+ * Uses the full peaks array + zoom so all existing playback wiring continues
+ * to work correctly (the same currentMedia element is reused).
+ */
+/**
+ * Find the scrollable element inside the WaveSurfer renderer.
+ *
+ * WaveSurfer v7 renders into a child <div> whose internals live inside a
+ * shadow root.  We must traverse that shadow root to reach the .scroll
+ * container.  Falls back gracefully for builds that don't use shadow DOM.
+ */
+function findWaveSurferScrollEl() {
+  // v7: container → rendererDiv (shadow host) → shadowRoot → .scroll
+  const rendererDiv = waveformDiv.firstElementChild;
+  if (rendererDiv?.shadowRoot) {
+    return (
+      rendererDiv.shadowRoot.querySelector(".scroll") ||
+      rendererDiv.shadowRoot.firstElementChild
+    );
+  }
+  // Non-shadow-DOM fallback
+  return (
+    waveformDiv.querySelector(".scroll") ||
+    waveformDiv.firstElementChild
+  );
+}
+
+function buildSectionWaveform(section) {
+  detachPlaybackMixSync();
+  if (wavesurfer) {
+    try { wavesurfer.destroy(); } catch (e) { /* ignore */ }
+    wavesurfer = null;
+  }
+
+  const offset          = currentAnalysis?.global_offset_s ?? 0;
+  const userSecStart    = section.start_s + offset;
+  const sectionDuration = Math.max(1, section.end_s - section.start_s);
+
+  // Compute zoom before creation — WaveSurfer v7's zoom() method silently
+  // no-ops when peaks are used (it guards on decodedData), so we must pass
+  // minPxPerSec as a constructor option so the peaks render at the right width.
+  const containerWidth = waveformDiv.clientWidth || 800;
+  const minPxPerSec    = containerWidth / sectionDuration;
+
+  wavesurfer = WaveSurfer.create({
+    container:     waveformDiv,
+    waveColor:     "#cec5bb",
+    progressColor: "#3b6fd4",
+    height:        128,
+    normalize:     true,
+    media:         currentMedia,
+    autoCenter:    false,
+    autoScroll:    false,
+    minPxPerSec:   minPxPerSec,
+    ...(fullPeaks ? { peaks: [fullPeaks], duration: currentDuration } : {}),
+  });
+
+  wavesurfer.on("error", (err) => {
+    console.error("WaveSurfer error:", err);
+  });
+
+  // Once rendered, scroll the shadow-DOM scroll container to the section
+  // start and lock it so the user can't scroll away.
+  const applyScroll = () => {
+    const scrollEl = findWaveSurferScrollEl();
+    if (scrollEl) {
+      scrollEl.scrollLeft = Math.round(userSecStart * minPxPerSec);
+      scrollEl.style.overflow = "hidden";
+    }
+  };
+  wavesurfer.on("ready", applyScroll);
+  // Belt-and-suspenders: also apply after two animation frames in case the
+  // ready event fired before our listener was registered.
+  requestAnimationFrame(() => requestAnimationFrame(applyScroll));
+
+  if (!fullPeaks && fullAudioUrl) wavesurfer.load(fullAudioUrl);
+
+  attachPlaybackMixSync();
+}
+
+/**
+ * Recreate WaveSurfer with the full audio at the normal (fit-to-container) zoom.
+ * Used when restoring from section view.
+ */
+function buildFullWaveform() {
+  detachPlaybackMixSync();
+  if (wavesurfer) {
+    try { wavesurfer.destroy(); } catch (e) { /* ignore */ }
+    wavesurfer = null;
+  }
+
+  wavesurfer = WaveSurfer.create({
+    container:     waveformDiv,
+    waveColor:     "#cec5bb",
+    progressColor: "#3b6fd4",
+    height:        128,
+    normalize:     true,
+    media:         currentMedia,
+    ...(fullPeaks ? { peaks: [fullPeaks], duration: currentDuration } : {}),
+  });
+
+  wavesurfer.on("error", (err) => {
+    console.error("WaveSurfer error:", err);
+    status.textContent = `Waveform failed to render (${err}). Playback may still work.`;
+    status.classList.add("error");
+  });
+
+  if (!fullPeaks && fullAudioUrl) wavesurfer.load(fullAudioUrl);
+
+  attachPlaybackMixSync();
+}
+
+/**
+ * Enter section view: zoom all timeline components to the selected section
+ * and filter coaching cards to that section only.
+ */
+async function setSectionFocus(section) {
+  // If already focused on this exact section, no-op
+  if (focusedSection && focusedSection.name === section.name) return;
+
+  focusedSection = section;
+
+  // 1. Show the back button in the playback controls bar
+  if (backToFullSongBtn) backToFullSongBtn.hidden = false;
+
+  // 2. Update section ribbon to show only focused section spanning full width
+  renderSectionFocusedRibbon(section);
+
+  // 3. Scope analysis graph to section song-time range
+  if (analysisGraph) analysisGraph.setTimeRange(section.start_s, section.end_s);
+
+  // 4. Recreate waveform zoomed to section
+  buildSectionWaveform(section);
+
+  // 5. Scope highlight regions to section
+  renderSectionRegions(section);
+
+  // 6. Filter coaching cards to section
+  const reference = await getReferenceAnnotation(currentPlaybackSongId).catch(() => null);
+  renderCoachingCards(reference ?? currentReference, currentAnalysis);
+}
+
+/**
+ * Leave section view: restore all timeline components to the full recording.
+ */
+async function clearSectionFocus() {
+  focusedSection = null;
+
+  // Hide the back button
+  if (backToFullSongBtn) backToFullSongBtn.hidden = true;
+
+  // Restore full analysis graph range
+  if (analysisGraph) analysisGraph.setTimeRange(null, null);
+
+  // Restore section ribbon
+  if (currentReference && currentAnalysis) {
+    renderSectionRibbon(currentReference, currentAnalysis);
+  }
+
+  // Restore full waveform (zoom reset)
+  buildFullWaveform();
+
+  // Restore all highlight regions
+  renderFullRegions();
+
+  // Restore all coaching cards
+  const reference = await getReferenceAnnotation(currentPlaybackSongId).catch(() => null);
+  renderCoachingCards(reference ?? currentReference, currentAnalysis);
+}
+
+// ---- End section focus helpers -------------------------------------------
 
 function lyricSnippet(reference, noteIndices) {
   if (!reference || !Array.isArray(reference.notes) || !noteIndices?.length) return "";
@@ -1044,10 +1314,20 @@ function renderCoachingCards(reference, analysis) {
       btn.classList.toggle("active", btn.dataset.basis === "all");
     }
   }
-  if (!analysis.highlights?.moments?.length) {
+  // Build the working moments list, filtering to section if in section view.
+  let moments = analysis.highlights?.moments ?? [];
+  if (focusedSection) {
+    const secStart = focusedSection.start_s;
+    const secEnd   = focusedSection.end_s;
+    moments = moments.filter(m => m.end_s > secStart && m.start_s < secEnd);
+  }
+
+  if (!moments.length) {
     const empty = document.createElement("div");
     empty.className = "empty-cards";
-    empty.textContent = "No coaching moments — try another take.";
+    empty.textContent = focusedSection
+      ? `No coaching moments in ${focusedSection.name}.`
+      : "No coaching moments — try another take.";
     highlightList.appendChild(empty);
     return;
   }
@@ -1056,7 +1336,7 @@ function renderCoachingCards(reference, analysis) {
   if (highlightFilters) highlightFilters.hidden = false;
   if (basisFilters) basisFilters.hidden = false;
 
-  for (const moment of analysis.highlights.moments) {
+  for (const moment of moments) {
     // Skip low-confidence cards defensively (should already be filtered server-side).
     if (moment.confidence === "low") continue;
     // Skip moments that span more than 25% of the song — too broad for a
@@ -1412,6 +1692,10 @@ function attachPlaybackMixSync() {
     for (const ev of ["play", "pause", "timeupdate", "seeked", "ended"]) {
       currentMedia.addEventListener(ev, sync, { signal });
     }
+    // Keep the play/pause icon in sync with actual media state
+    currentMedia.addEventListener("play",  updatePlayPauseIcon, { signal });
+    currentMedia.addEventListener("pause", updatePlayPauseIcon, { signal });
+    currentMedia.addEventListener("ended", updatePlayPauseIcon, { signal });
   }
   if (wavesurfer) {
     for (const ev of ["play", "pause", "timeupdate", "seeking", "interaction"]) {
@@ -1424,14 +1708,12 @@ function attachPlaybackMixSync() {
     wavesurfer.on("pause", () => {
       if (analysisGraph) {
         analysisGraph.stopPlayheadLoop();
-        const dur = currentDuration || 1;
-        analysisGraph.setPlayheadPosition(getPerformanceTime() / dur);
+        analysisGraph.setPlayheadUserTime(getPerformanceTime());
       }
     });
     wavesurfer.on("seeking", () => {
       if (analysisGraph) {
-        const dur = currentDuration || 1;
-        analysisGraph.setPlayheadPosition(getPerformanceTime() / dur);
+        analysisGraph.setPlayheadUserTime(getPerformanceTime());
       }
     });
   }
@@ -1470,6 +1752,12 @@ async function renderAnalysis(songId, analysis) {
   currentPlaybackSongId = songId;
   currentDuration = analysis.duration_s;
 
+  // Clear any lingering section focus from a previous analysis
+  focusedSection = null;
+  fullPeaks = null;
+  fullAudioUrl = null;
+  if (backToFullSongBtn) backToFullSongBtn.hidden = true;
+
   // Show a segment indicator when the user recorded only part of the song.
   const song = allSongs.find((s) => s.song_id === songId);
   if (analysis.segment_end_song_s != null && song) {
@@ -1501,6 +1789,7 @@ async function renderAnalysis(songId, analysis) {
   const audioUrl = apiUrl(`/api/songs/${encodeURIComponent(songId)}/performances/${encodeURIComponent(
     analysis.perf_id,
   )}/audio`);
+  fullAudioUrl = audioUrl;
 
   // Dedicated streaming media element: plays via HTTP range requests and is
   // a reliable fallback for the play-from-here actions regardless of whether
@@ -1513,6 +1802,7 @@ async function renderAnalysis(songId, analysis) {
   // Precomputed peaks from the loudness track avoid a fragile in-browser
   // decode of the full (40 MB+) performance WAV.
   const peaks = await fetchPeaks(songId, analysis.perf_id);
+  fullPeaks = peaks; // cached for section view waveform zoom
 
   // Unhide the timeline grid BEFORE WaveSurfer.create so that #waveform
   // has non-zero dimensions when the renderer measures it.
@@ -1565,28 +1855,7 @@ async function renderAnalysis(songId, analysis) {
   // Region markers in song time. NOTE: the Wavesurfer waveform is the
   // user vocal in *user* time; we shift song-time regions back to user
   // time using the analysis.global_offset_s.
-  timelineDiv.innerHTML = "";
-  const totalDur = currentDuration;
-  for (const moment of analysis.highlights.moments) {
-    // Skip song-wide trends (>25% of duration) — same filter as cards.
-    if (analysis.duration_s > 0 && (moment.end_s - moment.start_s) / analysis.duration_s > 0.25) continue;
-    const userStart = moment.start_s + analysis.global_offset_s;
-    const userEnd = moment.end_s + analysis.global_offset_s;
-    const left = (userStart / totalDur) * 100;
-    const width = ((userEnd - userStart) / totalDur) * 100;
-    const region = document.createElement("div");
-    region.className = `region ${regionCategoryClass(moment)}`;
-    region.style.left = `${Math.max(0, left)}%`;
-    region.style.width = `${Math.max(1, width)}%`;
-    region.title = `${moment.title}\n${moment.summary}`;
-    region.dataset.momentId = momentDomId(moment);
-    region.dataset.category = momentCategoryKey(moment);
-    region.addEventListener("click", () => {
-      seekAndPlay(userStart);
-      scrollToHighlightCard(region.dataset.momentId);
-    });
-    timelineDiv.appendChild(region);
-  }
+  renderFullRegions();
 
   // Section ribbon (verses/choruses/...) under the waveform.
   // getReferenceAnnotation caches the result; this is effectively free if
@@ -1598,11 +1867,23 @@ async function renderAnalysis(songId, analysis) {
   renderCoachingCards(sectionReference, analysis);
 }
 
+backToFullSongBtn?.addEventListener("click", () => {
+  clearSectionFocus().catch(console.error);
+});
+
+function updatePlayPauseIcon() {
+  const playing = isPerformancePlaying();
+  playPause.classList.toggle("is-playing", playing);
+  playPause.setAttribute("aria-label", playing ? "Pause" : "Play");
+  playPause.title = playing ? "Pause" : "Play";
+}
+
 playPause.addEventListener("click", () => {
   if (wavesurfer) {
     try {
       wavesurfer.playPause();
       syncMixLayers(getPerformanceTime(), isPerformancePlaying());
+      updatePlayPauseIcon();
       return;
     } catch (e) {
       /* fall through to media element */
@@ -1612,6 +1893,7 @@ playPause.addEventListener("click", () => {
     if (currentMedia.paused) currentMedia.play().catch(() => {});
     else currentMedia.pause();
     syncMixLayers(getPerformanceTime(), isPerformancePlaying());
+    updatePlayPauseIcon();
   }
 });
 

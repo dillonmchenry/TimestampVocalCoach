@@ -162,33 +162,23 @@
       <div id="overviewTiles" class="overview-tiles" hidden></div>
 
       <h2>Coaching highlights</h2>
-      <div class="caption playback-bar">
+      <div class="playback-bar">
         <div class="playback-controls">
-          <button id="playPause" type="button">Play / Pause</button>
-          <div class="mix-toggles" role="group" aria-label="Playback mix">
-            <button
-              id="mixRefVocal"
-              type="button"
-              class="mix-toggle"
-              aria-pressed="false"
-            >
-              Add original vocal
-            </button>
-            <button
-              id="mixInstrumental"
-              type="button"
-              class="mix-toggle"
-              aria-pressed="false"
-            >
-              Add instrumental
-            </button>
+          <button id="backToFullSong" type="button" class="back-to-full-btn" hidden>&#8592; Back to full song</button>
+          <button id="playPause" type="button" class="play-pause-btn" aria-label="Play" title="Play">
+            <svg class="icon-play" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+            <svg class="icon-pause" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="22" height="22" aria-hidden="true"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+          </button>
+          <div id="highlightFilters" class="highlight-filters" hidden>
+            <button type="button" class="badge highlight-filter-badge filter-pitch" data-filter="pitch">Pitch</button>
+            <button type="button" class="badge highlight-filter-badge filter-expression" data-filter="expression">Expression</button>
+            <button type="button" class="badge highlight-filter-badge filter-timing" data-filter="timing">Timing</button>
+            <button type="button" class="badge highlight-filter-badge filter-volume" data-filter="volume">Volume</button>
           </div>
         </div>
-        <div id="highlightFilters" class="highlight-filters" hidden>
-          <button type="button" class="badge highlight-filter-badge filter-pitch" data-filter="pitch">Pitch</button>
-          <button type="button" class="badge highlight-filter-badge filter-expression" data-filter="expression">Expression</button>
-          <button type="button" class="badge highlight-filter-badge filter-timing" data-filter="timing">Timing</button>
-          <button type="button" class="badge highlight-filter-badge filter-volume" data-filter="volume">Volume</button>
+        <div class="mix-toggles" role="group" aria-label="Playback mix">
+          <button id="mixRefVocal" type="button" class="mix-toggle" aria-pressed="false">Add original vocal</button>
+          <button id="mixInstrumental" type="button" class="mix-toggle" aria-pressed="false">Add instrumental</button>
         </div>
       </div>
       <div id="timelineGrid" class="timeline-grid" hidden>

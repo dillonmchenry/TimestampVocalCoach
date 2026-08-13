@@ -480,9 +480,10 @@ h3 {
 
 .playback-bar {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 12px 16px;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
   margin-bottom: 10px;
 }
 
@@ -495,13 +496,44 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
+  min-width: 0;
 }
+
+/* ---------- Play / Pause icon button ---------- */
+
+.play-pause-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  flex-shrink: 0;
+  border-radius: 50%;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.play-pause-btn:hover {
+  background: var(--border);
+}
+
+.play-pause-btn .icon-pause { display: none; }
+.play-pause-btn.is-playing .icon-play  { display: none; }
+.play-pause-btn.is-playing .icon-pause { display: block; }
+
+/* ---------- Mix toggles (right-justified) ---------- */
 
 .mix-toggles {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  flex-shrink: 0;
+  margin-left: auto;
 }
 
 .mix-toggle {
@@ -728,7 +760,8 @@ h3 {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  margin: 12px 0;
+  /* Align with the timeline content column (label column is 80px wide) */
+  padding-left: 32px;
 }
 
 .highlight-filter-badge {
@@ -1404,7 +1437,6 @@ h3 {
 /* Active step label slightly darker */
 .progress-step.is-active .step-label {
   color: var(--accent);
-  font-weight: 500;
 }
 
 /* Completed step label back to muted */
@@ -1501,6 +1533,37 @@ h3 {
 
 .technique-select:focus {
   border-color: var(--expr);
+}
+
+/* ---------- Back-to-full-song button (shown inside playback controls bar) ---------- */
+
+.back-to-full-btn[hidden] { display: none; }
+
+.back-to-full-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  /* Subtle right separator to visually separate it from Play/Pause */
+  margin-right: 4px;
+  padding-right: 16px;
+  border-right-width: 1px;
+  transition: background 0.12s ease, border-color 0.12s ease;
+}
+
+.back-to-full-btn:hover {
+  background: var(--border);
+  border-color: var(--muted);
 }
 
 /* Canvas sits directly in the grid — no wrapper container */

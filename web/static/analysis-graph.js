@@ -153,6 +153,10 @@ export class AnalysisGraph {
       refStars:     null,
     };
 
+    // Visible time range for section view (song time). null = show full recording.
+    this._visibleStart = null;
+    this._visibleEnd   = null;
+
     // Bind event listeners
     this._onCanvasClick  = this._handleCanvasClick.bind(this);
     this._onTechChange   = this._handleTechChange.bind(this);
@@ -201,6 +205,31 @@ export class AnalysisGraph {
   }
 
   /**
+   * Set the visible song-time range for section view.
+   * Pass (null, null) to restore the full-song view.
+   */
+  setTimeRange(startS, endS) {
+    this._visibleStart = (startS != null) ? startS : null;
+    this._visibleEnd   = (endS   != null) ? endS   : null;
+    this._syncCanvas();
+    this._renderWithFetch();
+  }
+
+  /**
+   * Update the playhead from an absolute user-time value.
+   * Correctly maps user time → song time → visible fraction.
+   */
+  setPlayheadUserTime(userTime) {
+    const offset = this._analysis?.global_offset_s ?? 0;
+    const dur    = this._analysis?.duration_s ?? 1;
+    const songTime = Math.max(0, userTime - offset);
+    const start  = this._visibleStart ?? 0;
+    const end    = this._visibleEnd   ?? dur;
+    this._playheadFraction = Math.max(0, Math.min(1, (songTime - start) / (end - start)));
+    if (!this._raf) this._drawPlayhead();
+  }
+
+  /**
    * Start a requestAnimationFrame loop that keeps the playhead moving smoothly.
    * Call when playback starts; stopPlayheadLoop() when paused.
    */
@@ -210,7 +239,11 @@ export class AnalysisGraph {
     const loop = () => {
       const dur = this._analysis?.duration_s ?? 0;
       if (dur > 0) {
-        this._playheadFraction = Math.max(0, Math.min(1, getCurrentTime() / dur));
+        const offset   = this._analysis?.global_offset_s ?? 0;
+        const songTime = Math.max(0, getCurrentTime() - offset);
+        const start    = this._visibleStart ?? 0;
+        const end      = this._visibleEnd   ?? dur;
+        this._playheadFraction = Math.max(0, Math.min(1, (songTime - start) / (end - start)));
       }
       const W = this._canvas.clientWidth;
       const H = this._canvas.clientHeight;
@@ -277,8 +310,9 @@ export class AnalysisGraph {
     if (!this._analysis) return;
     const rect = this._canvas.getBoundingClientRect();
     const fraction = (e.clientX - rect.left) / rect.width;
-    const songTime = fraction * (this._analysis.duration_s ?? 0);
-    // Convert song time -> user time using global_offset_s
+    const start    = this._visibleStart ?? 0;
+    const end      = this._visibleEnd   ?? (this._analysis.duration_s ?? 0);
+    const songTime = start + fraction * (end - start);
     const userTime = songTime + (this._analysis.global_offset_s ?? 0);
     this._seekAndPlay(Math.max(0, userTime));
   }
@@ -440,8 +474,9 @@ export class AnalysisGraph {
   // ---- Private: time -> x coordinate ----
 
   _timeToX(songTime, W) {
-    const dur = this._analysis?.duration_s ?? 1;
-    return (songTime / dur) * W;
+    const start = this._visibleStart ?? 0;
+    const end   = this._visibleEnd   ?? (this._analysis?.duration_s ?? 1);
+    return ((songTime - start) / (end - start)) * W;
   }
 
   // ---- Private: renderer -- Mimic Score ----
@@ -463,14 +498,22 @@ export class AnalysisGraph {
     if (!scored.length) { this._drawEmpty(ctx, W, H, "No score data"); return; }
 
     // --- Gaussian kernel smoothing over time ---
-    // sigma scales with the song: ~3 s for a 3-minute track, minimum 2 s.
+    // sigma scales with the song: ~3 s for a 3-minute track, minimum 1 s.
     const sigma      = Math.max(1.0, duration / 120);
     const inv2sig2   = 1 / (2 * sigma * sigma);
     const numSamples = Math.min(400, Math.ceil(W));
 
+    // Minimum kernel-weight sum below which a sample is treated as a gap
+    // (no notes close enough to support a score — i.e. silence / intro / outro).
+    // 0.1 corresponds to ~2.1 sigma distance from the nearest note.
+    const MIN_WEIGHT = 0.1;
+
+    // Sample over the visible range (supports section zoom)
+    const visStart = this._visibleStart ?? 0;
+    const visEnd   = this._visibleEnd   ?? duration;
     const samples = [];
     for (let i = 0; i <= numSamples; i++) {
-      const t = (i / numSamples) * duration;
+      const t = visStart + (i / numSamples) * (visEnd - visStart);
       let wSum = 0, sSum = 0;
       for (const n of scored) {
         const d = t - n.t;
@@ -478,15 +521,26 @@ export class AnalysisGraph {
         wSum += w;
         sSum += w * n.score;
       }
-      samples.push({ t, score: wSum > 1e-6 ? sSum / wSum : 0 });
+      // gap = true when no notes are nearby; score is null (not drawn)
+      const gap = wSum < MIN_WEIGHT;
+      samples.push({ t, score: gap ? null : sSum / wSum, gap });
     }
 
-    // Auto-scale Y to the smoothed range so the curve fills the canvas
-    const allScores  = samples.map(s => s.score);
-    const scoreMin   = Math.min(...allScores);
-    const scoreMax   = Math.max(...allScores);
+    // Song-level mean: average of ALL scored notes regardless of visible range.
+    // This keeps the green/red threshold consistent when zoomed into a section,
+    // so the split line reflects how this section compares to the whole song.
+    const songMean = scored.length > 0
+      ? scored.reduce((a, n) => a + n.score, 0) / scored.length
+      : 0;
+
+    // Auto-scale Y using only supported (non-gap) scores, but always include
+    // the song mean so the dashed threshold line stays visible.
+    const supportedScores = samples.filter(s => !s.gap).map(s => s.score);
+    if (!supportedScores.length) { this._drawEmpty(ctx, W, H, "No score data"); return; }
+    const scoreMin   = Math.min(...supportedScores, songMean);
+    const scoreMax   = Math.max(...supportedScores, songMean);
     const scoreRange = Math.max(0.05, scoreMax - scoreMin);
-    const mean       = allScores.reduce((a, b) => a + b, 0) / allScores.length;
+    const mean       = songMean;
 
     const PAD_T = 10, PAD_B = 6;
     const scoreToY = s =>
@@ -494,34 +548,53 @@ export class AnalysisGraph {
     const meanY = scoreToY(mean);
     const baseY = meanY; // fills are bounded by the center line, not the bottom
 
-    // Map samples to canvas points
+    // Map samples to canvas points; gap points carry null y/score
     const pts = samples.map(s => ({
-      x:     (s.t / duration) * W,
-      y:     scoreToY(s.score),
-      score: s.score,
+      x:     this._timeToX(s.t, W),
+      y:     s.gap ? null : scoreToY(s.score),
+      score: s.score,  // null for gaps
+      gap:   s.gap,
     }));
 
     // --- Split into green / red runs at the mean threshold ---
-    // Each run: array of {x, y, score}; crossover endpoints are interpolated.
+    // Runs are broken at gap points so the curve doesn't cross silent regions.
     const greenRuns = [], redRuns = [];
-    let curRun = [pts[0]];
-    (pts[0].score >= mean ? greenRuns : redRuns).push(curRun);
+    let curRun = null;
+    let prevPt = null; // last non-gap point
 
-    for (let i = 1; i < pts.length; i++) {
-      const prev = pts[i - 1], curr = pts[i];
-      const prevAbove = prev.score >= mean;
-      const currAbove = curr.score >= mean;
-
-      if (prevAbove !== currAbove) {
-        // Interpolate the exact crossover point
-        const frac   = (mean - prev.score) / (curr.score - prev.score);
-        const crossPt = { x: prev.x + frac * (curr.x - prev.x), y: meanY, score: mean };
-        curRun.push(crossPt);
-        curRun = [crossPt, curr];
-        (currAbove ? greenRuns : redRuns).push(curRun);
-      } else {
-        curRun.push(curr);
+    for (const pt of pts) {
+      if (pt.gap) {
+        // End of a singing region — close the current run
+        curRun = null;
+        prevPt = null;
+        continue;
       }
+
+      const isGreen = pt.score >= mean;
+
+      if (curRun === null) {
+        // Start a fresh run (beginning of song or after a gap)
+        curRun = [pt];
+        (isGreen ? greenRuns : redRuns).push(curRun);
+      } else {
+        const prevAbove = prevPt.score >= mean;
+        if (isGreen !== prevAbove) {
+          // Crossover: interpolate the exact mean-crossing point
+          const frac    = (mean - prevPt.score) / (pt.score - prevPt.score);
+          const crossPt = {
+            x: prevPt.x + frac * (pt.x - prevPt.x),
+            y: meanY,
+            score: mean,
+            gap: false,
+          };
+          curRun.push(crossPt);
+          curRun = [crossPt, pt];
+          (isGreen ? greenRuns : redRuns).push(curRun);
+        } else {
+          curRun.push(pt);
+        }
+      }
+      prevPt = pt;
     }
 
     // Helper: fill a run's area down to baseY
@@ -792,9 +865,12 @@ export class AnalysisGraph {
     const inv2sig2   = 1 / (2 * sigma * sigma);
     const numSamples = Math.min(400, Math.ceil(W));
 
+    // Sample over the visible range (supports section zoom)
+    const visStart = this._visibleStart ?? 0;
+    const visEnd   = this._visibleEnd   ?? duration;
     const samples = [];
     for (let i = 0; i <= numSamples; i++) {
-      const t = (i / numSamples) * duration;
+      const t = visStart + (i / numSamples) * (visEnd - visStart);
       let wSum = 0, sSum = 0;
       for (const n of scored) {
         const d = t - n.t;
@@ -814,7 +890,7 @@ export class AnalysisGraph {
     const offsetToY = ms => centerY + (ms / maxAbs) * halfH;
 
     const pts = samples.map(s => ({
-      x: (s.t / duration) * W,
+      x: this._timeToX(s.t, W),
       y: offsetToY(s.offsetMs),
       offsetMs: s.offsetMs,
     }));
