@@ -17,11 +17,14 @@
 
   <main>
     <section class="picker">
-      <label for="songSelect">Song</label>
-      <select id="songSelect" disabled>
-        <option>Loading…</option>
-      </select>
-      <div id="songBadges" class="badges"></div>
+      <span class="picker-label">CHOOSE A SONG</span>
+      <div class="carousel-wrapper">
+        <button class="carousel-arrow carousel-arrow--left" id="carouselLeft" aria-label="Scroll left">&#8249;</button>
+        <div class="carousel-track" id="carouselTrack">
+          <!-- song cards injected by JS -->
+        </div>
+        <button class="carousel-arrow carousel-arrow--right" id="carouselRight" aria-label="Scroll right">&#8250;</button>
+      </div>
     </section>
 
     <section class="upload">
@@ -30,10 +33,6 @@
         <button id="modeKaraoke" class="mode-btn" type="button">Sing along (karaoke)</button>
       </div>
 
-      <label class="profile-toggle">
-        <input id="fastProfile" type="checkbox" checked />
-        <span>Fast feedback (student model)</span>
-      </label>
 
       <div id="uploadPanel" class="mode-panel">
         <div id="dropZone" class="drop-zone">

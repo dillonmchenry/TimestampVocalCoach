@@ -51,6 +51,14 @@ class ReferenceNote(BaseModel):
         default_factory=list,
         description="Phonemes that fall inside this note (slur-aware)",
     )
+    phrase_break_before: bool = Field(
+        default=False,
+        description=(
+            "True if this note is the first note of a word that immediately "
+            "follows an UltraStar phrase-break marker (``-``).  Used by the "
+            "karaoke display to force a line break at real phrase boundaries."
+        ),
+    )
 
     @property
     def duration_s(self) -> float:

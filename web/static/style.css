@@ -69,17 +69,16 @@ section {
 }
 
 .picker {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 12px 16px;
-  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .picker[hidden] {
   display: none;
 }
 
-.picker label {
+.picker-label {
   color: var(--muted);
   font-size: 11px;
   font-weight: 600;
@@ -87,35 +86,7 @@ section {
   letter-spacing: 0.08em;
 }
 
-#songSelect {
-  appearance: none;
-  -webkit-appearance: none;
-  background-color: var(--panel-2);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='none' stroke='%236b7280' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round' d='M3 4.5 6 7.5 9 4.5'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 14px center;
-  color: var(--text);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 2.5rem 8px 10px;
-  font-size: 14px;
-  font-family: inherit;
-  outline: none;
-  cursor: pointer;
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
-}
-
-#songSelect:focus {
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(59, 111, 212, 0.12);
-}
-
-.badges {
-  grid-column: 1 / -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
+/* ---------- Generic pill badge (used by highlight filters and other UI) ---------- */
 
 .badge {
   font-size: 11px;
@@ -128,9 +99,186 @@ section {
   color: var(--muted);
 }
 
-.badge-lang     { color: var(--expr); border-color: rgba(124, 58, 237, 0.3); background: rgba(124, 58, 237, 0.06); }
-.badge-genre    { color: var(--accent); border-color: rgba(59, 111, 212, 0.3); background: rgba(59, 111, 212, 0.06); }
-.badge-duration { font-variant-numeric: tabular-nums; }
+/* ---------- Carousel wrapper + arrows ---------- */
+
+.carousel-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.carousel-track {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding: 4px 2px 8px;
+  flex: 1;
+}
+
+.carousel-track::-webkit-scrollbar {
+  display: none;
+}
+
+.carousel-arrow {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--panel);
+  color: var(--muted);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.15s, border-color 0.15s, box-shadow 0.15s;
+  z-index: 1;
+  padding: 0;
+}
+
+.carousel-arrow:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 111, 212, 0.1);
+}
+
+.carousel-arrow--left  { margin-right: 8px; }
+.carousel-arrow--right { margin-left: 8px; }
+
+.carousel-arrow[disabled] {
+  opacity: 0.3;
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ---------- Song cards ---------- */
+
+.song-card {
+  flex-shrink: 0;
+  width: 230px;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  cursor: pointer;
+  scroll-snap-align: start;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
+  position: relative;
+  overflow: hidden;
+  user-select: none;
+}
+
+.song-card:hover {
+  border-color: rgba(59, 111, 212, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.song-card.selected {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(59, 111, 212, 0.14), 0 4px 16px rgba(0, 0, 0, 0.1);
+}
+
+.song-card__check {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  background: var(--accent);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.7);
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.song-card.selected .song-card__check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.song-card__check svg {
+  width: 12px;
+  height: 12px;
+  stroke: #fff;
+  stroke-width: 2.5;
+  fill: none;
+}
+
+.song-card__cover {
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  display: block;
+  border-radius: 10px 10px 0 0;
+}
+
+.song-card__cover-placeholder {
+  width: 100%;
+  aspect-ratio: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.7);
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(135deg, var(--placeholder-a, #4a5568) 0%, var(--placeholder-b, #2d3748) 100%);
+  letter-spacing: -0.02em;
+}
+
+.song-card__info {
+  padding: 10px 10px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.song-card__title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-card__artist {
+  font-size: 11px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.song-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 0 10px 10px;
+}
+
+.song-tag {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.song-tag--lang     { color: var(--expr); border-color: rgba(124, 58, 237, 0.3); background: rgba(124, 58, 237, 0.06); }
+.song-tag--genre    { color: var(--accent); border-color: rgba(59, 111, 212, 0.3); background: rgba(59, 111, 212, 0.06); }
+.song-tag--duration { font-variant-numeric: tabular-nums; }
 
 /* ---------- Mode toggle + karaoke ---------- */
 
@@ -170,20 +318,6 @@ section {
 .mode-panel { display: block; }
 .mode-panel[hidden] { display: none; }
 
-.profile-toggle {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 16px;
-  font-size: 13px;
-  color: var(--muted);
-  cursor: pointer;
-}
-
-.profile-toggle input {
-  accent-color: var(--accent);
-  cursor: pointer;
-}
 
 .karaoke-controls {
   display: flex;
@@ -1250,7 +1384,6 @@ h3 {
 
 /* When upload section is collapsed, hide all interactive content */
 .upload--collapsed .mode-toggle,
-.upload--collapsed .profile-toggle,
 .upload--collapsed .mode-panel,
 .upload--collapsed #analysisProgress,
 .upload--collapsed #status {
@@ -1310,7 +1443,6 @@ h3 {
 
 /* Hide upload section UI while analysis is running */
 .upload--analyzing .mode-toggle,
-.upload--analyzing .profile-toggle,
 .upload--analyzing #uploadPanel,
 .upload--analyzing #karaokePanel {
   display: none;

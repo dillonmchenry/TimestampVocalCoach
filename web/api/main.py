@@ -196,6 +196,8 @@ def _resolve_torch_device(requested: str = "cuda") -> str:
 @app.get("/api/songs")
 def list_songs():
     """Return a list of installed songs."""
+    import json as _json
+
     if not SONGS_ROOT.is_dir():
         return JSONResponse({"songs": []})
     out = []
@@ -206,6 +208,24 @@ def list_songs():
             manifest = load_manifest(song_dir)
         except Exception:
             continue
+
+        # Load genre_tags from vocal_profile.json if available.
+        genre_tags: list[str] = []
+        vp_path = song_dir / manifest.vocal_profile_path if manifest.vocal_profile_path else None
+        if vp_path and vp_path.is_file():
+            try:
+                vp_data = _json.loads(vp_path.read_text(encoding="utf-8"))
+                genre_tags = vp_data.get("genre_tags", [])
+            except Exception:
+                pass
+
+        # Check for a cover image (jpg or png).
+        cover_url: str | None = None
+        for ext in ("jpg", "jpeg", "png", "webp"):
+            if (song_dir / f"cover.{ext}").is_file():
+                cover_url = f"/api/songs/{manifest.song_id}/cover"
+                break
+
         out.append(
             {
                 "song_id": manifest.song_id,
@@ -213,6 +233,8 @@ def list_songs():
                 "artist": manifest.artist,
                 "language": manifest.language,
                 "duration_s": manifest.duration_s,
+                "genre_tags": genre_tags,
+                "cover_url": cover_url,
                 "has_instrumental": manifest.instrumental_path is not None,
                 "has_reference_pitch": manifest.reference_pitch_path is not None,
                 "has_reference_stars": manifest.reference_stars_path is not None,
@@ -220,6 +242,18 @@ def list_songs():
             }
         )
     return {"songs": out}
+
+
+@app.get("/api/songs/{song_id}/cover")
+def get_song_cover(song_id: str):
+    """Serve the cover image for a song (cover.jpg / cover.png / etc.)."""
+    song_dir = _song_dir(song_id)
+    for ext in ("jpg", "jpeg", "png", "webp"):
+        cover_path = song_dir / f"cover.{ext}"
+        if cover_path.is_file():
+            mime = {"jpg": "image/jpeg", "jpeg": "image/jpeg", "png": "image/png", "webp": "image/webp"}.get(ext, "image/jpeg")
+            return FileResponse(str(cover_path), media_type=mime)
+    raise HTTPException(status_code=404, detail="No cover image found for this song.")
 
 
 @app.get("/api/songs/{song_id}/manifest")

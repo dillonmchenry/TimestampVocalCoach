@@ -11,8 +11,9 @@ function apiUrl(path) {
   return base + path;
 }
 
-const songSelect = document.getElementById("songSelect");
-const songBadges = document.getElementById("songBadges");
+const carouselTrack = document.getElementById("carouselTrack");
+const carouselLeft = document.getElementById("carouselLeft");
+const carouselRight = document.getElementById("carouselRight");
 const dropZone = document.getElementById("dropZone");
 const fileInput = document.getElementById("fileInput");
 const analyzeButton = document.getElementById("analyzeButton");
@@ -35,7 +36,6 @@ let highlightFilters = null;
 const basisFilters = document.getElementById("basisFilters");
 let overviewTiles = null;
 let segmentInfo = null;
-const fastProfile = document.getElementById("fastProfile");
 let backToFullSongBtn = null;
 const addPerformanceBar = document.getElementById("addPerformanceBar");
 const addPerformanceBtn = document.getElementById("addPerformanceBtn");
@@ -452,6 +452,7 @@ const SECTION_KIND_CLASS = {
 const LAST_SONG_KEY = "vocalCoach.lastSongId";
 
 let allSongs = [];
+let selectedSongId = "";
 
 async function loadSongs() {
   status.textContent = "Loading songs…";
@@ -461,48 +462,21 @@ async function loadSongs() {
     const data = await r.json();
     allSongs = data.songs || [];
     if (!allSongs.length) {
-      songSelect.innerHTML = "";
-      const opt = document.createElement("option");
-      opt.textContent = "(no songs found — run scripts/import_ultrastar.py)";
-      songSelect.appendChild(opt);
-      songSelect.disabled = true;
+      carouselTrack.textContent = "No songs found — run scripts/import_ultrastar.py";
       status.textContent = "No songs available.";
       return;
     }
-    populateSongSelect(allSongs);
     // Restore last selection from localStorage if it still exists.
     const remembered = localStorage.getItem(LAST_SONG_KEY);
-    if (remembered && allSongs.some((s) => s.song_id === remembered)) {
-      songSelect.value = remembered;
-    }
-    songSelect.disabled = false;
-    songSelect.addEventListener("change", () => {
-      currentReference = null;
-      currentReferenceSongId = null;
-      const song = songSelect.selectedOptions[0]?._song;
-      if (song) localStorage.setItem(LAST_SONG_KEY, song.song_id);
-      updateSongBadges(song);
-    });
-    updateSongBadges(songSelect.selectedOptions[0]?._song);
+    const initialId =
+      remembered && allSongs.some((s) => s.song_id === remembered)
+        ? remembered
+        : allSongs[0].song_id;
+    renderCarousel(allSongs, initialId);
     status.textContent = "";
   } catch (e) {
     status.textContent = `Failed to load songs: ${e.message}`;
     status.classList.add("error");
-  }
-}
-
-function populateSongSelect(songs) {
-  const remembered = songSelect.value;
-  songSelect.innerHTML = "";
-  for (const s of songs) {
-    const opt = document.createElement("option");
-    opt.value = s.song_id;
-    opt.textContent = `${s.title} — ${s.artist || "Unknown artist"}`;
-    opt._song = s;
-    songSelect.appendChild(opt);
-  }
-  if (remembered && songs.some((s) => s.song_id === remembered)) {
-    songSelect.value = remembered;
   }
 }
 
@@ -513,21 +487,145 @@ function fmtDuration(secs) {
   return `${m}:${s}`;
 }
 
-function updateSongBadges(song) {
-  songBadges.innerHTML = "";
-  if (!song) return;
-  const badges = [
-    { label: song.language || "English", kind: "lang" },
-    { label: song.genre || "Pop", kind: "genre" },
-    { label: fmtDuration(song.duration_s), kind: "duration" },
-  ];
-  for (const b of badges) {
-    const span = document.createElement("span");
-    span.className = `badge badge-${b.kind}`;
-    span.textContent = b.label;
-    songBadges.appendChild(span);
+// Placeholder gradient pairs keyed by first letter of song_id, cycling through a palette.
+const PLACEHOLDER_GRADIENTS = [
+  ["#4a5568", "#2d3748"],
+  ["#4c6a52", "#2d4a34"],
+  ["#6a4c52", "#4a2d34"],
+  ["#4c4a6a", "#2d2d4a"],
+  ["#6a5c3a", "#4a3e22"],
+  ["#3a5c6a", "#224a52"],
+  ["#6a3a52", "#4a2238"],
+  ["#3a6a5c", "#224a42"],
+];
+
+function selectCardById(songId, { animate = true } = {}) {
+  selectedSongId = songId;
+  const song = allSongs.find((s) => s.song_id === songId);
+  if (song) localStorage.setItem(LAST_SONG_KEY, songId);
+
+  let selectedCard = null;
+  carouselTrack.querySelectorAll(".song-card").forEach((card) => {
+    const isSelected = card.dataset.songId === songId;
+    card.classList.toggle("selected", isSelected);
+    if (isSelected) selectedCard = card;
+  });
+
+  // Scroll so the selected card is centered in the track viewport.
+  if (selectedCard) {
+    const trackRect = carouselTrack.getBoundingClientRect();
+    const cardRect = selectedCard.getBoundingClientRect();
+    const targetScroll =
+      carouselTrack.scrollLeft +
+      (cardRect.left - trackRect.left) -
+      (trackRect.width - cardRect.width) / 2;
+    carouselTrack.scrollTo({
+      left: Math.max(0, targetScroll),
+      behavior: animate ? "smooth" : "instant",
+    });
   }
+
+  // Reset reference cache when song changes.
+  currentReference = null;
+  currentReferenceSongId = null;
 }
+
+function renderCarousel(songs, initialId) {
+  carouselTrack.innerHTML = "";
+
+  songs.forEach((song, idx) => {
+    const card = document.createElement("div");
+    card.className = "song-card";
+    card.dataset.songId = song.song_id;
+
+    // Cover image or placeholder.
+    if (song.cover_url) {
+      const img = document.createElement("img");
+      img.className = "song-card__cover";
+      img.src = apiUrl(song.cover_url);
+      img.alt = `${song.title} cover`;
+      img.onerror = () => img.replaceWith(makeCoverPlaceholder(song, idx));
+      card.appendChild(img);
+    } else {
+      card.appendChild(makeCoverPlaceholder(song, idx));
+    }
+
+    // Checkmark badge (shown when selected).
+    const check = document.createElement("div");
+    check.className = "song-card__check";
+    check.innerHTML =
+      '<svg viewBox="0 0 12 12"><polyline points="2,6 5,9 10,3"/></svg>';
+    card.appendChild(check);
+
+    // Title + artist.
+    const info = document.createElement("div");
+    info.className = "song-card__info";
+    const title = document.createElement("div");
+    title.className = "song-card__title";
+    title.textContent = song.title;
+    const artist = document.createElement("div");
+    artist.className = "song-card__artist";
+    artist.textContent = song.artist || "Unknown artist";
+    info.appendChild(title);
+    info.appendChild(artist);
+    card.appendChild(info);
+
+    // Tags: language, first genre tag, duration.
+    const tags = document.createElement("div");
+    tags.className = "song-card__tags";
+    const tagDefs = [
+      { label: song.language || "English", kind: "lang" },
+      { label: (song.genre_tags && song.genre_tags[0]) || "Pop", kind: "genre" },
+      { label: fmtDuration(song.duration_s), kind: "duration" },
+    ];
+    for (const t of tagDefs) {
+      const span = document.createElement("span");
+      span.className = `song-tag song-tag--${t.kind}`;
+      span.textContent = t.label;
+      tags.appendChild(span);
+    }
+    card.appendChild(tags);
+
+    card.addEventListener("click", () => selectCardById(song.song_id));
+    carouselTrack.appendChild(card);
+  });
+
+  // Set initial selection without animation so the card is already centered on load.
+  selectCardById(initialId, { animate: false });
+  updateCarouselArrows();
+}
+
+function makeCoverPlaceholder(song, idx) {
+  const div = document.createElement("div");
+  div.className = "song-card__cover-placeholder";
+  const [a, b] = PLACEHOLDER_GRADIENTS[idx % PLACEHOLDER_GRADIENTS.length];
+  div.style.setProperty("--placeholder-a", a);
+  div.style.setProperty("--placeholder-b", b);
+  // Two-letter initials from title.
+  const words = song.title.trim().split(/\s+/);
+  div.textContent = words.length > 1
+    ? (words[0][0] + words[1][0]).toUpperCase()
+    : song.title.slice(0, 2).toUpperCase();
+  return div;
+}
+
+function updateCarouselArrows() {
+  if (!carouselTrack) return;
+  const atStart = carouselTrack.scrollLeft <= 4;
+  const atEnd =
+    carouselTrack.scrollLeft + carouselTrack.clientWidth >=
+    carouselTrack.scrollWidth - 4;
+  carouselLeft.disabled = atStart;
+  carouselRight.disabled = atEnd;
+}
+
+carouselLeft.addEventListener("click", () => {
+  carouselTrack.scrollBy({ left: -180, behavior: "smooth" });
+});
+carouselRight.addEventListener("click", () => {
+  carouselTrack.scrollBy({ left: 180, behavior: "smooth" });
+});
+carouselTrack.addEventListener("scroll", updateCarouselArrows);
 
 function setAnalyzeLoading(loading) {
   analyzeButton.disabled = loading || !pendingFile;
@@ -619,7 +717,7 @@ fileInput.addEventListener("change", (e) => {
 
 analyzeButton.addEventListener("click", async () => {
   if (!pendingFile) return;
-  const songId = songSelect.value;
+  const songId = selectedSongId;
   if (!songId) return;
 
   analysisAbortController = new AbortController();
@@ -1733,7 +1831,7 @@ function playReferenceRanged(songStart, songEnd) {
 }
 
 function currentStarsProfile() {
-  return fastProfile && fastProfile.checked ? "fast" : "full";
+  return "fast";
 }
 
 // Build a normalized peak envelope from the per-frame RMS (dB) loudness track
@@ -2232,15 +2330,17 @@ function _wavEncode(buffers, sampleRate) {
 }
 
 // A timing gap larger than this triggers a line break — but only once the
-// current line has reached LYRIC_MIN_WORDS, so short words like "Yesterday"
-// don't end up alone on a line after a brief pause.
+// current line has reached LYRIC_MIN_WORDS real words, so short entries like
+// "Yesterday" (a single lyric_word that is just one token) don't get stranded.
 const LYRIC_LINE_GAP_S = 0.8;
 // A gap this long always forces a new line regardless of word count
 // (covers true section rests / instrumentals).
 const LYRIC_HARD_GAP_S = 5.0;
-// Minimum words a line must accumulate before a normal gap can break it.
+// Minimum real space-separated word tokens before a normal gap can break.
 const LYRIC_MIN_WORDS = 4;
-// Absolute maximum words before forcing a line break regardless of timing.
+// Maximum real word tokens before forcing a break regardless of timing.
+// Now that phrase_break_before handles primary line splits, this is only
+// a last resort for unusually long phrases (e.g. rap-heavy or ad-lib sections).
 const LYRIC_MAX_WORDS = 12;
 // How far above the container top the active line is positioned (px).
 const LYRIC_SCROLL_OFFSET_PX = 80;
@@ -2256,7 +2356,7 @@ function setMode(mode) {
 modeUploadBtn.addEventListener("click", () => setMode("upload"));
 modeKaraokeBtn.addEventListener("click", async () => {
   setMode("karaoke");
-  const songId = songSelect.value;
+  const songId = selectedSongId;
   if (!songId) return;
   const reference = await getReferenceAnnotation(songId);
   buildKaraokeLyrics(reference);
@@ -2273,6 +2373,9 @@ function buildKaraokeLyrics(reference) {
   }
 
   // Deduplicate notes into unique words by word_index.
+  // phrase_break_before is True on the first note of each word that
+  // immediately follows an UltraStar phrase-break marker (``-``).  We keep
+  // that flag so the line-grouping step below can use it as a hard break.
   const wordsMap = new Map();
   for (const note of reference.notes) {
     const wordIdx = note.word_index;
@@ -2282,6 +2385,7 @@ function buildKaraokeLyrics(reference) {
         word: (note.lyric_word || "").trim(),
         start_s: note.start_s,
         end_s: note.end_s,
+        phrase_break_before: !!note.phrase_break_before,
       });
     } else {
       const entry = wordsMap.get(wordIdx);
@@ -2291,10 +2395,19 @@ function buildKaraokeLyrics(reference) {
   const words = [...wordsMap.values()].filter((w) => w.word);
   words.sort((a, b) => a.start_s - b.start_s);
 
-  // Group words into lines using a minimum-word guard so short words don't
-  // end up alone. A soft gap break (>= LYRIC_LINE_GAP_S) only fires once the
-  // current line has at least LYRIC_MIN_WORDS words. A hard gap
-  // (>= LYRIC_HARD_GAP_S, e.g. an instrumental rest) always breaks immediately.
+  // Count actual space-separated tokens in the accumulated line (used for
+  // the LYRIC_MAX_WORDS hard cap so no single line becomes too long).
+  const tokenCount = (line) =>
+    line.reduce((n, w) => n + w.word.trim().split(/\s+/).length, 0);
+
+  // Group words into display lines.
+  // Primary rule: break whenever a word has phrase_break_before = true
+  // (derived directly from the UltraStar "-" phrase-break markers in the
+  // chart — the most reliable signal available).
+  // Fallback rules for songs without that data or very long phrases:
+  //   • hard gap >= LYRIC_HARD_GAP_S always breaks,
+  //   • soft gap >= LYRIC_LINE_GAP_S breaks once LYRIC_MIN_WORDS are met,
+  //   • LYRIC_MAX_WORDS forces a break regardless of timing.
   const rawLines = [];
   let currentLine = [];
   for (let i = 0; i < words.length; i++) {
@@ -2302,10 +2415,12 @@ function buildKaraokeLyrics(reference) {
     const prev = i > 0 ? words[i - 1] : null;
     const gap = prev ? w.start_s - prev.end_s : 0;
     if (currentLine.length > 0) {
-      const hardBreak = gap >= LYRIC_HARD_GAP_S;
-      const softBreak = gap >= LYRIC_LINE_GAP_S && currentLine.length >= LYRIC_MIN_WORDS;
-      const maxBreak  = currentLine.length >= LYRIC_MAX_WORDS;
-      if (hardBreak || softBreak || maxBreak) {
+      const tokens = tokenCount(currentLine);
+      const phraseBreak = !!w.phrase_break_before;
+      const hardBreak   = gap >= LYRIC_HARD_GAP_S;
+      const softBreak   = gap >= LYRIC_LINE_GAP_S && tokens >= LYRIC_MIN_WORDS;
+      const maxBreak    = tokens >= LYRIC_MAX_WORDS;
+      if (phraseBreak || hardBreak || softBreak || maxBreak) {
         rawLines.push(currentLine);
         currentLine = [];
       }
@@ -2535,7 +2650,7 @@ async function endKaraokeSession({ analyze }) {
     return;
   }
 
-  const songId = songSelect.value;
+  const songId = selectedSongId;
   if (!songId) return;
 
   analysisAbortController = new AbortController();
@@ -2584,7 +2699,7 @@ async function endKaraokeSession({ analyze }) {
 }
 
 karaokeRecordBtn.addEventListener("click", async () => {
-  const songId = songSelect.value;
+  const songId = selectedSongId;
   if (!songId) return;
   if (!navigator.mediaDevices) {
     status.textContent = "Browser does not support microphone access.";

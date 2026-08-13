@@ -84,6 +84,10 @@ class UltraStarNote:
     starts_new_word: bool = False
     """True if this note begins a new word (leading space in text or first
     note after a phrase break)."""
+    phrase_break_before: bool = False
+    """True if this note is the first note after a UltraStar phrase-break
+    marker (``-``).  Unlike ``starts_new_word``, this is NOT set for ordinary
+    whitespace-delimited word boundaries within a phrase."""
 
 
 @dataclass
@@ -169,6 +173,7 @@ def parse_ultrastar(
     body_started = False
     seconds_per_beat: Optional[float] = None
     pending_phrase_break = False
+    prev_had_trailing_space = False  # trailing space on previous syllable → new word
 
     for raw_line in lines:
         line = _maybe_strip_bom(raw_line).rstrip("\r\n")
@@ -285,11 +290,22 @@ def parse_ultrastar(
         end_s = start_s + duration_beats * seconds_per_beat
         midi = ULTRASTAR_BASE_MIDI + pitch_raw + midi_offset
 
+        # A new word begins when:
+        #  • it's the very first note in the chart,
+        #  • it immediately follows a phrase-break marker (``-``),
+        #  • its text has a leading space (the canonical UltraStar convention),
+        #  • the *previous* syllable's text ended with a trailing space.
+        # The last rule handles charts (e.g. older IC-style) that mark word
+        # boundaries with a trailing space on the syllable that *ends* the word
+        # rather than a leading space on the syllable that *starts* the next one.
+        phrase_break_before = pending_phrase_break
         starts_new_word = (
             len(notes) == 0
-            or pending_phrase_break
+            or phrase_break_before
             or text.startswith(" ")
+            or prev_had_trailing_space
         )
+        prev_had_trailing_space = text.endswith(" ")
         pending_phrase_break = False
 
         notes.append(
@@ -307,6 +323,7 @@ def parse_ultrastar(
                 is_freestyle=(first == NOTE_TYPE_FREESTYLE),
                 is_rap=(first in {NOTE_TYPE_RAP, NOTE_TYPE_RAP_GOLDEN}),
                 starts_new_word=starts_new_word,
+                phrase_break_before=phrase_break_before,
             )
         )
 

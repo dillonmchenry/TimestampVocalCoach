@@ -3999,7 +3999,8 @@
       "phonemes": [
         "Y",
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 1,
@@ -4014,7 +4015,8 @@
         "EY1",
         "N",
         "JH"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 2,
@@ -4028,7 +4030,8 @@
         "Y",
         "AO1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 3,
@@ -4043,7 +4046,8 @@
         "AY1",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 4,
@@ -4057,7 +4061,8 @@
         "L",
         "AY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 5,
@@ -4069,7 +4074,8 @@
       "word_index": 5,
       "phonemes": [
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 6,
@@ -4083,7 +4089,8 @@
         "G",
         "ER1",
         "L"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 7,
@@ -4097,7 +4104,8 @@
         "CH",
         "EY1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 8,
@@ -4111,7 +4119,8 @@
         "JH",
         "AH0",
         "Z"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 9,
@@ -4127,7 +4136,8 @@
         "OW1",
         "DH",
         "Z"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 10,
@@ -4140,7 +4150,8 @@
       "phonemes": [
         "Y",
         "AE1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 11,
@@ -4153,7 +4164,8 @@
       "phonemes": [
         "Y",
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 12,
@@ -4166,7 +4178,8 @@
       "phonemes": [
         "P",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 13,
@@ -4179,7 +4192,8 @@
       "phonemes": [
         "EH1",
         "M"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 14,
@@ -4192,7 +4206,8 @@
       "phonemes": [
         "EH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 15,
@@ -4206,7 +4221,8 @@
         "L",
         "AY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 16,
@@ -4218,7 +4234,8 @@
       "word_index": 13,
       "phonemes": [
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 17,
@@ -4232,7 +4249,8 @@
         "B",
         "IH1",
         "CH"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 18,
@@ -4244,7 +4262,8 @@
       "word_index": 15,
       "phonemes": [
         "AY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 19,
@@ -4258,7 +4277,8 @@
         "W",
         "UH1",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 20,
@@ -4271,7 +4291,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 21,
@@ -4285,7 +4306,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 22,
@@ -4298,7 +4320,8 @@
       "phonemes": [
         "Y",
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 23,
@@ -4311,7 +4334,8 @@
       "phonemes": [
         "OW1",
         "V"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 24,
@@ -4324,7 +4348,8 @@
       "phonemes": [
         "ER0",
         "TH"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 25,
@@ -4338,7 +4363,8 @@
         "IH2",
         "NG",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 26,
@@ -4351,7 +4377,8 @@
       "phonemes": [
         "AO1",
         "L"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 27,
@@ -4365,7 +4392,8 @@
         "W",
         "EY2",
         "Z"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 28,
@@ -4378,7 +4406,8 @@
       "phonemes": [
         "S",
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 29,
@@ -4391,7 +4420,8 @@
       "phonemes": [
         "IY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 30,
@@ -4405,7 +4435,8 @@
         "K",
         "R",
         "IH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 31,
@@ -4419,7 +4450,8 @@
         "T",
         "IH0",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 32,
@@ -4433,7 +4465,8 @@
         "AH0",
         "L",
         "IY0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 33,
@@ -4445,7 +4478,8 @@
       "word_index": 24,
       "phonemes": [
         "AY1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 34,
@@ -4459,7 +4493,8 @@
         "SH",
         "UH1",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 35,
@@ -4472,7 +4507,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 36,
@@ -4486,7 +4522,8 @@
         "DH",
         "AE1",
         "T"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 37,
@@ -4500,7 +4537,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 38,
@@ -4513,7 +4551,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 39,
@@ -4527,7 +4566,8 @@
         "G",
         "UH1",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 40,
@@ -4541,7 +4581,8 @@
         "F",
         "AO1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 41,
@@ -4553,7 +4594,8 @@
       "word_index": 32,
       "phonemes": [
         "M"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 42,
@@ -4565,7 +4607,8 @@
       "word_index": 32,
       "phonemes": [
         "IY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 43,
@@ -4575,7 +4618,8 @@
       "note_name": "E4",
       "lyric_word": "me.",
       "word_index": 32,
-      "phonemes": []
+      "phonemes": [],
+      "phrase_break_before": false
     },
     {
       "index": 44,
@@ -4590,7 +4634,8 @@
         "K",
         "AA1",
         "Z"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 45,
@@ -4604,7 +4649,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 46,
@@ -4618,7 +4664,8 @@
         "HH",
         "AA1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 47,
@@ -4632,7 +4679,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 48,
@@ -4646,7 +4694,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 49,
@@ -4661,7 +4710,8 @@
         "OW1",
         "L",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 50,
@@ -4675,7 +4725,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 51,
@@ -4689,7 +4740,8 @@
         "Y",
         "EH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 52,
@@ -4703,7 +4755,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 53,
@@ -4717,7 +4770,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 54,
@@ -4730,7 +4784,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 55,
@@ -4744,7 +4799,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 56,
@@ -4757,7 +4813,8 @@
       "phonemes": [
         "IH0",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 57,
@@ -4771,7 +4828,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 58,
@@ -4785,7 +4843,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 59,
@@ -4798,7 +4857,8 @@
       "phonemes": [
         "AW1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 60,
@@ -4812,7 +4872,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 61,
@@ -4825,7 +4886,8 @@
       "phonemes": [
         "AH1",
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 62,
@@ -4839,7 +4901,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 63,
@@ -4853,7 +4916,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 64,
@@ -4865,7 +4929,8 @@
       "word_index": 53,
       "phonemes": [
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 65,
@@ -4878,7 +4943,8 @@
       "phonemes": [
         "AW1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 66,
@@ -4892,7 +4958,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 67,
@@ -4906,7 +4973,8 @@
         "R",
         "AO1",
         "NG"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 68,
@@ -4920,7 +4988,8 @@
         "W",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 69,
@@ -4934,7 +5003,8 @@
         "IH1",
         "T",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 70,
@@ -4948,7 +5018,8 @@
         "R",
         "AY1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 71,
@@ -4962,7 +5033,8 @@
         "IH1",
         "T",
         "S"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 72,
@@ -4977,7 +5049,8 @@
         "L",
         "AE1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 73,
@@ -4991,7 +5064,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 74,
@@ -5005,7 +5079,8 @@
         "IH1",
         "T",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 75,
@@ -5019,7 +5094,8 @@
         "W",
         "AY1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 76,
@@ -5032,7 +5108,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 77,
@@ -5046,7 +5123,8 @@
         "F",
         "AY1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 78,
@@ -5059,7 +5137,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 79,
@@ -5074,7 +5153,8 @@
         "R",
         "EY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 80,
@@ -5087,7 +5167,8 @@
       "phonemes": [
         "AH1",
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 81,
@@ -5100,7 +5181,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 82,
@@ -5114,7 +5196,8 @@
         "K",
         "IH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 83,
@@ -5127,7 +5210,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 84,
@@ -5141,7 +5225,8 @@
         "M",
         "EY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 85,
@@ -5153,7 +5238,8 @@
       "word_index": 73,
       "phonemes": [
         "AH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 86,
@@ -5165,7 +5251,8 @@
       "word_index": 73,
       "phonemes": [
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 87,
@@ -5177,7 +5264,8 @@
       "word_index": 74,
       "phonemes": [
         "Y"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 88,
@@ -5189,7 +5277,8 @@
       "word_index": 74,
       "phonemes": [
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 89,
@@ -5202,7 +5291,8 @@
       "phonemes": [
         "Y",
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 90,
@@ -5217,7 +5307,8 @@
         "OW1",
         "N",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 91,
@@ -5230,7 +5321,8 @@
       "phonemes": [
         "R",
         "IH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 92,
@@ -5243,7 +5335,8 @@
       "phonemes": [
         "L",
         "IY0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 93,
@@ -5256,7 +5349,8 @@
       "phonemes": [
         "W",
         "AA1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 94,
@@ -5269,7 +5363,8 @@
       "phonemes": [
         "N",
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 95,
@@ -5283,7 +5378,8 @@
         "S",
         "T",
         "EY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 96,
@@ -5296,7 +5392,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 97,
@@ -5308,7 +5405,8 @@
       "word_index": 81,
       "phonemes": [
         "Y"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 98,
@@ -5320,7 +5418,8 @@
       "word_index": 81,
       "phonemes": [
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 99,
@@ -5334,7 +5433,8 @@
         "B",
         "AH1",
         "T"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 100,
@@ -5347,7 +5447,8 @@
       "phonemes": [
         "Y",
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 101,
@@ -5362,7 +5463,8 @@
         "OW1",
         "N",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 102,
@@ -5375,7 +5477,8 @@
       "phonemes": [
         "R",
         "IH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 103,
@@ -5388,7 +5491,8 @@
       "phonemes": [
         "L",
         "IY0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 104,
@@ -5401,7 +5505,8 @@
       "phonemes": [
         "W",
         "AA1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 105,
@@ -5414,7 +5519,8 @@
       "phonemes": [
         "N",
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 106,
@@ -5426,7 +5532,8 @@
       "word_index": 87,
       "phonemes": [
         "G"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 107,
@@ -5438,7 +5545,8 @@
       "word_index": 87,
       "phonemes": [
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 108,
@@ -5452,7 +5560,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 109,
@@ -5466,7 +5575,8 @@
         "HH",
         "AA1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 110,
@@ -5480,7 +5590,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 111,
@@ -5494,7 +5605,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 112,
@@ -5509,7 +5621,8 @@
         "OW1",
         "L",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 113,
@@ -5523,7 +5636,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 114,
@@ -5537,7 +5651,8 @@
         "Y",
         "EH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 115,
@@ -5551,7 +5666,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 116,
@@ -5565,7 +5681,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 117,
@@ -5578,7 +5695,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 118,
@@ -5592,7 +5710,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 119,
@@ -5605,7 +5724,8 @@
       "phonemes": [
         "IH0",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 120,
@@ -5619,7 +5739,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 121,
@@ -5633,7 +5754,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 122,
@@ -5646,7 +5768,8 @@
       "phonemes": [
         "AW1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 123,
@@ -5660,7 +5783,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 124,
@@ -5673,7 +5797,8 @@
       "phonemes": [
         "AH1",
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 125,
@@ -5687,7 +5812,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 126,
@@ -5701,7 +5827,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 127,
@@ -5713,7 +5840,8 @@
       "word_index": 107,
       "phonemes": [
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 128,
@@ -5726,7 +5854,8 @@
       "phonemes": [
         "AW1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 129,
@@ -5739,7 +5868,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 130,
@@ -5754,7 +5884,8 @@
         "UW1",
         "Z",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 131,
@@ -5767,7 +5898,8 @@
       "phonemes": [
         "T",
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 132,
@@ -5780,7 +5912,8 @@
       "phonemes": [
         "B",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 133,
@@ -5795,7 +5928,8 @@
         "AH1",
         "S",
         "T"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 134,
@@ -5809,7 +5943,8 @@
         "L",
         "AY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 135,
@@ -5825,7 +5960,8 @@
         "IH1",
         "N",
         "Z"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 136,
@@ -5838,7 +5974,8 @@
       "phonemes": [
         "S",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 137,
@@ -5851,7 +5988,8 @@
       "phonemes": [
         "IH0",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 138,
@@ -5866,7 +6004,8 @@
         "IH1",
         "NG",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 139,
@@ -5879,7 +6018,8 @@
       "phonemes": [
         "DH",
         "AH0"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 140,
@@ -5893,7 +6033,8 @@
         "S",
         "EY1",
         "M"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 141,
@@ -5905,7 +6046,8 @@
       "word_index": 120,
       "phonemes": [
         "EH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 142,
@@ -5917,7 +6059,8 @@
       "word_index": 120,
       "phonemes": [
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 143,
@@ -5931,7 +6074,8 @@
         "ER0",
         "JH",
         "IY0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 144,
@@ -5945,7 +6089,8 @@
         "N",
         "AW1",
         "Z"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 145,
@@ -5957,7 +6102,8 @@
       "word_index": 122,
       "phonemes": [
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 146,
@@ -5971,7 +6117,8 @@
         "D",
         "EH1",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 147,
@@ -5983,7 +6130,8 @@
       "word_index": 124,
       "phonemes": [
         "B"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 148,
@@ -5995,7 +6143,8 @@
       "word_index": 124,
       "phonemes": [
         "AE1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 149,
@@ -6009,7 +6158,8 @@
         "T",
         "ER0",
         "IY0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 150,
@@ -6024,7 +6174,8 @@
         "UW1",
         "Z",
         "D"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 151,
@@ -6037,7 +6188,8 @@
       "phonemes": [
         "T",
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 152,
@@ -6051,7 +6203,8 @@
         "L",
         "AE1",
         "F"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 153,
@@ -6066,7 +6219,8 @@
         "B",
         "AW1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 154,
@@ -6079,7 +6233,8 @@
       "phonemes": [
         "N",
         "AH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 155,
@@ -6093,7 +6248,8 @@
         "TH",
         "IH0",
         "NG"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 156,
@@ -6106,7 +6262,8 @@
       "phonemes": [
         "N",
         "AW1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 157,
@@ -6120,7 +6277,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 158,
@@ -6135,7 +6293,8 @@
         "L",
         "EY1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 159,
@@ -6147,7 +6306,8 @@
       "word_index": 133,
       "phonemes": [
         "B"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 160,
@@ -6159,7 +6319,8 @@
       "word_index": 133,
       "phonemes": [
         "AO1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 161,
@@ -6173,7 +6334,8 @@
         "R",
         "IH0",
         "NG"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 162,
@@ -6185,7 +6347,8 @@
       "word_index": 134,
       "phonemes": [
         "AY1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 163,
@@ -6199,7 +6362,8 @@
         "SH",
         "UH1",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 164,
@@ -6212,7 +6376,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 165,
@@ -6226,7 +6391,8 @@
         "DH",
         "AE1",
         "T"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 166,
@@ -6240,7 +6406,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 167,
@@ -6254,7 +6421,8 @@
         "N",
         "AA1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 168,
@@ -6267,7 +6435,8 @@
       "phonemes": [
         "G",
         "AA1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 169,
@@ -6280,7 +6449,8 @@
       "phonemes": [
         "N",
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 170,
@@ -6292,7 +6462,8 @@
       "word_index": 141,
       "phonemes": [
         "CH"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 171,
@@ -6304,7 +6475,8 @@
       "word_index": 141,
       "phonemes": [
         "EY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 172,
@@ -6316,7 +6488,8 @@
       "word_index": 141,
       "phonemes": [
         "JH"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 173,
@@ -6326,7 +6499,8 @@
       "note_name": "D4",
       "lyric_word": "chage.",
       "word_index": 141,
-      "phonemes": []
+      "phonemes": [],
+      "phrase_break_before": false
     },
     {
       "index": 174,
@@ -6341,7 +6515,8 @@
         "K",
         "AA1",
         "Z"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 175,
@@ -6355,7 +6530,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 176,
@@ -6369,7 +6545,8 @@
         "HH",
         "AA1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 177,
@@ -6383,7 +6560,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 178,
@@ -6397,7 +6575,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 179,
@@ -6412,7 +6591,8 @@
         "OW1",
         "L",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 180,
@@ -6426,7 +6606,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 181,
@@ -6440,7 +6621,8 @@
         "Y",
         "EH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 182,
@@ -6454,7 +6636,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 183,
@@ -6468,7 +6651,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 184,
@@ -6481,7 +6665,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 185,
@@ -6495,7 +6680,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 186,
@@ -6508,7 +6694,8 @@
       "phonemes": [
         "IH0",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 187,
@@ -6522,7 +6709,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 188,
@@ -6536,7 +6724,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 189,
@@ -6549,7 +6738,8 @@
       "phonemes": [
         "AW1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 190,
@@ -6563,7 +6753,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 191,
@@ -6576,7 +6767,8 @@
       "phonemes": [
         "AH1",
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 192,
@@ -6590,7 +6782,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 193,
@@ -6604,7 +6797,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 194,
@@ -6616,7 +6810,8 @@
       "word_index": 162,
       "phonemes": [
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 195,
@@ -6629,7 +6824,8 @@
       "phonemes": [
         "AW1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 196,
@@ -6643,7 +6839,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 197,
@@ -6657,7 +6854,8 @@
         "R",
         "AO1",
         "NG"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 198,
@@ -6671,7 +6869,8 @@
         "W",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 199,
@@ -6685,7 +6884,8 @@
         "IH1",
         "T",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 200,
@@ -6699,7 +6899,8 @@
         "R",
         "AY1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 201,
@@ -6713,7 +6914,8 @@
         "IH1",
         "T",
         "S"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 202,
@@ -6728,7 +6930,8 @@
         "L",
         "AE1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 203,
@@ -6742,7 +6945,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 204,
@@ -6756,7 +6960,8 @@
         "IH1",
         "T",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 205,
@@ -6770,7 +6975,8 @@
         "W",
         "AY1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 206,
@@ -6783,7 +6989,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 207,
@@ -6797,7 +7004,8 @@
         "F",
         "AY1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 208,
@@ -6810,7 +7018,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 209,
@@ -6825,7 +7034,8 @@
         "R",
         "EY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 210,
@@ -6838,7 +7048,8 @@
       "phonemes": [
         "AH1",
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 211,
@@ -6851,7 +7062,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 212,
@@ -6865,7 +7077,8 @@
         "K",
         "IH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 213,
@@ -6878,7 +7091,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 214,
@@ -6892,7 +7106,8 @@
         "M",
         "EY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 215,
@@ -6904,7 +7119,8 @@
       "word_index": 182,
       "phonemes": [
         "AH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 216,
@@ -6916,7 +7132,8 @@
       "word_index": 182,
       "phonemes": [
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 217,
@@ -6928,7 +7145,8 @@
       "word_index": 183,
       "phonemes": [
         "Y"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 218,
@@ -6940,7 +7158,8 @@
       "word_index": 183,
       "phonemes": [
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 219,
@@ -6953,7 +7172,8 @@
       "phonemes": [
         "Y",
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 220,
@@ -6968,7 +7188,8 @@
         "OW1",
         "N",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 221,
@@ -6981,7 +7202,8 @@
       "phonemes": [
         "R",
         "IH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 222,
@@ -6994,7 +7216,8 @@
       "phonemes": [
         "L",
         "IY0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 223,
@@ -7007,7 +7230,8 @@
       "phonemes": [
         "W",
         "AA1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 224,
@@ -7020,7 +7244,8 @@
       "phonemes": [
         "N",
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 225,
@@ -7034,7 +7259,8 @@
         "S",
         "T",
         "EY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 226,
@@ -7047,7 +7273,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 227,
@@ -7059,7 +7286,8 @@
       "word_index": 190,
       "phonemes": [
         "Y"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 228,
@@ -7071,7 +7299,8 @@
       "word_index": 190,
       "phonemes": [
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 229,
@@ -7085,7 +7314,8 @@
         "B",
         "AH1",
         "T"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 230,
@@ -7098,7 +7328,8 @@
       "phonemes": [
         "Y",
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 231,
@@ -7113,7 +7344,8 @@
         "OW1",
         "N",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 232,
@@ -7126,7 +7358,8 @@
       "phonemes": [
         "R",
         "IH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 233,
@@ -7139,7 +7372,8 @@
       "phonemes": [
         "L",
         "IY0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 234,
@@ -7152,7 +7386,8 @@
       "phonemes": [
         "W",
         "AA1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 235,
@@ -7165,7 +7400,8 @@
       "phonemes": [
         "N",
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 236,
@@ -7177,7 +7413,8 @@
       "word_index": 196,
       "phonemes": [
         "G"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 237,
@@ -7189,7 +7426,8 @@
       "word_index": 196,
       "phonemes": [
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 238,
@@ -7203,7 +7441,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 239,
@@ -7217,7 +7456,8 @@
         "HH",
         "AA1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 240,
@@ -7231,7 +7471,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 241,
@@ -7245,7 +7486,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 242,
@@ -7260,7 +7502,8 @@
         "OW1",
         "L",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 243,
@@ -7274,7 +7517,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 244,
@@ -7288,7 +7532,8 @@
         "Y",
         "EH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 245,
@@ -7302,7 +7547,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 246,
@@ -7316,7 +7562,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 247,
@@ -7329,7 +7576,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 248,
@@ -7343,7 +7591,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 249,
@@ -7356,7 +7605,8 @@
       "phonemes": [
         "IH0",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 250,
@@ -7370,7 +7620,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 251,
@@ -7384,7 +7635,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 252,
@@ -7397,7 +7649,8 @@
       "phonemes": [
         "AW1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 253,
@@ -7411,7 +7664,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 254,
@@ -7424,7 +7678,8 @@
       "phonemes": [
         "AH1",
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 255,
@@ -7438,7 +7693,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 256,
@@ -7452,7 +7708,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 257,
@@ -7464,7 +7721,8 @@
       "word_index": 216,
       "phonemes": [
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 258,
@@ -7477,7 +7735,8 @@
       "phonemes": [
         "AW1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 259,
@@ -7491,7 +7750,8 @@
         "S",
         "AH1",
         "M"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 260,
@@ -7505,7 +7765,8 @@
         "W",
         "AH2",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 261,
@@ -7519,7 +7780,8 @@
         "K",
         "AO1",
         "L"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 262,
@@ -7532,7 +7794,8 @@
       "phonemes": [
         "DH",
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 263,
@@ -7545,7 +7808,8 @@
       "phonemes": [
         "D",
         "AA1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 264,
@@ -7559,7 +7823,8 @@
         "K",
         "T",
         "ER0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 265,
@@ -7573,7 +7838,8 @@
         "G",
         "AA1",
         "T"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 266,
@@ -7585,7 +7851,8 @@
       "word_index": 222,
       "phonemes": [
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 267,
@@ -7599,7 +7866,8 @@
         "K",
         "EY1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 268,
@@ -7612,7 +7880,8 @@
       "phonemes": [
         "AH1",
         "V"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 269,
@@ -7624,7 +7893,8 @@
       "word_index": 225,
       "phonemes": [
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 270,
@@ -7638,7 +7908,8 @@
         "L",
         "AH1",
         "V"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 271,
@@ -7651,7 +7922,8 @@
       "phonemes": [
         "B",
         "AY0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 272,
@@ -7664,7 +7936,8 @@
       "phonemes": [
         "P",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 273,
@@ -7677,7 +7950,8 @@
       "phonemes": [
         "L",
         "ER0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 274,
@@ -7692,7 +7966,8 @@
         "T",
         "AH1",
         "K"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 275,
@@ -7705,7 +7980,8 @@
       "phonemes": [
         "AA1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 276,
@@ -7717,7 +7993,8 @@
       "word_index": 230,
       "phonemes": [
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 277,
@@ -7730,7 +8007,8 @@
       "phonemes": [
         "R",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 278,
@@ -7743,7 +8021,8 @@
       "phonemes": [
         "L",
         "ER0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 279,
@@ -7756,7 +8035,8 @@
       "phonemes": [
         "K",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 280,
@@ -7770,7 +8050,8 @@
         "S",
         "T",
         "ER0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 281,
@@ -7785,7 +8066,8 @@
         "AE1",
         "N",
         "T"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 282,
@@ -7799,7 +8081,8 @@
         "G",
         "EH1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 283,
@@ -7812,7 +8095,8 @@
       "phonemes": [
         "AO1",
         "F"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 284,
@@ -7826,7 +8110,8 @@
         "DH",
         "IH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 285,
@@ -7838,7 +8123,8 @@
       "word_index": 237,
       "phonemes": [
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 286,
@@ -7850,7 +8136,8 @@
       "word_index": 237,
       "phonemes": [
         "AY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 287,
@@ -7862,7 +8149,8 @@
       "word_index": 237,
       "phonemes": [
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 288,
@@ -7875,7 +8163,8 @@
       "phonemes": [
         "Y",
         "UW1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 289,
@@ -7890,7 +8179,8 @@
         "EY1",
         "N",
         "JH"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 290,
@@ -7904,7 +8194,8 @@
         "Y",
         "AO1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 291,
@@ -7919,7 +8210,8 @@
         "AY1",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 292,
@@ -7933,7 +8225,8 @@
         "L",
         "AY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 293,
@@ -7945,7 +8238,8 @@
       "word_index": 243,
       "phonemes": [
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 294,
@@ -7959,7 +8253,8 @@
         "G",
         "ER1",
         "L"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 295,
@@ -7973,7 +8268,8 @@
         "CH",
         "EY1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 296,
@@ -7987,7 +8283,8 @@
         "JH",
         "AH0",
         "Z"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 297,
@@ -8003,7 +8300,8 @@
         "OW1",
         "DH",
         "Z"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 298,
@@ -8018,7 +8316,8 @@
         "K",
         "AA1",
         "Z"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 299,
@@ -8032,7 +8331,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 300,
@@ -8046,7 +8346,8 @@
         "HH",
         "AA1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 301,
@@ -8060,7 +8361,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 302,
@@ -8074,7 +8376,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 303,
@@ -8089,7 +8392,8 @@
         "OW1",
         "L",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 304,
@@ -8103,7 +8407,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 305,
@@ -8117,7 +8422,8 @@
         "Y",
         "EH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 306,
@@ -8131,7 +8437,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 307,
@@ -8145,7 +8452,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 308,
@@ -8158,7 +8466,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 309,
@@ -8172,7 +8481,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 310,
@@ -8185,7 +8495,8 @@
       "phonemes": [
         "IH0",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 311,
@@ -8199,7 +8510,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 312,
@@ -8213,7 +8525,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 313,
@@ -8226,7 +8539,8 @@
       "phonemes": [
         "AW1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 314,
@@ -8240,7 +8554,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 315,
@@ -8253,7 +8568,8 @@
       "phonemes": [
         "AH1",
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 316,
@@ -8267,7 +8583,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 317,
@@ -8281,7 +8598,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 318,
@@ -8293,7 +8611,8 @@
       "word_index": 267,
       "phonemes": [
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 319,
@@ -8306,7 +8625,8 @@
       "phonemes": [
         "AW1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 320,
@@ -8320,7 +8640,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 321,
@@ -8334,7 +8655,8 @@
         "R",
         "AO1",
         "NG"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 322,
@@ -8348,7 +8670,8 @@
         "W",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 323,
@@ -8362,7 +8685,8 @@
         "IH1",
         "T",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 324,
@@ -8376,7 +8700,8 @@
         "R",
         "AY1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 325,
@@ -8390,7 +8715,8 @@
         "IH1",
         "T",
         "S"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 326,
@@ -8405,7 +8731,8 @@
         "L",
         "AE1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 327,
@@ -8419,7 +8746,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 328,
@@ -8433,7 +8761,8 @@
         "IH1",
         "T",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 329,
@@ -8447,7 +8776,8 @@
         "W",
         "AY1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 330,
@@ -8460,7 +8790,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 331,
@@ -8474,7 +8805,8 @@
         "F",
         "AY1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 332,
@@ -8487,7 +8819,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 333,
@@ -8502,7 +8835,8 @@
         "R",
         "EY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 334,
@@ -8515,7 +8849,8 @@
       "phonemes": [
         "AH1",
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 335,
@@ -8528,7 +8863,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 336,
@@ -8542,7 +8878,8 @@
         "K",
         "IH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 337,
@@ -8555,7 +8892,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 338,
@@ -8569,7 +8907,8 @@
         "M",
         "EY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 339,
@@ -8581,7 +8920,8 @@
       "word_index": 287,
       "phonemes": [
         "AH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 340,
@@ -8593,7 +8933,8 @@
       "word_index": 287,
       "phonemes": [
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 341,
@@ -8607,7 +8948,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 342,
@@ -8621,7 +8963,8 @@
         "HH",
         "AA1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 343,
@@ -8635,7 +8978,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 344,
@@ -8649,7 +8993,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 345,
@@ -8664,7 +9009,8 @@
         "OW1",
         "L",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 346,
@@ -8678,7 +9024,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 347,
@@ -8692,7 +9039,8 @@
         "Y",
         "EH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 348,
@@ -8706,7 +9054,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 349,
@@ -8720,7 +9069,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 350,
@@ -8733,7 +9083,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 351,
@@ -8747,7 +9098,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 352,
@@ -8760,7 +9112,8 @@
       "phonemes": [
         "IH0",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 353,
@@ -8774,7 +9127,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 354,
@@ -8788,7 +9142,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 355,
@@ -8801,7 +9156,8 @@
       "phonemes": [
         "AW1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 356,
@@ -8815,7 +9171,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 357,
@@ -8828,7 +9185,8 @@
       "phonemes": [
         "AH1",
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 358,
@@ -8842,7 +9200,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 359,
@@ -8856,7 +9215,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 360,
@@ -8868,7 +9228,8 @@
       "word_index": 307,
       "phonemes": [
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 361,
@@ -8881,7 +9242,8 @@
       "phonemes": [
         "AW1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 362,
@@ -8895,7 +9257,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 363,
@@ -8909,7 +9272,8 @@
         "R",
         "AO1",
         "NG"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 364,
@@ -8923,7 +9287,8 @@
         "W",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 365,
@@ -8937,7 +9302,8 @@
         "IH1",
         "T",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 366,
@@ -8951,7 +9317,8 @@
         "R",
         "AY1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 367,
@@ -8965,7 +9332,8 @@
         "IH1",
         "T",
         "S"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 368,
@@ -8980,7 +9348,8 @@
         "L",
         "AE1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 369,
@@ -8994,7 +9363,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 370,
@@ -9008,7 +9378,8 @@
         "IH1",
         "T",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 371,
@@ -9022,7 +9393,8 @@
         "W",
         "AY1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 372,
@@ -9035,7 +9407,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 373,
@@ -9049,7 +9422,8 @@
         "F",
         "AY1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 374,
@@ -9062,7 +9436,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 375,
@@ -9077,7 +9452,8 @@
         "R",
         "EY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 376,
@@ -9090,7 +9466,8 @@
       "phonemes": [
         "AH1",
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 377,
@@ -9103,7 +9480,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 378,
@@ -9117,7 +9495,8 @@
         "K",
         "IH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 379,
@@ -9130,7 +9509,8 @@
       "phonemes": [
         "W",
         "IY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 380,
@@ -9144,7 +9524,8 @@
         "M",
         "EY1",
         "K"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 381,
@@ -9156,7 +9537,8 @@
       "word_index": 327,
       "phonemes": [
         "AH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 382,
@@ -9168,7 +9550,8 @@
       "word_index": 327,
       "phonemes": [
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 383,
@@ -9180,7 +9563,8 @@
       "word_index": 328,
       "phonemes": [
         "Y"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 384,
@@ -9192,7 +9576,8 @@
       "word_index": 328,
       "phonemes": [
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 385,
@@ -9205,7 +9590,8 @@
       "phonemes": [
         "Y",
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 386,
@@ -9220,7 +9606,8 @@
         "OW1",
         "N",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 387,
@@ -9233,7 +9620,8 @@
       "phonemes": [
         "R",
         "IH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 388,
@@ -9246,7 +9634,8 @@
       "phonemes": [
         "L",
         "IY0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 389,
@@ -9259,7 +9648,8 @@
       "phonemes": [
         "W",
         "AA1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 390,
@@ -9272,7 +9662,8 @@
       "phonemes": [
         "N",
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 391,
@@ -9286,7 +9677,8 @@
         "S",
         "T",
         "EY1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 392,
@@ -9299,7 +9691,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 393,
@@ -9311,7 +9704,8 @@
       "word_index": 335,
       "phonemes": [
         "Y"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 394,
@@ -9323,7 +9717,8 @@
       "word_index": 335,
       "phonemes": [
         "UW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 395,
@@ -9336,7 +9731,8 @@
       "phonemes": [
         "Y",
         "UW1"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 396,
@@ -9351,7 +9747,8 @@
         "OW1",
         "N",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 397,
@@ -9364,7 +9761,8 @@
       "phonemes": [
         "R",
         "IH1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 398,
@@ -9377,7 +9775,8 @@
       "phonemes": [
         "L",
         "IY0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 399,
@@ -9390,7 +9789,8 @@
       "phonemes": [
         "W",
         "AA1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 400,
@@ -9403,7 +9803,8 @@
       "phonemes": [
         "N",
         "AH0"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 401,
@@ -9415,7 +9816,8 @@
       "word_index": 340,
       "phonemes": [
         "G"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 402,
@@ -9427,7 +9829,8 @@
       "word_index": 340,
       "phonemes": [
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 403,
@@ -9441,7 +9844,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 404,
@@ -9455,7 +9859,8 @@
         "HH",
         "AA1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 405,
@@ -9469,7 +9874,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 406,
@@ -9483,7 +9889,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 407,
@@ -9498,7 +9905,8 @@
         "OW1",
         "L",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 408,
@@ -9512,7 +9920,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 409,
@@ -9526,7 +9935,8 @@
         "Y",
         "EH1",
         "S"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 410,
@@ -9540,7 +9950,8 @@
         "DH",
         "EH1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 411,
@@ -9554,7 +9965,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 412,
@@ -9567,7 +9979,8 @@
       "phonemes": [
         "N",
         "OW1"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 413,
@@ -9581,7 +9994,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 414,
@@ -9594,7 +10008,8 @@
       "phonemes": [
         "IH0",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 415,
@@ -9608,7 +10023,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 416,
@@ -9622,7 +10038,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 417,
@@ -9635,7 +10052,8 @@
       "phonemes": [
         "AW1",
         "T"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 418,
@@ -9649,7 +10067,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": true
     },
     {
       "index": 419,
@@ -9662,7 +10081,8 @@
       "phonemes": [
         "AH1",
         "P"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 420,
@@ -9676,7 +10096,8 @@
         "AH0",
         "N",
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 421,
@@ -9690,7 +10111,8 @@
         "Y",
         "UH1",
         "R"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 422,
@@ -9702,7 +10124,8 @@
       "word_index": 360,
       "phonemes": [
         "D"
-      ]
+      ],
+      "phrase_break_before": false
     },
     {
       "index": 423,
@@ -9715,7 +10138,8 @@
       "phonemes": [
         "AW1",
         "N"
-      ]
+      ],
+      "phrase_break_before": false
     }
   ]
 }
