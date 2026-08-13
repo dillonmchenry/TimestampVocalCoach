@@ -79,7 +79,7 @@ class GlobalOffsetConfig:
 class HighlightsConfig:
     """Highlight-engine thresholds."""
 
-    cap: int = 15
+    cap: int = 25
     """Maximum highlights returned per performance."""
 
     window_min: int = 4
@@ -90,14 +90,14 @@ class HighlightsConfig:
     pitch_window_max: int = 16
     """Rolling-phrase window size (in notes) for pitch best/struggle highlights."""
 
-    pitch_phrases_per_type: int = 2
+    pitch_phrases_per_type: int = 3
     """How many non-overlapping pitch phrase highlights to surface per type
     (``best_pitch_phrase`` and ``pitch_struggle``)."""
 
-    max_per_type: int = 2
+    max_per_type: int = 3
     """Maximum highlights of any single type in the final capped list."""
 
-    max_per_category: int = 5
+    max_per_category: int = 8
     """Maximum highlights from any single feedback category (pitch, technique,
     alignment, dynamics) in the final list.  Enforced via round-robin so every
     category with candidates gets representation."""
@@ -122,7 +122,7 @@ class HighlightsConfig:
     # Sprint 3: section-level detectors
     # ------------------------------------------------------------------
 
-    section_max_moments: int = 5
+    section_max_moments: int = 8
     """Maximum section-scope moments admitted in the final cap."""
 
     section_min_notes: int = 3
@@ -188,17 +188,17 @@ class HighlightsConfig:
     """Individual notes at or beyond this |median_cents| are surfaced as
     sharp/flat callouts."""
 
-    sharp_flat_note_max: int = 3
+    sharp_flat_note_max: int = 5
     """Maximum sharp/flat single-note callouts emitted."""
 
     # ------------------------------------------------------------------
     # Multiple entrance timing callouts
     # ------------------------------------------------------------------
 
-    entrance_timing_max: int = 2
+    entrance_timing_max: int = 3
     """How many individual late/early entrance notes to surface."""
 
-    max_per_category_alignment: int = 2
+    max_per_category_alignment: int = 3
     """Maximum timing/alignment highlights in the final list.  Overrides
     ``max_per_category`` for the 'alignment' category so that low-value
     per-note timing callouts don't crowd out pitch and expression feedback."""
