@@ -40,6 +40,8 @@ from fastapi.staticfiles import StaticFiles
 
 import time
 
+import numpy as np
+
 from vocal_coach.align_v2 import estimate_global_offset_s, measure_song
 from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH
 from vocal_coach.feedback import generate_performance_summary, rewrite_card_summaries
@@ -318,12 +320,18 @@ def _run_analysis_job(
         if not skip_user_stars:
             try:
                 meta_path = _stars_metadata_for_perf(song_dir, perf_dir, user_audio)
+                # Reuse the NanoPitch F0 already computed in Step 1 so the
+                # student model skips its own RMVPE pass (~190 MB model load).
+                _nanopitch_f0 = np.array(
+                    [f.f0_hz for f in pitch_user.frames], dtype=np.float32
+                )
                 stars_user = run_stars_with_profile(
                     profile=stars_profile,
                     metadata_path=meta_path,
                     save_dir=perf_dir / "stars_out",
                     sample_id=f"{manifest.song_id}__{perf_id}",
                     stars_dir=DEFAULT_STARS_DIR,
+                    nanopitch_f0=_nanopitch_f0,
                 )
                 write_stars_track(stars_user, stars_path)
             except Exception as exc:

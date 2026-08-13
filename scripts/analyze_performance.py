@@ -31,6 +31,8 @@ import sys
 import uuid
 from pathlib import Path
 
+import numpy as np
+
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
@@ -248,6 +250,11 @@ def main() -> int:
         print(
             f"[analyze] stars       : profile={args.stars_profile} -> {save_dir}"
         )
+        # Reuse the NanoPitch F0 already computed in Step 1 so the student
+        # model skips its own RMVPE pass (~190 MB model load).
+        nanopitch_f0 = np.array(
+            [f.f0_hz for f in pitch_user.frames], dtype=np.float32
+        )
         stars_user = run_stars_with_profile(
             profile=args.stars_profile,
             metadata_path=meta_path,
@@ -256,6 +263,7 @@ def main() -> int:
             stars_dir=args.stars_dir,
             cuda_visible_devices=args.cuda_visible_devices,
             student_dir=args.student_dir,
+            nanopitch_f0=nanopitch_f0,
         )
         write_stars_track(stars_user, stars_user_path)
         print(

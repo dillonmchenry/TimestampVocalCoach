@@ -487,7 +487,7 @@ def discover_song_clips(songs_dir: Path) -> list[ClipSpec]:
 # Feature extraction (mel + F0 at STARS's frame rate)
 # ---------------------------------------------------------------------------
 
-from vocal_coach.rmvpe_f0 import extract_f0_rmvpe  # noqa: E402
+from vocal_coach.student_runner import _resample_f0_to_student_grid  # noqa: E402
 
 
 def _compute_mel_and_f0(
@@ -501,13 +501,20 @@ def _compute_mel_and_f0(
 ) -> tuple[np.ndarray, np.ndarray]:
     """Return (mel: (T, n_mels) float32 log-mel, f0: (T,) float32 Hz).
 
-    F0 is extracted with RMVPE (GPU-accelerated neural pitch estimator) so
-    that the training feature matches exactly what ``student_runner`` uses at
-    inference time.  RMVPE replaces the previous ``librosa.pyin`` call which
-    was accurate but extremely slow (CPU-only, O(n × candidates × states)).
+    F0 is extracted with NanoPitch (resampled to the student grid) so that the
+    training feature matches what ``student_runner`` now uses at inference time.
+    NanoPitch was trained on RMVPE labels and runs ~orders-of-magnitude faster
+    than RMVPE, making corpus export substantially quicker.
+
+    ``extract_f0`` handles all NanoPitch path defaults and returns a
+    ``PitchTrack`` with per-frame F0 in Hz at 10 ms (16 kHz / 160-hop).  We
+    then upsample that onto the student's ~5.33 ms grid.
     """
     import librosa
 
+    from vocal_coach.pitch import extract_f0
+
+    # Student-grid mel (80 bands, 24 kHz / 128-hop) -- used by the model.
     wav, _sr = librosa.load(str(wav_path), sr=sample_rate, mono=True)
     mel_power = librosa.feature.melspectrogram(
         y=wav,
@@ -523,13 +530,15 @@ def _compute_mel_and_f0(
     log_mel = np.log(mel_power + 1e-10).astype(np.float32).T  # (T, n_mels)
     T = log_mel.shape[0]
 
-    f0 = extract_f0_rmvpe(
-        wav,
-        sample_rate=sample_rate,
-        hop_length=hop_length,
-        n_frames=T,
-        device=device,
-    )
+    # NanoPitch F0 at 10 ms / 16 kHz.  extract_f0 handles default checkpoint
+    # path resolution.  The model is re-loaded each call (no cache yet), so
+    # batch export is slower per-clip than inference, but still far faster than
+    # RMVPE was for a corpus of this size.
+    pitch_track = extract_f0(wav_path, device=device)
+    np_f0 = np.array([f.f0_hz for f in pitch_track.frames], dtype=np.float32)
+
+    # Upsample from NanoPitch 10 ms grid to student ~5.33 ms grid.
+    f0 = _resample_f0_to_student_grid(np_f0, T)
 
     return log_mel, f0
 
@@ -722,7 +731,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument(
         "--device",
         default="cuda",
-        help="Torch device for RMVPE F0 extraction (default: cuda).",
+        help="Torch device for NanoPitch F0 extraction (default: cuda).",
     )
     p.add_argument(
         "--dry-run",

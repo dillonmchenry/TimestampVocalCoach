@@ -35,6 +35,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 
+import numpy as np
+
 from vocal_coach.schemas import (
     STARS_TECH_NAMES,
     StarsMetadataEntry,
@@ -322,6 +324,7 @@ def run_stars_with_profile(
     student_dir: Optional[Path] = None,
     student_device: Optional[str] = None,
     fallback_to_full: bool = True,
+    nanopitch_f0: Optional[np.ndarray] = None,
 ) -> StarsTrack:
     """Dispatch between the teacher subprocess and the distilled student.
 
@@ -330,6 +333,11 @@ def run_stars_with_profile(
     ``StarsTrack`` matching the same schema. When ``fallback_to_full`` is True
     and the student checkpoint is missing we silently fall back to ``full``
     so the demo keeps working before the student has been trained.
+
+    ``nanopitch_f0`` is an optional float32 array of F0 in Hz (0 = unvoiced)
+    at the NanoPitch 10 ms grid (16 kHz / 160-hop).  When provided and
+    ``profile="fast"``, it is passed to the student runner so RMVPE is skipped.
+    Ignored for ``profile="full"`` (the teacher subprocess manages its own F0).
     """
     profile = (profile or STARS_PROFILE_FULL).lower()
     if profile not in STARS_PROFILES:
@@ -361,6 +369,7 @@ def run_stars_with_profile(
                     item_name=item_name,
                     student_dir=sdir,
                     device=student_device or ("cuda" if cuda_visible_devices else "cpu"),
+                    nanopitch_f0=nanopitch_f0,
                 )
             except FileNotFoundError as exc:
                 if not fallback_to_full:

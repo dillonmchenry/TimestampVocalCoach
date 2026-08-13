@@ -1012,6 +1012,8 @@ function renderSectionFocusedRibbon(section) {
   band.style.width = "100%";
   band.title = section.name;
   band.innerHTML = `<span class="section-band-label">${section.name}</span>`;
+  band.title = "Back to full song";
+  band.addEventListener("click", () => clearSectionFocus().catch(console.error));
   sectionRibbon.appendChild(band);
 }
 

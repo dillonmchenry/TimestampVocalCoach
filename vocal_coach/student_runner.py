@@ -119,6 +119,49 @@ def load_student(
 
 
 # ---------------------------------------------------------------------------
+# F0 grid resampling
+# ---------------------------------------------------------------------------
+
+
+def _resample_f0_to_student_grid(
+    f0_10ms: np.ndarray,
+    n_target_frames: int,
+    source_hop_s: float = 0.01,
+    target_hop_s: float = 128 / 24000,
+) -> np.ndarray:
+    """Upsample NanoPitch F0 (10 ms grid) to the student model grid (~5.33 ms).
+
+    Uses linear interpolation on voiced regions only.  Unvoiced frames
+    (f0 == 0) are propagated by nearest-source-frame lookup so that voiced/
+    unvoiced transitions are preserved rather than smoothed across.
+
+    Args:
+        f0_10ms:         NanoPitch F0 array, shape ``(N,)``, Hz, 0 = unvoiced.
+        n_target_frames: Number of student-grid frames (must equal mel.shape[0]).
+        source_hop_s:    NanoPitch hop in seconds (default 10 ms).
+        target_hop_s:    Student hop in seconds (default 128/24000 ≈ 5.33 ms).
+
+    Returns:
+        float32 array of shape ``(n_target_frames,)``, Hz, 0 = unvoiced.
+    """
+    source_times = np.arange(len(f0_10ms), dtype=np.float64) * source_hop_s
+    target_times = np.arange(n_target_frames, dtype=np.float64) * target_hop_s
+
+    f0_interp = np.interp(target_times, source_times, f0_10ms.astype(np.float64))
+
+    # Re-apply voicing: a target frame is unvoiced if its nearest source frame
+    # was unvoiced, so we don't linearly interpolate across voiced/unvoiced gaps.
+    source_indices = np.clip(
+        np.round(target_times / source_hop_s).astype(int),
+        0,
+        len(f0_10ms) - 1,
+    )
+    f0_interp[f0_10ms[source_indices] == 0.0] = 0.0
+
+    return f0_interp.astype(np.float32)
+
+
+# ---------------------------------------------------------------------------
 # Feature extraction (must match scripts/export_student_dataset.py)
 # ---------------------------------------------------------------------------
 
@@ -131,19 +174,23 @@ def _compute_features(
     n_mels: int = 80,
     n_fft: int = 512,
     device: str = "cuda",
+    nanopitch_f0: Optional[np.ndarray] = None,
 ) -> tuple[np.ndarray, np.ndarray]:
     """Return ``(mel: (T, n_mels) log-mel, f0: (T,) Hz)`` on the student grid.
 
-    F0 is extracted with RMVPE (same as the training corpus), guaranteeing
-    identical feature distributions at train and inference time.  The old
-    ``librosa.pyin`` path caused saturation because its voiced-frame density
-    (~82%) was far higher than NanoPitch (~27%), pushing the technique head out
-    of distribution.  RMVPE is the pitch estimator STARS itself uses internally,
-    so it is both consistent and GPU-accelerated (~12 clips/s).
+    When ``nanopitch_f0`` is provided (a NanoPitch F0 array at 10 ms / 16 kHz),
+    it is resampled onto the student grid instead of running RMVPE.  This
+    eliminates the ~190 MB RMVPE model load and GPU inference pass during
+    interactive analysis.
+
+    When ``nanopitch_f0`` is None (training corpus export, eval scripts, or
+    callers that don't have a pre-computed F0), RMVPE is used as before so the
+    feature distribution is identical to what the current checkpoint was trained
+    on.  After retraining on NanoPitch F0 (via the updated
+    export_student_dataset.py), passing NanoPitch F0 here will be the primary
+    path at both train and inference time.
     """
     import librosa
-
-    from vocal_coach.rmvpe_f0 import extract_f0_rmvpe
 
     wav, _sr = librosa.load(str(wav_path), sr=sample_rate, mono=True)
     mel_power = librosa.feature.melspectrogram(
@@ -160,13 +207,18 @@ def _compute_features(
     log_mel = np.log(mel_power + 1e-10).astype(np.float32).T  # (T, n_mels)
     T = log_mel.shape[0]
 
-    f0 = extract_f0_rmvpe(
-        wav,
-        sample_rate=sample_rate,
-        hop_length=hop_length,
-        n_frames=T,
-        device=device,
-    )
+    if nanopitch_f0 is not None:
+        f0 = _resample_f0_to_student_grid(nanopitch_f0, T)
+    else:
+        from vocal_coach.rmvpe_f0 import extract_f0_rmvpe
+
+        f0 = extract_f0_rmvpe(
+            wav,
+            sample_rate=sample_rate,
+            hop_length=hop_length,
+            n_frames=T,
+            device=device,
+        )
     return log_mel, f0
 
 
@@ -184,14 +236,17 @@ def run_student(
     student_dir: Path = DEFAULT_STUDENT_DIR,
     device: str = "cuda",
     hop_seconds: float = STARS_BILINGUAL_HOP_SECONDS,
+    nanopitch_f0: Optional[np.ndarray] = None,
 ) -> StarsTrack:
     """Run the student on a single audio clip referenced by ``metadata_path``.
 
     Matches the contract of ``vocal_coach.stars_runner.run_stars`` so callers
-    can swap between profiles by changing one function call.  F0 is always
-    extracted with RMVPE so the inference feature is identical to the training
-    feature (``scripts/regen_f0.py`` regenerated the corpus using the same
-    ``vocal_coach.rmvpe_f0`` module).
+    can swap between profiles by changing one function call.
+
+    When ``nanopitch_f0`` is provided (a float32 array of F0 in Hz at 10 ms /
+    16 kHz from NanoPitch), it is resampled to the student grid and used in
+    place of RMVPE, eliminating the heavy RMVPE model load and GPU pass.
+    When omitted, RMVPE is used as the fallback (matches the v6 training corpus).
     """
     raw = json.loads(Path(metadata_path).read_text(encoding="utf-8"))
     if not raw:
@@ -208,7 +263,8 @@ def run_student(
     model, phone_vocab, resolved_device = load_student(student_dir, device=device)
     phone_to_id = {p: i for i, p in enumerate(phone_vocab)}
 
-    mel_np, f0_np = _compute_features(wav_path, device=resolved_device)
+    mel_np, f0_np = _compute_features(wav_path, device=resolved_device,
+                                       nanopitch_f0=nanopitch_f0)
     mel = torch.from_numpy(mel_np).unsqueeze(0).to(resolved_device)
     f0 = torch.from_numpy(f0_np).unsqueeze(0).to(resolved_device)
 
@@ -321,4 +377,5 @@ __all__ = [
     "DEFAULT_STUDENT_DIR",
     "load_student",
     "run_student",
+    "_resample_f0_to_student_grid",
 ]
