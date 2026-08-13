@@ -35,6 +35,7 @@ let highlightList = null;
 let highlightFilters = null;
 const basisFilters = document.getElementById("basisFilters");
 let overviewTiles = null;
+let overviewHeading = null;
 let segmentInfo = null;
 let backToFullSongBtn = null;
 const addPerformanceBar = document.getElementById("addPerformanceBar");
@@ -892,77 +893,186 @@ function renderOverviewTiles(overview, analysis) {
   overviewTiles.innerHTML = "";
   if (!overview) {
     overviewTiles.hidden = true;
+    if (overviewHeading) overviewHeading.hidden = true;
     return;
   }
   overviewTiles.hidden = false;
+  if (overviewHeading) overviewHeading.hidden = false;
 
-  const tiles = [];
+  // Mimic score circle
   if (overview.mimic_score != null) {
-    tiles.push({
-      label: "Mimic score",
-      value: `${overview.mimic_score.toFixed(0)}`,
-      sub: "/ 100",
-      kind: "headline",
-    });
+    overviewTiles.appendChild(_buildMimicTile(overview.mimic_score));
   }
+
+  // Pitch card
   if (overview.pct_in_tune != null) {
-    tiles.push({
-      label: "In tune",
-      value: `${(overview.pct_in_tune * 100).toFixed(0)}%`,
-      sub: `${overview.note_count} notes scored`,
-    });
-  }
-  if (overview.median_cents != null) {
     const med = overview.median_cents;
-    const direction = med < -3 ? "flat" : med > 3 ? "sharp" : "centered";
-    tiles.push({
-      label: "Median pitch",
-      value: `${med >= 0 ? "+" : ""}${med.toFixed(0)}c`,
-      sub: direction,
-    });
+    const pills = [];
+    if (med != null && Math.abs(med) >= 3) {
+      const isSharp = med > 0;
+      pills.push({
+        text: `${isSharp ? "Slightly sharp" : "Slightly flat"} ${isSharp ? "+" : ""}${med.toFixed(0)} cents`,
+        cls: isSharp ? "tile-pill--sharp" : "tile-pill--flat",
+      });
+    }
+    if (overview.octave_shift_semitones) {
+      const semis = overview.octave_shift_semitones;
+      pills.push({ text: `Octave shift: ${semis > 0 ? "+" : ""}${semis} semitones` });
+    }
+    overviewTiles.appendChild(_buildCard({
+      iconClass: "tile-card-icon--pitch",
+      iconSvg: _iconPitch(),
+      name: "Pitch",
+      value: `${(overview.pct_in_tune * 100).toFixed(0)}% in tune`,
+      sub: `${overview.note_count} notes scored`,
+      pills,
+    }));
   }
-  if (overview.octave_shift_semitones) {
-    const semis = overview.octave_shift_semitones;
-    tiles.push({
-      label: "Octave shift",
-      value: `${semis > 0 ? "+" : ""}${semis} semitones`,
-      sub: semis > 0 ? "you sang higher" : "you sang lower",
-    });
-  }
+
+  // Technique card
   if (overview.technique_match_rate != null) {
-    tiles.push({
-      label: "Technique match",
-      value: `${(overview.technique_match_rate * 100).toFixed(0)}%`,
-      sub: "vs reference",
-    });
+    const pct = overview.technique_match_rate * 100;
+    const sub = pct >= 70 ? "Close to the reference"
+      : pct >= 40 ? "Some variation from reference"
+      : "Far from reference";
+    overviewTiles.appendChild(_buildCard({
+      iconClass: "tile-card-icon--tech",
+      iconSvg: _iconTech(),
+      name: "Technique",
+      value: `${pct.toFixed(0)}% match`,
+      sub,
+    }));
   }
-  const strongestSection =
-    overview.strongest_section ?? computeStrongestSection(analysis);
-  if (strongestSection) {
-    tiles.push({
-      label: "Strongest section",
-      value: strongestSection,
-      sub: "pitch · expression · timing",
-    });
-  }
+
+  // Timing card
   if (overview.arrival_offset_ms_mean != null) {
     const ms = overview.arrival_offset_ms_mean;
-    tiles.push({
-      label: "Avg timing",
+    const absMs = Math.abs(ms);
+    const direction = ms >= 0 ? "behind the beat" : "ahead of the beat";
+    const sub = absMs < 30 ? "Very tight timing" : absMs < 80 ? "Just " + direction : direction;
+    overviewTiles.appendChild(_buildCard({
+      iconClass: "tile-card-icon--timing",
+      iconSvg: _iconTiming(),
+      name: "Timing",
       value: `${ms >= 0 ? "+" : ""}${ms.toFixed(0)} ms`,
-      sub: ms >= 0 ? "behind beat" : "ahead of beat",
-    });
+      sub,
+    }));
   }
-  for (const tile of tiles) {
-    const card = document.createElement("div");
-    card.className = `tile ${tile.kind || ""}`;
-    card.innerHTML = `
-      <span class="tile-label">${tile.label}</span>
-      <span class="tile-value">${tile.value}</span>
-      <span class="tile-sub">${tile.sub || ""}</span>
-    `;
-    overviewTiles.appendChild(card);
+
+  // Strongest section card
+  const strongestSection = overview.strongest_section ?? computeStrongestSection(analysis);
+  if (strongestSection) {
+    const tags = _strongestSectionTags(strongestSection, analysis);
+    overviewTiles.appendChild(_buildCard({
+      iconClass: "tile-card-icon--section",
+      iconSvg: _iconSection(),
+      name: "Strongest Section",
+      value: strongestSection,
+      sub: "",
+      pills: tags.map(t => ({ text: t })),
+    }));
   }
+}
+
+function _buildMimicTile(score) {
+  const tier = score <= 25 ? "Beginner"
+    : score <= 50 ? "Developing"
+    : score <= 75 ? "Intermediate"
+    : score <= 90 ? "Advanced"
+    : "Expert";
+  const r = 44;
+  const cx = 56;
+  const cy = 56;
+  const circ = 2 * Math.PI * r;
+  const offset = circ * (1 - score / 100);
+  const tile = document.createElement("div");
+  tile.className = "tile-mimic";
+  tile.innerHTML = `
+    <span class="tile-card-name">Mimic Score</span>
+    <svg width="112" height="112" viewBox="0 0 112 112">
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--border)" stroke-width="8"/>
+      <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="var(--accent)" stroke-width="8"
+        stroke-dasharray="${circ.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"
+        stroke-linecap="round" transform="rotate(-90 ${cx} ${cy})"/>
+      <text x="${cx}" y="${cy - 6}" text-anchor="middle" dominant-baseline="middle"
+        font-size="28" font-weight="700" fill="var(--accent)" font-family="inherit">${score.toFixed(0)}</text>
+      <text x="${cx}" y="${cy + 18}" text-anchor="middle" dominant-baseline="middle"
+        font-size="11" fill="var(--muted)" font-family="inherit">/ 100</text>
+    </svg>
+    <span class="tile-mimic-label">${tier}</span>
+  `;
+  return tile;
+}
+
+function _buildCard({ iconClass, iconSvg, name, value, sub, pills }) {
+  const pillsHtml = pills && pills.length
+    ? `<div class="tile-card-pills">${pills.map(p => `<span class="tile-pill ${p.cls || ""}">${p.text}</span>`).join("")}</div>`
+    : "";
+  const card = document.createElement("div");
+  card.className = "tile-card";
+  card.innerHTML = `
+    <div class="tile-card-header">
+      <div class="tile-card-icon ${iconClass}">${iconSvg}</div>
+      <span class="tile-card-name">${name}</span>
+    </div>
+    <div class="tile-card-value">${value}</div>
+    ${sub ? `<div class="tile-card-sub">${sub}</div>` : ""}
+    ${pillsHtml}
+  `;
+  return card;
+}
+
+function _iconPitch() {
+  return `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--bad)" stroke-width="2" stroke-linecap="round"><path d="M2 10 Q5 4 8 10 Q11 16 14 10"/></svg>`;
+}
+
+function _iconTech() {
+  return `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--good)" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="2,9 6,13 14,4"/></svg>`;
+}
+
+function _iconTiming() {
+  return `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="6"/><polyline points="8,4 8,8 11,10"/></svg>`;
+}
+
+function _iconSection() {
+  return `<svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="var(--accent)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polygon points="8,1.5 10.2,6 15,6.7 11.5,10.1 12.4,15 8,12.6 3.6,15 4.5,10.1 1,6.7 5.8,6"/></svg>`;
+}
+
+function _strongestSectionTags(sectionName, analysis) {
+  if (!analysis) return ["Pitch", "Expression", "Timing"];
+  const section = (analysis.sections || []).find(s => s.name === sectionName);
+  if (!section) return ["Pitch", "Expression", "Timing"];
+
+  const notes = analysis.notes || [];
+  const techniques = analysis.techniques || [];
+  const scores = [];
+
+  if (section.pct_in_tune != null) {
+    scores.push({ label: "Pitch", score: section.pct_in_tune });
+  }
+
+  const secNoteIndices = new Set();
+  for (const n of notes) {
+    const mid = 0.5 * (n.start_s + n.end_s);
+    if (mid >= section.start_s && mid < section.end_s) secNoteIndices.add(n.note_index);
+  }
+  let exprCount = 0;
+  for (const t of techniques) {
+    const hasExpr = (t.matched && t.matched.length) || (t.user_added && t.user_added.length);
+    if (secNoteIndices.has(t.note_index) && hasExpr) exprCount++;
+  }
+  scores.push({ label: "Expression", score: exprCount / Math.max(1, secNoteIndices.size) });
+
+  if (section.arrival_offset_ms_mean != null) {
+    scores.push({ label: "Timing", score: Math.max(0, 1 - Math.abs(section.arrival_offset_ms_mean) / 200) });
+  }
+
+  if (section.rms_delta_db != null) {
+    scores.push({ label: "Volume", score: Math.max(0, 1 - Math.abs(section.rms_delta_db) / 4) });
+  }
+
+  scores.sort((a, b) => b.score - a.score);
+  return scores.slice(0, 3).map(s => s.label);
 }
 
 function renderPerformanceSummary(summary) {
@@ -1370,6 +1480,7 @@ function activateBlock(idx) {
   sectionRibbon      = container.querySelector('[data-role="sectionRibbon"]');
   timelineDiv        = container.querySelector('[data-role="timeline"]');
   overviewTiles      = container.querySelector('[data-role="overviewTiles"]');
+  overviewHeading    = container.querySelector('[data-role="overviewHeading"]');
   highlightList      = container.querySelector('[data-role="highlightList"]');
   segmentInfo        = container.querySelector('[data-role="segmentInfo"]');
   performanceSummaryEl = container.querySelector('[data-role="performanceSummary"]');
@@ -1447,6 +1558,7 @@ function removeBlock(idx) {
     highlightFilters     = null;
     highlightList        = null;
     overviewTiles        = null;
+    overviewHeading      = null;
     segmentInfo          = null;
     performanceSummaryEl = null;
     resultsContainer.hidden = true;
