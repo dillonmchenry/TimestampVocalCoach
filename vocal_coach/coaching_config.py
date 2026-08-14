@@ -43,6 +43,13 @@ class ArrivalConfig:
     pitch_lock_cents: float = 50.0
     pitch_lock_hold_s: float = 0.05
 
+    edge_margin_s: float = 0.020
+    """If the detected arrival time sits within this many seconds of the search
+    window boundary (search_back_s or search_forward_s), treat it as a missed
+    entrance rather than a genuine timing offset.  Values at the window edge
+    almost always mean no real onset was found; keeping them inflates the
+    absolute-offset distribution and can zero out the mimic timing score."""
+
 
 @dataclass
 class CoreWindowConfig:
@@ -236,6 +243,31 @@ class HighlightsConfig:
 
     section_best_overall_min_notes: int = 4
     """Section needs at least this many notes for a blended best/weakest pick."""
+
+    # ------------------------------------------------------------------
+    # Overview mimic-score timing threshold
+    # ------------------------------------------------------------------
+
+    overview_arrival_late_ms: float = 150.0
+    """Full-penalty ceiling (ms) for the arrival-consistency slice of the mimic
+    score.  The median |arrival_offset_ms| is normalised against this value:
+    0 ms → 1.0, overview_arrival_late_ms or more → 0.0.
+
+    Keep this separate from ArrivalConfig.late_ms (50 ms), which is the
+    tagging threshold for "late arrival" coaching moments.  Using 50 ms as a
+    scoring ceiling would zero out any singer who is consistently 50+ ms late,
+    including a perfectly consistent +57 ms take.  150 ms matches the per-note
+    timing graph scale and leaves headroom for human timing variation."""
+
+    # ------------------------------------------------------------------
+    # Overview arrival edge-rejection margin
+    # ------------------------------------------------------------------
+
+    overview_arrival_edge_margin_ms: float = 20.0
+    """Arrival detections within this many milliseconds of the search-window
+    boundaries (search_back_s or search_forward_s) are treated as detector
+    failures and excluded from scoring.  Values at the window edge almost
+    always indicate no real onset was found, not a genuine timing offset."""
 
 
 @dataclass

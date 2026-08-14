@@ -8,6 +8,17 @@ The ``mimic_score`` (0-100) blends:
     - pitch accuracy  (pct_in_tune)              weight 0.60
     - technique match rate                        weight 0.25
     - arrival consistency (low variance = good)   weight 0.15
+
+Arrival consistency is computed as::
+
+    1.0 - median(|arrival_offset_ms|) / arrival_late_ms
+
+using the **median** of absolute per-note offsets (not the mean) so that a
+handful of window-edge detector failures cannot collapse the score for an
+otherwise tight take.  Before the median is computed, notes whose detected
+arrival sits within ``arrival_edge_margin_ms`` of the search-window boundary
+are excluded, as those indicate no real onset was found rather than a genuine
+timing offset of ±200–500 ms.
 """
 
 from __future__ import annotations
@@ -71,7 +82,8 @@ def compute_overview(
     sections: Optional[list[SectionTrend]] = None,
     section_best_overall_min_notes: int = 4,
     octave_shift_semitones: int = 0,
-    arrival_late_ms: float = 80.0,
+    arrival_late_ms: float = 150.0,
+    arrival_edge_margin_ms: float = 20.0,
 ) -> Optional[PerformanceOverview]:
     """Build a ``PerformanceOverview`` from note-level measurements.
 
@@ -79,9 +91,17 @@ def compute_overview(
         notes: Per-note measurements from ``align_v2.measure_song``.
         techniques: Per-note technique comparisons from ``align_v2.measure_song``.
         octave_shift_semitones: Auto-detected integer-semitone register shift.
-        arrival_late_ms: Threshold (ms) used to define "consistent" timing;
-            arrival variance is normalised against this to produce the arrival
-            component of the mimic score.
+        arrival_late_ms: Full-penalty ceiling (ms) for the arrival-consistency
+            component of the mimic score.  The **median** absolute per-note
+            offset is normalised against this: 0 ms → 1.0, arrival_late_ms or
+            more → 0.0.  Default 150 ms matches the per-note timing graph.
+            Note: keep this separate from ``ArrivalConfig.late_ms`` (50 ms),
+            which is the highlight-tagging threshold, not a scoring ceiling.
+        arrival_edge_margin_ms: Per-note arrival offsets whose absolute value
+            sits within this margin of the search-window edge
+            (search_back_s × 1000 or search_forward_s × 1000) are excluded
+            before computing the median.  These almost always represent detector
+            failures (no genuine onset found) rather than real timing offsets.
 
     Returns:
         ``None`` when there are no scoreable notes (pitch track absent, etc.).
@@ -99,15 +119,31 @@ def compute_overview(
     voiced_coverage = _safe_mean([n.voiced_coverage for n in notes]) or 0.0
 
     # --- Arrival stats ---
-    arrival_values = [n.arrival_offset_ms for n in notes if n.arrival_offset_ms is not None]
-    arrival_offset_ms_mean = _safe_mean(arrival_values)
+    # Raw values include all measured onsets (positive = late, negative = early).
+    arrival_values_raw = [n.arrival_offset_ms for n in notes if n.arrival_offset_ms is not None]
+    arrival_offset_ms_mean = _safe_mean(arrival_values_raw)
 
-    # Arrival consistency: 1.0 = perfectly on time, 0.0 = all notes maximally late.
+    # Filter out window-edge detections before scoring.  The onset detector
+    # searches [-search_back, +search_forward] and will return the nearest
+    # rising edge even when no genuine onset exists; those detections cluster
+    # at ~±(search_back*1000) or ~+(search_forward*1000) ms.  Exclude any
+    # measurement whose absolute value is within arrival_edge_margin_ms of
+    # either boundary (using the default search window from ArrivalConfig).
+    _SEARCH_BACK_MS  = 200.0   # = ArrivalConfig.search_back_s  * 1000
+    _SEARCH_FWD_MS   = 500.0   # = ArrivalConfig.search_forward_s * 1000
+    arrival_values = [
+        v for v in arrival_values_raw
+        if not (abs(abs(v) - _SEARCH_BACK_MS) <= arrival_edge_margin_ms
+                or abs(abs(v) - _SEARCH_FWD_MS) <= arrival_edge_margin_ms)
+    ]
+
+    # Arrival consistency: 1.0 = perfectly on time, 0.0 = median offset >= ceiling.
+    # Use the MEDIAN of |offset| so a handful of outliers cannot collapse the score.
     arrival_consistency: Optional[float] = None
     if arrival_values:
-        mean_abs = statistics.mean(abs(v) for v in arrival_values)
-        # Normalise: 0 ms late -> 1.0; arrival_late_ms or more -> 0.0, clamped.
-        arrival_consistency = max(0.0, 1.0 - mean_abs / max(1.0, arrival_late_ms))
+        median_abs = statistics.median(abs(v) for v in arrival_values)
+        # Normalise: 0 ms → 1.0; arrival_late_ms or more → 0.0, clamped.
+        arrival_consistency = max(0.0, 1.0 - median_abs / max(1.0, arrival_late_ms))
 
     # --- Technique stats ---
     total_ref = 0
@@ -161,6 +197,7 @@ def compute_overview(
         octave_shift_semitones=octave_shift_semitones,
         voiced_coverage=voiced_coverage,
         arrival_offset_ms_mean=arrival_offset_ms_mean,
+        arrival_consistency=arrival_consistency,
         expressive_density=expressive_density,
         technique_match_rate=technique_match_rate,
         mimic_score=mimic_score,

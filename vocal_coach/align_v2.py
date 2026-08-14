@@ -477,7 +477,12 @@ def _arrival_via_voicing(
     *,
     config: CoachingConfig,
 ) -> Optional[float]:
-    """Onset-mode arrival: voicing rising edge near ``expected_onset``."""
+    """Onset-mode arrival: voicing rising edge near ``expected_onset``.
+
+    Returns ``None`` when no rising edge is found **or** when the best
+    candidate sits within ``cfg.edge_margin_s`` of the search-window boundary,
+    which almost always means no genuine onset was present in the window.
+    """
     cfg = config.arrival
     voicing_thr = config.pitch.voicing_threshold
     search = (pitch.times >= expected_onset - cfg.search_back_s) & (
@@ -503,7 +508,17 @@ def _arrival_via_voicing(
     if not rising:
         return None
     best = min(rising, key=lambda i: abs(pitch.times[i] - expected_onset))
-    return float(pitch.times[best])
+    arrival_t = float(pitch.times[best])
+
+    # Reject detections that land within edge_margin_s of either search boundary.
+    # Those indicate the detector reached the window limit without finding a clean
+    # onset; the resulting offset (≈ ±search_back/forward) is not a real latency.
+    delta = arrival_t - expected_onset
+    if delta <= -(cfg.search_back_s - cfg.edge_margin_s):
+        return None
+    if delta >= (cfg.search_forward_s - cfg.edge_margin_s):
+        return None
+    return arrival_t
 
 
 def _arrival_via_pitch_lock(
@@ -518,6 +533,9 @@ def _arrival_via_pitch_lock(
 
     ``cents`` is octave-folded so the pitch-lock check is octave-invariant
     around ``note.midi_pitch + octave_shift_semitones``.
+
+    Returns ``None`` when no pitch-lock is found **or** when the first locked
+    frame sits within ``cfg.edge_margin_s`` of the search-window boundary.
     """
     cfg = config.arrival
     voicing_thr = config.pitch.voicing_threshold
@@ -544,7 +562,14 @@ def _arrival_via_pitch_lock(
         if end > last_idx + 1:
             break
         if on_pitch[i:end].all():
-            return float(pitch.times[i])
+            arrival_t = float(pitch.times[i])
+            # Reject detections at the window edge — same logic as voicing mode.
+            delta = arrival_t - expected_onset
+            if delta <= -(cfg.search_back_s - cfg.edge_margin_s):
+                return None
+            if delta >= (cfg.search_forward_s - cfg.edge_margin_s):
+                return None
+            return arrival_t
     return None
 
 

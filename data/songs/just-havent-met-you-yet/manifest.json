@@ -1,0 +1,24 @@
+{
+  "song_id": "just-havent-met-you-yet",
+  "title": "Haven’t Met You Yet",
+  "artist": "Michael Bublé",
+  "language": "English",
+  "source_format": "ultrastar",
+  "chart_path": "song.txt",
+  "reference_vocal_path": "reference_vocal.wav",
+  "instrumental_path": "instrumental.wav",
+  "duration_s": 243.70673469387756,
+  "ultrastar": {
+    "bpm": 245.1,
+    "gap_ms": 17085.0,
+    "audio_ref": "Michael Bublé - Haven’t Met You Yet.mp3",
+    "cover": null,
+    "background": null,
+    "edition": "SingStar Chart Hits",
+    "midi_offset": 0
+  },
+  "reference_pitch_path": "reference/pitch.json",
+  "reference_stars_path": "reference/stars.json",
+  "reference_loudness_path": "reference/loudness.json",
+  "vocal_profile_path": null
+}

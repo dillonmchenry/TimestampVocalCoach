@@ -430,7 +430,8 @@ def _run_analysis_job(
             sections=section_trends,
             section_best_overall_min_notes=cfg.highlights.section_best_overall_min_notes,
             octave_shift_semitones=octave_shift,
-            arrival_late_ms=cfg.arrival.late_ms,
+            arrival_late_ms=cfg.highlights.overview_arrival_late_ms,
+            arrival_edge_margin_ms=cfg.highlights.overview_arrival_edge_margin_ms,
         )
 
         # Sprint 3 Phase B: LLM feedback (card rewriting + performance summary)

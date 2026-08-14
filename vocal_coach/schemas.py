@@ -804,7 +804,16 @@ class PerformanceOverview(BaseModel):
         0.0, description='Mean voiced_coverage across notes.'
     )
     arrival_offset_ms_mean: Optional[float] = Field(
-        None, description='Mean arrival offset (positive = late).'
+        None, description='Signed mean arrival offset across all notes (positive = late).'
+    )
+    arrival_consistency: Optional[float] = Field(
+        None,
+        description=(
+            '0-1 timing consistency score used in the mimic blend: '
+            '1.0 = median |offset| is 0 ms; 0.0 = median |offset| >= arrival_late_ms. '
+            'Window-edge detections are excluded before the median is computed. '
+            'None when no arrival measurements are available.'
+        ),
     )
     expressive_density: float = Field(
         0.0,
@@ -824,7 +833,9 @@ class PerformanceOverview(BaseModel):
         None,
         description=(
             '0-100 blended score = w_pitch * pct_in_tune + w_tech * '
-            'technique_match_rate + w_arrival * arrival_consistency.'
+            'technique_match_rate + w_arrival * arrival_consistency. '
+            'arrival_consistency uses median |offset| normalised against '
+            'overview_arrival_late_ms (150 ms), not the 50 ms highlight threshold.'
         ),
     )
     note_count: int = Field(0, description='Number of scoreable user notes.')

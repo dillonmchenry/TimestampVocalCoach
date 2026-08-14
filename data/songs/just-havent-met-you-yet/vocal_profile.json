@@ -1,0 +1,38 @@
+{
+  "song_id": "just-havent-met-you-yet",
+  "genre_tags": [
+    "Jazz",
+    "Pop",
+    "Swing"
+  ],
+  "vocal_style": "Michael Bublé's vocal approach is characterized by a warm, rich tone and a smooth delivery. He often employs a relaxed phrasing style that allows for expressive nuances while maintaining clarity in his vocal lines.",
+  "key_techniques": [
+    "breath support",
+    "vibrato control",
+    "dynamic contrast",
+    "expressive phrasing"
+  ],
+  "emphasize_highlights": [
+    "best_pitch_phrase",
+    "clean_attack",
+    "high_note_control",
+    "expressive_match"
+  ],
+  "deemphasize_highlights": [
+    "pitch_struggle",
+    "section_weakness",
+    "loud_pitch_instability"
+  ],
+  "highlight_notes": {
+    "best_pitch_phrase": "This section showcases the singer's best pitch accuracy, which is essential for capturing the essence of the song.",
+    "clean_attack": "Bublé's style often involves a clean onset to notes, which contributes to the overall smoothness of his performance.",
+    "high_note_control": "Maintaining control over high notes is crucial in this song, reflecting Bublé's technique and vocal strength.",
+    "expressive_match": "Matching Bublé's expressive techniques enhances the emotional delivery of the song.",
+    "pitch_struggle": "Identifying areas of pitch struggle can help the singer focus on improving their intonation.",
+    "section_weakness": "Noting sections with weak pitch accuracy can guide targeted practice for improvement.",
+    "loud_pitch_instability": "Addressing pitch instability in louder sections is important for maintaining overall vocal integrity."
+  },
+  "coaching_context": "Focus on helping the singer develop a strong breath support system to maintain pitch accuracy throughout the song. Encourage them to pay attention to their dynamic contrasts and expressive phrasing to align with Bublé's style.",
+  "model_used": "gpt-4o-mini",
+  "generated_at": "2026-08-14T04:30:26.083220+00:00"
+}

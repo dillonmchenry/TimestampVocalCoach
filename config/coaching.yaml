@@ -20,6 +20,7 @@ arrival:
   unvoiced_lead_s: 0.05
   pitch_lock_cents: 50.0
   pitch_lock_hold_s: 0.05
+  edge_margin_s: 0.020   # detections within this of the window edge are treated as missed
 
 core_window:
   attack_trim_s: 0.05
@@ -80,6 +81,10 @@ highlights:
   section_dynamic_contrast_min_db: 1.5
   # Blended best/weakest section
   section_best_overall_min_notes: 4
+  # Overview mimic-score timing threshold (separate from arrival.late_ms tagging threshold)
+  overview_arrival_late_ms: 150.0
+  # Arrival detections within this margin of the search-window edge are treated as failures
+  overview_arrival_edge_margin_ms: 20.0
 
 confidence:
   low_threshold: 0.35

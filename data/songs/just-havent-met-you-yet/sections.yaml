@@ -1,0 +1,74 @@
+# Section labels for "Haven't Met You Yet" by Michael Bublé.
+#
+# Times are song-time seconds from the UltraStar chart (BPM=245.1, GAP=17085ms,
+# sec/beat = 60/(245.1*4) ≈ 0.0612). Each boundary is the start of the first
+# lyric of that section (or the previous section's last lyric when an
+# instrumental gap follows). Genius.com labels, with repeats numbered for the
+# UI. The "You might also like" ads in the Genius paste are ignored.
+#
+# GAP was moved from the SingStar original 17770 → 17085 so on-screen lyrics
+# match the reference vocal (calibrated by running the reference through
+# SecondPass; median arrival was +85ms behind the 17000ms GAP).
+#
+# Schema:
+#   sections:
+#     - name: str
+#       start_s: float
+#       end_s: float
+#       kind: optional[str]  # intro|verse|pre_chorus|chorus|bridge|refrain|outro
+#
+# Present at load time this OVERRIDES the auto "Phrase N" sections
+# (vocal_coach/reference.py); no re-import required.
+
+sections:
+  - name: Intro
+    kind: intro
+    start_s: 0.0
+    end_s: 17.085
+  - name: Verse 1
+    kind: verse
+    start_s: 17.085
+    end_s: 32.507
+  - name: Pre-Chorus 1
+    kind: pre_chorus
+    start_s: 32.507
+    end_s: 46.216
+  - name: Chorus 1
+    kind: chorus
+    start_s: 46.216
+    end_s: 71.675
+  - name: Verse 2
+    kind: verse
+    start_s: 71.675
+    end_s: 87.342
+  - name: Pre-Chorus 2
+    kind: pre_chorus
+    start_s: 87.342
+    end_s: 100.990
+  - name: Chorus 2
+    kind: chorus
+    start_s: 100.990
+    end_s: 118.860
+  - name: Bridge 1
+    kind: bridge
+    start_s: 118.860
+    end_s: 134.588
+  - name: Instrumental
+    start_s: 134.588
+    end_s: 151.969
+  - name: Chorus 3
+    kind: chorus
+    start_s: 151.969
+    end_s: 167.881
+  - name: Bridge 2
+    kind: bridge
+    start_s: 167.881
+    end_s: 185.322
+  - name: Chorus 4
+    kind: chorus
+    start_s: 185.322
+    end_s: 207.844
+  - name: Outro
+    kind: outro
+    start_s: 207.844
+    end_s: 243.70673469387756
