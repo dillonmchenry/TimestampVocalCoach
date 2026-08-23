@@ -39,8 +39,9 @@ entries:
     practice_tip: >
       Isolate the two most out-of-tune notes. Sing each in isolation on a sustained 'ah',
       targeting the pitch with your inner ear before you produce sound. Then chain them back
-      into the phrase. Alternatively, lip-trill or straw-phonate through the phrase to let
-      the pitch lock without muscular effort, then transition to open vowels on the same notes.
+      into the phrase. Alternatively, lip-trill (motorboat lips) or hum gently through a
+      drinking straw to let the pitch settle without muscular effort, then transition to open
+      vowels on the same notes.
 
   - detector: sharp_flat_note
     pedagogy: >
@@ -55,8 +56,10 @@ entries:
       - "The E4 on 'easy' landed 38 cents flat — that note sits just below your passaggio, where breath pressure tends to drop. Try engaging your support slightly before you arrive on that word."
       - "Your G4 on 'game' was 31 cents sharp. That pitch is right at your bridge; you may be adding chest-voice tension to compensate. Try approaching it in a lighter mix."
     practice_tip: >
-      Sing just that note — sustain it for four beats. Tune it to a reference pitch (piano
-      or tuner app). Once you have it, place it back into the phrase with the same vowel shape.
+      Sing the two notes immediately before the problem note, then land on it — this trains
+      pitch targeting in melodic context rather than in isolation. If the note is still off,
+      hum the interval approach on 'mm' before adding the vowel; the closed position often
+      locks intonation that an open vowel can't find.
 
   - detector: scoop_habit
     pedagogy: >
@@ -198,11 +201,11 @@ entries:
       - "On A4 in the second chorus you're landing 28 cents sharp and about 4 dB louder than your average. That note is at your passaggio — pushing chest voice up there tends to sharpen pitch and increase effort. Try a lighter mix on that note."
       - "The Bb4 on 'yesterday' is coming in 32 cents sharp with elevated volume. That's a flag for registration strain. The note wants to be in a light mix or head voice — the sharp pitch usually resolves when you stop pushing."
     practice_tip: >
-      Sing the strained note on 'ng' (as in 'sing'). The ng position prevents chest pushing.
-      If pitch centres on ng, your registration is the issue. Carry that lighter sensation
-      into the full vowel. If 'ng' alone does not resolve it, try phonating the note through
-      a straw — the back-pressure prevents chest pushing and lets the voice self-organize
-      around the correct register transition.
+      Sing the strained note on 'ng' (as in 'sing'). The ng position naturally prevents
+      over-pushing. If pitch centres on ng, your register choice is the issue — carry that
+      lighter sensation into the full vowel. If 'ng' alone does not resolve it, hum the note
+      gently through a drinking straw; the gentle resistance encourages the voice to find a
+      lighter, more effortless quality on that pitch.
 
   - detector: loud_pitch_instability
     pedagogy: >

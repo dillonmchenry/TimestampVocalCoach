@@ -65,8 +65,74 @@ _NO_TRY_THIS_TYPES: frozenset[str] = frozenset({
     "vibrato_with_support", "expressive_stability",
     "high_note_control", "section_improvement", "dynamic_surge",
     "expressive_match", "expressive_moment",
+    # Volume mismatch — card summary is the actionable info; no exercise adds value
+    "dynamic_drop",
 })
 
+
+# Accessible production instructions for each STARS technique, keyed by the
+# internal technique id.  Used to give concrete, anatomy-free "how to produce
+# this sound" guidance for missed_expression and vocal_texture cards.
+_TECHNIQUE_PRODUCTION_HINTS: dict[str, str] = {
+    "glissando": (
+        "Slide between the two notes like a siren — start on the first pitch and let your voice "
+        "glide smoothly to the next without any steps. Try it on 'wee-oo' first to feel the "
+        "slide, then apply that same connected motion to the actual words."
+    ),
+    "vibrato": (
+        "Sustain a comfortable 'ah' with a relaxed jaw and open throat — vibrato arrives when "
+        "you stop preventing it. If nothing happens, drop your jaw slightly lower and release "
+        "any tongue tension. Don't try to manufacture a wobble; just remove whatever is "
+        "holding the note still."
+    ),
+    "falsetto": (
+        "Think of the voice you'd use to say 'woo-hoo' or imitate an owl — that light, floaty "
+        "sound above your normal speaking range. Start there and gently bring it toward the "
+        "melody note."
+    ),
+    "breathe": (
+        "Whisper the word first, then gradually add just enough voice to be heard — keep that "
+        "airy, sighing quality. Imagine fogging a mirror while you sing."
+    ),
+    "pharyngeal": (
+        "Think of the beginning of a yawn — that open, spacious feeling in the back of your "
+        "mouth. Keep that sensation while singing the phrase. Your voice should sound rounder "
+        "and darker."
+    ),
+    "strong": (
+        "Imagine calling someone across a large room — 'Hey!' — and carry that projected, "
+        "committed sound into the note. The power comes from your core, not from squeezing "
+        "your throat."
+    ),
+    "weak": (
+        "Sing as if someone is sleeping in the next room — present and clear, but gentle. "
+        "Keep your belly engaged; only the volume drops."
+    ),
+    "bubble": (
+        "Start with vocal fry — that low, creaky morning-voice sound — then gently bring "
+        "pitch into it while keeping that textured edge."
+    ),
+    "mixed": (
+        "Say 'nay nay nay' (like a bratty kid) on the target pitch — that nasal buzz naturally "
+        "puts you in a blend of chest and head voice. Once you feel it, open to the song's "
+        "vowel while keeping the buzz behind your nose."
+    ),
+}
+
+# Direction-specific tips for sharp_flat_note.  Flat and sharp notes have
+# different likely causes, so the practice guidance differs.
+_SHARP_FLAT_TIPS: dict[str, str] = {
+    "flat": (
+        "Think the note slightly higher than you expect — aim for the top of the pitch rather "
+        "than the bottom. Firm up your belly support as the note begins; flat notes often trace "
+        "to running out of breath pressure right as the sound starts."
+    ),
+    "sharp": (
+        "Relax your jaw and soften into the note — imagine it sitting lower and more settled "
+        "in your mouth. Back off the effort slightly and let the pitch find its centre rather "
+        "than pushing up to it."
+    ),
+}
 
 # User-facing copy for STARS technique keys (short label + coaching explanation).
 TECH_LABELS: dict[str, str] = {
@@ -3356,9 +3422,23 @@ def select_highlights(
     # Attach practice tips from playbook YAML to eligible moment types.
     # Tips are excluded for timing cards (metronome/strategy-based) and
     # affirming cards (positive reinforcement rather than corrective drills).
+    # For missed_expression and vocal_texture, use a technique-specific
+    # production hint when one is available so the guidance is concrete.
+    # For sharp_flat_note, choose a direction-specific tip (flat vs sharp).
     tips = load_practice_tips(_PLAYBOOKS_DIR)
     for moment in chosen:
-        if moment.type not in _NO_TRY_THIS_TYPES:
+        if moment.type in _NO_TRY_THIS_TYPES:
+            continue
+        tech = moment.detail.get("technique") or (
+            moment.techniques[0] if moment.techniques else None
+        )
+        if moment.type in ("missed_expression", "vocal_texture") and tech:
+            hint = _TECHNIQUE_PRODUCTION_HINTS.get(tech)
+            moment.practice_tip = hint if hint else tips.get(moment.type)
+        elif moment.type == "sharp_flat_note":
+            direction = moment.detail.get("direction", "")
+            moment.practice_tip = _SHARP_FLAT_TIPS.get(direction) or tips.get(moment.type)
+        else:
             moment.practice_tip = tips.get(moment.type)
 
     return HighlightsReport(moments=chosen, cap=cfg.highlights.cap)

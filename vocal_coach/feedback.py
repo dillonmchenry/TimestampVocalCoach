@@ -93,13 +93,24 @@ moment without referencing whether the artist does the same thing. Use the artis
   • Never quote raw values (dB, Hz, ratios, percentages)
 - When a playbook passage is provided, let its coaching register guide your tone.
 
-PRACTICE TIP ENHANCEMENT (optional):
-If a "practice_tip" is provided in the card evidence, you may optionally produce an enhanced
-version that references specific lyrics or notes from this moment when doing so makes the
-exercise more concrete (e.g. "Try sustaining the 'blue' vowel shape on a single pitch for
-four beats"). If the tip is already sufficiently specific, or the lyric context adds nothing
-meaningful, return it unchanged. If no practice_tip is provided, omit the field entirely.
-Do NOT suggest sustaining a note if the note is short or fast — the tip must suit the context.
+PRACTICE TIP REWRITING (required when practice_tip is provided):
+You MUST rewrite the practice_tip to fit the specific musical context of this moment.
+Rules:
+- If the note(s) are short or fast-passing (quick syllables, running notes, or a lyric
+  that implies a brief duration), do NOT suggest sustained practice (holding a note for
+  beats). Instead, suggest targeting the pitch or technique within the melodic phrase
+  context — approaching from the neighbor note, humming the interval, or singing the
+  surrounding notes.
+- If the note(s) are clearly long and sustained, sustain exercises are appropriate.
+- Reference the specific lyric word(s) when it makes the exercise more concrete
+  (e.g. "on the word 'far'" rather than "on that note").
+- Keep the rewritten tip to 1-2 sentences maximum.
+- The tip must describe a physical action the singer can do right now.
+- For comparative or stylistic detectors (feedback_basis "comparative"), you may add
+  one sentence of stylistic awareness after the concrete exercise.
+- NEVER contradict the musical context: do not suggest holding or sustaining a fast note,
+  and do not suggest phrase-level exercises for a single isolated note problem.
+If no practice_tip is provided, omit the field entirely.
 
 RESPONSE FORMAT:
 Return valid JSON with a single key "cards" containing an array. Each element must have:
