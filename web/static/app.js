@@ -33,6 +33,7 @@ let mixRefVocalBtn = null;
 let mixInstrumentalBtn = null;
 let highlightList = null;
 let highlightFilters = null;
+let sectionStoryBanner = null;
 const basisFilters = document.getElementById("basisFilters");
 let overviewTiles = null;
 let overviewHeading = null;
@@ -1368,6 +1369,32 @@ function buildFullWaveform() {
 }
 
 /**
+ * Show the section story banner for the given section name, or hide it.
+ * Stories come from analysis.section_stories (list of SectionStory objects).
+ */
+function updateSectionStoryBanner(sectionName) {
+  if (!sectionStoryBanner) return;
+  // The label cell is the previous sibling element inside the grid.
+  const labelCell = sectionStoryBanner.previousElementSibling;
+  const stories = currentAnalysis?.section_stories ?? [];
+  const story = stories.find(s => s.section_name === sectionName);
+  if (!story) {
+    sectionStoryBanner.hidden = true;
+    if (labelCell) labelCell.hidden = true;
+    return;
+  }
+  const narrative = story.narrative || story.deterministic_summary || "";
+  if (!narrative) {
+    sectionStoryBanner.hidden = true;
+    if (labelCell) labelCell.hidden = true;
+    return;
+  }
+  sectionStoryBanner.innerHTML = `<p class="story-narrative">${narrative}</p>`;
+  sectionStoryBanner.hidden = false;
+  if (labelCell) labelCell.hidden = false;
+}
+
+/**
  * Enter section view: zoom all timeline components to the selected section
  * and filter coaching cards to that section only.
  */
@@ -1395,6 +1422,9 @@ async function setSectionFocus(section) {
   // 6. Filter coaching cards to section
   const reference = await getReferenceAnnotation(currentPlaybackSongId).catch(() => null);
   renderCoachingCards(reference ?? currentReference, currentAnalysis);
+
+  // 7. Show section story banner above cards
+  updateSectionStoryBanner(section.name);
 }
 
 /**
@@ -1423,6 +1453,13 @@ async function clearSectionFocus() {
   // Restore all coaching cards
   const reference = await getReferenceAnnotation(currentPlaybackSongId).catch(() => null);
   renderCoachingCards(reference ?? currentReference, currentAnalysis);
+
+  // Hide section story banner and its label cell
+  if (sectionStoryBanner) {
+    sectionStoryBanner.hidden = true;
+    const labelCell = sectionStoryBanner.previousElementSibling;
+    if (labelCell) labelCell.hidden = true;
+  }
 }
 
 // ---- End section focus helpers -------------------------------------------
@@ -1482,6 +1519,7 @@ function activateBlock(idx) {
   overviewTiles      = container.querySelector('[data-role="overviewTiles"]');
   overviewHeading    = container.querySelector('[data-role="overviewHeading"]');
   highlightList      = container.querySelector('[data-role="highlightList"]');
+  sectionStoryBanner = container.querySelector('[data-role="sectionStoryBanner"]');
   segmentInfo        = container.querySelector('[data-role="segmentInfo"]');
   performanceSummaryEl = container.querySelector('[data-role="performanceSummary"]');
   // Playback bar buttons are now per-block (inside the template)
@@ -1557,6 +1595,7 @@ function removeBlock(idx) {
     backToFullSongBtn    = null;
     highlightFilters     = null;
     highlightList        = null;
+    sectionStoryBanner   = null;
     overviewTiles        = null;
     overviewHeading      = null;
     segmentInfo          = null;

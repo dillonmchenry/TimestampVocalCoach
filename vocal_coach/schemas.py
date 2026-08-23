@@ -904,6 +904,14 @@ class PerformanceAnalysis(BaseModel):
             'None when no scoreable notes were measured.'
         ),
     )
+    section_stories: list["SectionStory"] = Field(
+        default_factory=list,
+        description=(
+            'Per-section narrative summaries shown as a banner above the granular '
+            'coaching cards when the user focuses a section. Separate from '
+            'highlights.moments — never mixed into the flat card list.'
+        ),
+    )
     performance_summary: Optional["PerformanceSummary"] = Field(
         None,
         description=(
@@ -982,6 +990,51 @@ class VocalProfile(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Final sprint: per-section story (drill-down UX)
+# ---------------------------------------------------------------------------
+
+
+class SectionStory(BaseModel):
+    """Narrative summary for one song section, shown as a banner above the
+    granular coaching cards when the user focuses that section.
+
+    Separate from ``CoachingMoment`` — stories live in
+    ``PerformanceAnalysis.section_stories`` and are never mixed into the
+    flat highlights list.  The ``narrative`` field is an LLM-rewritten
+    2-3 sentence comparative assessment grounded in the reference artist;
+    ``deterministic_summary`` is the template fallback used when the LLM is
+    unavailable.
+    """
+
+    section_name: str = Field(..., description='Section name, e.g. "Verse 1" or "Chorus".')
+    section_kind: Optional[str] = Field(
+        None, description='Section kind tag, e.g. "verse", "chorus", "bridge".'
+    )
+    start_s: float = Field(..., description='Section start time in song seconds.')
+    end_s: float = Field(..., description='Section end time in song seconds.')
+    narrative: str = Field(
+        "",
+        description=(
+            'Primary user-facing narrative: 2-3 sentences comparing the user\'s '
+            'performance in this section to the reference artist. LLM-generated '
+            'when available; falls back to deterministic_summary.'
+        ),
+    )
+    deterministic_summary: str = Field(
+        "",
+        description='Template-based fallback summary built from aggregate metrics.',
+    )
+    dimensions: dict = Field(
+        default_factory=dict,
+        description=(
+            'Structured metrics for this section: pct_in_tune, median_cents, '
+            'technique_match_pct, rms_delta_db, arrival_offset_ms_mean, '
+            'standout_techniques (list of technique names user matched/missed).'
+        ),
+    )
+
+
+# ---------------------------------------------------------------------------
 # Sprint 3 Phase B: LLM-generated performance summary
 # ---------------------------------------------------------------------------
 
@@ -1024,5 +1077,5 @@ class PerformanceSummary(BaseModel):
     )
 
 
-# Resolve the forward reference on PerformanceAnalysis now that PerformanceSummary is defined.
+# Resolve forward references now that SectionStory and PerformanceSummary are defined.
 PerformanceAnalysis.model_rebuild()

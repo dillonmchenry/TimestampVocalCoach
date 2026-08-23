@@ -43,6 +43,7 @@ from vocal_coach.schemas import (
     NoteTechniqueComparison,
     ReferenceAnnotation,
     ReferenceNote,
+    SectionStory,
     SectionTrend,
 )
 
@@ -712,18 +713,36 @@ def detect_expressive_moment(
             prev = best_by_tech.get(tech)
             if prev is None or score > prev[0]:
                 best_by_tech[tech] = (score, start, end, count)
+    # Track whether the window was purely user_added (no matched notes with ref).
+    matched_count_by_tech: dict[str, int] = {}
+    for start, end in _windowed_indices(len(notes), cfg.window_min, cfg.window_max):
+        for tech in expressive:
+            m = sum(1 for i in range(start, end) if tech in techniques[i].matched)
+            if m > 0:
+                prev = matched_count_by_tech.get(tech, 0)
+                matched_count_by_tech[tech] = max(prev, m)
+
     out: list[CoachingMoment] = []
     for tech, (score, s, e, count) in sorted(best_by_tech.items(), key=lambda t: t[1][0], reverse=True):
         start_s, end_s, idxs = _phrase_window_for_note(reference, notes, s, e)
+        user_only = matched_count_by_tech.get(tech, 0) == 0
+        if user_only:
+            # User added a technique the reference doesn't use here; frame comparatively.
+            summary = (
+                f"You added {_hint(tech)} on {count} of {e - s} notes here — "
+                "a different stylistic choice from the artist's take."
+            )
+        else:
+            summary = (
+                f"You brought {_hint(tech)} on {count} of {e - s} notes here, "
+                "matching the artist's expressive approach."
+            )
         out.append(
             CoachingMoment(
                 id=f"expressive_moment:{tech}:{idxs[0]}-{idxs[-1]}",
                 type="expressive_moment",
                 title=f"Strong {_label(tech)}",
-                summary=(
-                    f"You brought {_hint(tech)} on {count} of {e - s} notes here — "
-                    "nice expressive choice."
-                ),
+                summary=summary,
                 start_s=start_s,
                 end_s=end_s,
                 score=score,
@@ -733,6 +752,7 @@ def detect_expressive_moment(
                     "technique": tech,
                     "user_note_count": count,
                     "window_size": e - s,
+                    "user_only": user_only,
                     "section": _section_for(reference, 0.5 * (start_s + end_s)),
                 },
             )
@@ -2935,7 +2955,7 @@ MOMENT_CATEGORY: dict[str, str] = {
 MOMENT_FEEDBACK_BASIS: dict[str, str] = {
     # Existing
     "best_pitch_phrase":        "absolute",
-    "pitch_struggle":           "absolute",
+    "pitch_struggle":           "comparative",   # "vs the artist's clean delivery here"
     "sharp_flat_note":          "absolute",
     "late_entrance":            "absolute",
     "timing_consistency":       "absolute",
@@ -2943,20 +2963,20 @@ MOMENT_FEEDBACK_BASIS: dict[str, str] = {
     "fade_within_notes":        "absolute",
     "dynamic_drop":             "absolute",
     "dynamic_surge":            "absolute",
-    "section_strength":         "absolute",
-    "section_weakness":         "absolute",
-    "best_overall_section":     "absolute",
-    "weakest_overall_section":  "absolute",
+    "section_strength":         "comparative",   # framed relative to what the song demands
+    "section_weakness":         "comparative",
+    "best_overall_section":     "comparative",
+    "weakest_overall_section":  "comparative",
     "section_dynamic_contrast": "absolute",
     "expressive_match":         "comparative",
     "expressive_moment":        "comparative",
     "missed_expression":        "comparative",
     "vocal_texture":            "comparative",
-    # Sprint 2: continuous pitch (dual defaults to absolute)
-    "scoop_habit":              "absolute",
-    "pitch_overshoot":          "absolute",
+    # Sprint 2: continuous pitch (dual defaults shifted to comparative)
+    "scoop_habit":              "comparative",   # "artist scoops/doesn't scoop here"
+    "pitch_overshoot":          "comparative",
     "clean_attack":             "absolute",
-    "falling_release":          "absolute",
+    "falling_release":          "comparative",   # "artist sustains where you released"
     "steady_sustain":           "absolute",
     "pitch_instability":        "absolute",
     "vibrato_quality":          "absolute",
@@ -2970,7 +2990,7 @@ MOMENT_FEEDBACK_BASIS: dict[str, str] = {
     "sforzando_attack":         "absolute",
     "note_crescendo":           "absolute",
     "note_swell":               "comparative",
-    "support_fade":             "absolute",
+    "support_fade":             "comparative",   # "artist sustains, your support faded"
     "dynamic_sustain":          "absolute",
     "release_cutoff":           "absolute",
     # Sprint 2: cross-dimensional
@@ -3297,6 +3317,13 @@ def select_highlights(
         m.confidence = _tier_from_strength(strength, low_t, med_t)
         m.detail["evidence_strength"] = round(strength, 3)
 
+    # Comparative boost: reference-grounded moments win selection slots.
+    _comp_boost = getattr(cfg.highlights, "comparative_boost", 1.3)
+    if _comp_boost != 1.0:
+        for m in candidates:
+            if m.feedback_basis == "comparative":
+                m.score *= _comp_boost
+
     # ── Sprint 3: vocal profile emphasis weighting ────────────────────────
     if vocal_profile is not None:
         emphasize = set(getattr(vocal_profile, "emphasize_highlights", []))
@@ -3335,6 +3362,186 @@ def select_highlights(
             moment.practice_tip = tips.get(moment.type)
 
     return HighlightsReport(moments=chosen, cap=cfg.highlights.cap)
+
+
+# ---------------------------------------------------------------------------
+# Section story generation (drill-down UX)
+# ---------------------------------------------------------------------------
+
+
+def _classify_pitch_quality(pct_in_tune: Optional[float], median_cents: Optional[float]) -> str:
+    """Return a plain-language pitch quality phrase for a section."""
+    if pct_in_tune is None:
+        return "pitch accuracy wasn't measured"
+    if pct_in_tune >= 0.75:
+        quality = "held the pitch well"
+    elif pct_in_tune >= 0.55:
+        quality = "had mixed pitch accuracy"
+    elif pct_in_tune >= 0.35:
+        quality = "struggled with pitch"
+    else:
+        quality = "had significant pitch difficulties"
+
+    if median_cents is not None and abs(median_cents) >= 20:
+        direction = "flat" if median_cents < 0 else "sharp"
+        quality += f" with a tendency to run {direction}"
+    return quality
+
+
+def _classify_technique_match(
+    section: SectionTrend,
+    notes: list[NoteMeasurementV2],
+    techniques: list[NoteTechniqueComparison],
+) -> tuple[str, list[str], list[str], Optional[float]]:
+    """Return (phrase, matched_techs, missed_techs, match_pct) for the section."""
+    section_note_indices: set[int] = {
+        n.note_index
+        for n in notes
+        if section.start_s <= 0.5 * (n.start_s + n.end_s) < section.end_s
+    }
+    if not section_note_indices:
+        return "technique matching wasn't measured", [], [], None
+
+    total_ref = 0
+    total_matched = 0
+    tech_matched: dict[str, int] = {}
+    tech_missed: dict[str, int] = {}
+
+    for t in techniques:
+        if t.note_index not in section_note_indices:
+            continue
+        total_ref += len(t.reference_techniques)
+        total_matched += len(t.matched)
+        for tech in t.matched:
+            tech_matched[tech] = tech_matched.get(tech, 0) + 1
+        for tech in t.missed:
+            tech_missed[tech] = tech_missed.get(tech, 0) + 1
+
+    match_pct = total_matched / total_ref if total_ref > 0 else None
+
+    # Top matched and missed techniques by count, filtered to expressive set.
+    expressive = {"vibrato", "glissando", "falsetto", "breathe", "pharyngeal", "mixed"}
+    top_matched = sorted(
+        [t for t in tech_matched if t in expressive],
+        key=lambda t: tech_matched[t], reverse=True,
+    )[:2]
+    top_missed = sorted(
+        [t for t in tech_missed if t in expressive],
+        key=lambda t: tech_missed[t], reverse=True,
+    )[:2]
+
+    if match_pct is None:
+        phrase = "the reference has no expressive techniques flagged here"
+    elif top_matched and top_missed:
+        matched_str = " and ".join(_label(t) for t in top_matched)
+        missed_str = " and ".join(_label(t) for t in top_missed)
+        phrase = f"matched the {matched_str} but dropped the {missed_str} the artist uses"
+    elif top_matched:
+        matched_str = " and ".join(_label(t) for t in top_matched)
+        phrase = f"matched the artist's {matched_str}"
+    elif top_missed:
+        missed_str = " and ".join(_label(t) for t in top_missed)
+        phrase = f"dropped the {missed_str} the artist uses here"
+    elif match_pct is not None and match_pct >= 0.6:
+        phrase = "matched the artist's expressive choices well"
+    elif match_pct is not None and match_pct < 0.3:
+        phrase = "took a different expressive approach than the artist"
+    else:
+        phrase = "partially matched the artist's expressiveness"
+
+    return phrase, top_matched, top_missed, match_pct
+
+
+def _classify_dynamics(rms_delta_db: Optional[float]) -> str:
+    """Return a plain-language dynamics note vs the reference."""
+    if rms_delta_db is None:
+        return ""
+    if rms_delta_db <= -3.0:
+        return "Your dynamics were noticeably quieter than the original."
+    if rms_delta_db >= 3.0:
+        return "Your dynamics were noticeably louder than the original."
+    if rms_delta_db <= -1.5:
+        return "Your dynamics were slightly softer than the original."
+    if rms_delta_db >= 1.5:
+        return "Your dynamics were slightly stronger than the original."
+    return ""
+
+
+def _classify_timing(arrival_offset_ms_mean: Optional[float]) -> str:
+    """Return a timing note only when the deviation is extreme."""
+    if arrival_offset_ms_mean is None:
+        return ""
+    if arrival_offset_ms_mean >= 80:
+        return "Entrances were consistently late in this section."
+    if arrival_offset_ms_mean <= -60:
+        return "Entrances were consistently early in this section."
+    return ""
+
+
+def generate_section_stories(
+    sections: list[SectionTrend],
+    notes: list[NoteMeasurementV2],
+    techniques: list[NoteTechniqueComparison],
+    *,
+    config: Optional[CoachingConfig] = None,
+) -> list[SectionStory]:
+    """Build deterministic ``SectionStory`` objects for qualifying sections.
+
+    Each story aggregates pitch quality, technique matching, dynamics, and
+    (when extreme) timing into a template-based summary.  The ``narrative``
+    field is initialised to the deterministic summary and will be overwritten
+    by ``feedback.rewrite_section_stories()`` when LLM rewriting is enabled.
+
+    Called after ``compute_section_trends()`` and before ``select_highlights()``
+    in the analysis pipeline.
+    """
+    cfg = (config or CoachingConfig()).highlights
+    stories: list[SectionStory] = []
+
+    for section in sections:
+        if section.note_count < cfg.section_min_notes:
+            continue
+
+        pitch_phrase = _classify_pitch_quality(section.pct_in_tune, section.median_cents)
+        tech_phrase, matched_techs, missed_techs, match_pct = _classify_technique_match(
+            section, notes, techniques,
+        )
+        dynamics_note = _classify_dynamics(section.rms_delta_db)
+        timing_note = _classify_timing(section.arrival_offset_ms_mean)
+
+        # Build deterministic summary.
+        kind_label = section.kind or section.name
+        parts = [
+            f"In the {kind_label}, you {pitch_phrase}.",
+            f"You {tech_phrase}.",
+        ]
+        if dynamics_note:
+            parts.append(dynamics_note)
+        if timing_note:
+            parts.append(timing_note)
+        deterministic_summary = " ".join(parts)
+
+        dimensions: dict = {
+            "pct_in_tune": round(section.pct_in_tune, 3) if section.pct_in_tune is not None else None,
+            "median_cents": round(section.median_cents, 1) if section.median_cents is not None else None,
+            "technique_match_pct": round(match_pct, 3) if match_pct is not None else None,
+            "rms_delta_db": round(section.rms_delta_db, 2) if section.rms_delta_db is not None else None,
+            "arrival_offset_ms_mean": round(section.arrival_offset_ms_mean, 1) if section.arrival_offset_ms_mean is not None else None,
+            "matched_techniques": matched_techs,
+            "missed_techniques": missed_techs,
+        }
+
+        stories.append(SectionStory(
+            section_name=section.name,
+            section_kind=section.kind,
+            start_s=section.start_s,
+            end_s=section.end_s,
+            deterministic_summary=deterministic_summary,
+            narrative=deterministic_summary,
+            dimensions=dimensions,
+        ))
+
+    return stories
 
 
 __all__ = [
@@ -3395,5 +3602,6 @@ __all__ = [
     "detect_phrase_pitch_arc",
     "detect_section_improvement",
     "detect_section_vibrato_contrast",
+    "generate_section_stories",
     "select_highlights",
 ]

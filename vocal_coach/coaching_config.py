@@ -139,7 +139,7 @@ class GlobalOffsetConfig:
 class HighlightsConfig:
     """Highlight-engine thresholds."""
 
-    cap: int = 25
+    cap: int = 20
     """Maximum highlights returned per performance."""
 
     window_min: int = 4
@@ -258,10 +258,15 @@ class HighlightsConfig:
     entrance_timing_max: int = 3
     """How many individual late/early entrance notes to surface."""
 
-    max_per_category_alignment: int = 3
-    """Maximum timing/alignment highlights in the final list.  Overrides
-    ``max_per_category`` for the 'alignment' category so that low-value
-    per-note timing callouts don't crowd out pitch and expression feedback."""
+    max_per_category_alignment: int = 0
+    """Maximum timing/alignment highlights in the final list.  Set to 0 to
+    suppress standalone timing cards entirely; timing data still feeds the
+    mimic score, SectionTrend aggregates, and section story narratives."""
+
+    comparative_boost: float = 1.3
+    """Score multiplier applied to comparative-basis moments before diversity
+    selection.  Ensures reference-grounded feedback wins slots over generic
+    absolute technique observations."""
 
     # ------------------------------------------------------------------
     # Timing-consistency window detector

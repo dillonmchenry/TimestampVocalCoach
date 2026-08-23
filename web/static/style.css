@@ -1060,6 +1060,29 @@ h3 {
   background: rgba(180, 83, 9, 0.1);
 }
 
+/* ---------- Section story banner (grid Row 5, visible when section focused) ---------- */
+
+.section-story-label {
+  /* Vertically centred in the grid row like other tl-labels */
+  align-self: center;
+}
+
+.section-story-banner {
+  padding: 10px 14px;
+  background: var(--surface-alt, rgba(255,255,255,0.05));
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--fg);
+}
+
+.section-story-banner[hidden] { display: none; }
+
+.section-story-banner .story-narrative {
+  margin: 0;
+}
+
 /* ---------- Rich coaching cards ---------- */
 
 .highlights {

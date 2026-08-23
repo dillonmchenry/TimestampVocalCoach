@@ -69,7 +69,7 @@ class _PerformanceSummaryRaw(BaseModel):
 # ---------------------------------------------------------------------------
 
 _CARD_SYSTEM_BASE = """\
-You are a vocal coach giving technical, specific feedback on a singing performance.
+You are a vocal coach giving specific, comparative feedback on a singing performance.
 For each coaching card, write a single sentence that describes what the measurements show — \
 the observation only. Do not include coaching suggestions, instructions, or exercises in the summary. \
 Those belong in the practice_tip field, not here.
@@ -78,13 +78,19 @@ RULES:
 - One sentence maximum per card. Shorter is better.
 - Only describe what the measurements show. Do not invent observations.
 - Do NOT mention the associated lyric — it is already displayed separately on the card.
-- Do NOT include any suggestion, instruction, drill, or fix in the summary. \
-The summary is a factual observation ("Your pitch dropped 40 cents flat across this phrase") \
-not a prescription ("Try singing this phrase on a straw").
-- Be direct and technically precise. Avoid vague praise ("great job", "nice work").
-- When a card's feedback_basis is "comparative" (comparing the user to the reference), \
-refer to the original artist by name (provided in SONG CONTEXT below) rather than \
-saying "the reference." Ground your feedback in the artist's known vocal style.
+- Do NOT include any suggestion, instruction, drill, or fix in the summary.
+- Avoid vague praise ("great job", "nice work").
+- COMPARATIVE FRAMING (most important rule): Frame ALL feedback relative to the original \
+artist's recording. Whether the card is affirming or corrective, always say what the artist \
+does in the same passage and how the user's performance compares. Never describe a vocal \
+moment without referencing whether the artist does the same thing. Use the artist's name \
+(from SONG CONTEXT) rather than "the reference."
+- ACCESSIBLE LANGUAGE: Do NOT use technical jargon or raw numbers. Translate measurements:
+  • "slightly flat" or "slightly sharp" instead of any number of cents
+  • "a beat early" or "a beat late" instead of milliseconds
+  • "a blend of chest and head voice" instead of "mixed chest/head voice"
+  • Describe vibrato as "a gentle wavering in pitch" on first mention if clarity helps
+  • Never quote raw values (dB, Hz, ratios, percentages)
 - When a playbook passage is provided, let its coaching register guide your tone.
 
 PRACTICE TIP ENHANCEMENT (optional):
@@ -93,6 +99,7 @@ version that references specific lyrics or notes from this moment when doing so 
 exercise more concrete (e.g. "Try sustaining the 'blue' vowel shape on a single pitch for
 four beats"). If the tip is already sufficiently specific, or the lyric context adds nothing
 meaningful, return it unchanged. If no practice_tip is provided, omit the field entirely.
+Do NOT suggest sustaining a note if the note is short or fast — the tip must suit the context.
 
 RESPONSE FORMAT:
 Return valid JSON with a single key "cards" containing an array. Each element must have:
@@ -109,35 +116,34 @@ You have access to every coaching highlight, overall statistics, section-by-sect
 and context about the song and original artist.
 
 YOUR TASKS:
-  (1) Write a 3-4 sentence narrative assessment. Frame the user's performance relative to what \
-the song demands — reference the original artist's vocal approach, the song's mood, or its \
-signature characteristics when relevant (e.g. "You captured the gentle intimacy that defines \
-Paul McCartney's delivery on this track" or "The soaring chorus demands sustained breath \
-support that wasn't quite there yet"). Ground praise and critique in the song's context, \
-not just raw numbers.
+  (1) Write a 3-4 sentence narrative assessment. Lead with how the overall performance \
+compares to the original artist's approach — reference the artist by name, their signature \
+vocal choices on this song, and where the user's take matched or diverged. Ground every \
+observation in the comparison, not in abstract technique.
   (2) List 2-4 actionable takeaways — specific, prioritised directional observations \
-about what to focus on next (e.g. "Your breath support collapses mid-phrase in the second verse — \
-both pitch and volume fall simultaneously there").
+about what to focus on next. Each takeaway should name a section or pattern and compare \
+it to the artist's approach (e.g. "In the chorus your voice lost power mid-phrase where \
+[Artist] sustains fully — that's the biggest gap to close").
   (3) List 1-3 trends you observe by looking across ALL the highlights together — \
-patterns that span multiple cards or sections (e.g. "Your pitch accuracy degrades \
-progressively from verse to chorus across the whole song", \
-"Breathiness increases as the song progresses").
+patterns that span multiple cards or sections (e.g. "Pitch accuracy drops in every chorus \
+compared to the verses", "Your expressiveness grows as the song progresses — \
+the later sections sound more like the artist than the opening").
 
 RULES:
 - Only cite observations present in the data. Do not invent.
-- Write like a coach talking to a singer, not an engineer reading a report. \
-Translate every measurement into plain language: instead of "arriving 489ms late" \
-say "consistently late on your entrances"; instead of "-1238 cents/s" say \
-"your pitch falls away sharply at the end of notes"; instead of "-28 dB/s fade" \
-say "your voice loses power quickly through the phrase". Use words of magnitude \
-("very", "slightly", "consistently", "noticeably") rather than raw numbers.
-- Never quote a raw number (milliseconds, cents, dB values, ratios). \
-You may name sections, note names, and descriptive terms (e.g. "C5") when they \
-add clarity, but keep it conversational.
-- Reference the original artist by name (not "the reference") when discussing how the \
-user's performance compares to the original recording.
-- Takeaways should be directional observations ("your pitch falls flat in the bridge") \
-not prescriptive drills — those come later.
+- Write like a coach talking to a singer, not an engineer reading a report.
+- ACCESSIBLE LANGUAGE — never quote raw numbers. Translate every measurement:
+  • Instead of "arriving 489ms late" say "consistently late on your entrances"
+  • Instead of "-28 dB/s fade" say "your voice loses power quickly through the phrase"
+  • Instead of "25 cents flat" say "running a touch flat"
+  • Use magnitude words ("very", "slightly", "consistently", "noticeably")
+  • Do NOT say "cents", "dB", "Hz", "milliseconds", or any ratio/percentage
+  • Do NOT say "mixed chest/head voice" — say "a blend of chest and head voice"
+- Reference the original artist by name (not "the reference") throughout.
+- TIMING: Only mention timing if it correlates with another issue (e.g. rushing a phrase \
+that compresses expressiveness, or late entrances that suggest breath control difficulty). \
+Do not mention timing as a standalone observation.
+- Takeaways should be directional observations, not prescriptive drills.
 - Trends must be genuine cross-highlight patterns, not a restatement of a single card.
 
 RESPONSE FORMAT:
@@ -580,4 +586,157 @@ def generate_performance_summary(
     return summary
 
 
-__all__ = ["rewrite_card_summaries", "generate_performance_summary"]
+# ---------------------------------------------------------------------------
+# Section story LLM rewriting
+# ---------------------------------------------------------------------------
+
+_STORY_SYSTEM_BASE = """\
+You are a vocal coach writing a concise section-level assessment after reviewing a \
+singing performance.
+For each section of the song you will receive aggregate metrics and a list of specific \
+coaching observations from that section.
+
+YOUR TASK:
+Write 2-3 sentences that describe what happened in this section of the performance, \
+comparing the user's delivery to the original artist. Use the specific coaching \
+observations to make the story concrete — you may reference particular findings \
+(e.g. "the high notes went flat", "you dropped the vibrato on the held notes") but \
+synthesise them into a section-level narrative rather than repeating card summaries.
+
+RULES:
+- Ground every observation in how the original artist performs this section. \
+Always frame feedback as comparison to the artist, not generic advice.
+- Use plain, accessible language. Do NOT use technical terms: \
+  • "slightly flat" or "slightly sharp" instead of "X cents"  
+  • "a beat early" or "a beat late" instead of milliseconds  
+  • "a blend of chest and head voice" instead of "mixed chest/head voice"  
+  • "a gentle wavering in pitch" instead of "vibrato" (unless already on screen)
+- Do NOT use raw numbers (cents, dB, Hz, milliseconds, ratios).
+- Keep it conversational — like a coach talking to a singer between takes, not a report.
+- Do NOT repeat card summaries word-for-word.
+- Prioritise the most impactful observations; omit minor details.
+
+RESPONSE FORMAT:
+Return valid JSON with a single key "stories" containing an array. Each element must have:
+  "section_name": the exact section_name from the input,
+  "narrative": the 2-3 sentence story.\
+"""
+
+
+class _StorySummary(BaseModel):
+    """Single rewritten story in the batch response."""
+
+    model_config = {"extra": "ignore"}
+
+    section_name: str
+    narrative: str
+
+
+class _StorySummaryBatch(BaseModel):
+    """Full batch response: one entry per section story."""
+
+    model_config = {"extra": "ignore"}
+
+    stories: list[_StorySummary]
+
+
+def rewrite_section_stories(
+    stories: list,
+    moments: list,
+    *,
+    llm,
+    rag=None,
+    vocal_profile=None,
+    song_title: str = "",
+    artist: str = "",
+    max_tokens: int = 1024,
+) -> list:
+    """Rewrite SectionStory.narrative fields using a batched LLM call.
+
+    Each story is enriched with the selected ``CoachingMoment`` entries whose
+    time span overlaps the section, giving the LLM specific findings to
+    reference rather than only aggregate metrics.
+
+    Falls back to ``deterministic_summary`` when the LLM is unavailable or
+    the call fails, so the pipeline never breaks.
+    """
+    if llm is None:
+        logger.info("[feedback] LLM not available — skipping section story rewriting")
+        return stories
+    if not stories:
+        return stories
+
+    def _moments_for_section(story) -> list[dict]:
+        """Return compact moment dicts whose time span overlaps a story section."""
+        out = []
+        for m in moments:
+            # Overlap: moment starts before section ends AND ends after section starts.
+            if m.end_s > story.start_s and m.start_s < story.end_s:
+                row: dict = {
+                    "type": m.type,
+                    "title": m.title,
+                    "summary": m.summary,
+                    "feedback_basis": m.feedback_basis,
+                    "confidence": m.confidence,
+                }
+                meas = _extract_measurements(m.detail)
+                if meas:
+                    row["measurements"] = meas
+                out.append(row)
+        return out
+
+    # Build evidence payload for each story.
+    evidence_list: list[dict] = []
+    for story in stories:
+        ev: dict = {
+            "section_name": story.section_name,
+            "section_kind": story.section_kind,
+            "deterministic_summary": story.deterministic_summary,
+            "dimensions": story.dimensions,
+            "coaching_observations": _moments_for_section(story),
+        }
+        evidence_list.append(ev)
+
+    # Build system prompt with song context.
+    system = _STORY_SYSTEM_BASE
+    song_ctx_parts: list[str] = []
+    if song_title or artist:
+        label = f'"{song_title}"' if song_title else "this song"
+        if artist:
+            label += f" by {artist}"
+        song_ctx_parts.append(f"Song: {label}.")
+    if vocal_profile:
+        vs = getattr(vocal_profile, "vocal_style", "")
+        if vs:
+            song_ctx_parts.append(vs)
+        cc = getattr(vocal_profile, "coaching_context", "")
+        if cc:
+            song_ctx_parts.append(cc)
+    if song_ctx_parts:
+        system += "\n\nSONG CONTEXT:\n" + " ".join(song_ctx_parts)
+
+    orig_max = llm.max_tokens
+    llm.max_tokens = max_tokens
+    rewritten: dict[str, str] = {}
+    try:
+        user = json.dumps({"stories": evidence_list}, ensure_ascii=False, indent=2)
+        result = llm.chat_json(system=system, user=user, schema=_StorySummaryBatch)
+        if result is None:
+            logger.warning("[feedback] section story rewriting failed — keeping deterministic summaries")
+        else:
+            for s in result.stories:
+                if s.narrative.strip():
+                    rewritten[s.section_name] = s.narrative
+            logger.info("[feedback] section story rewriting: %d/%d stories updated", len(rewritten), len(stories))
+    finally:
+        llm.max_tokens = orig_max
+
+    for story in stories:
+        narrative = rewritten.get(story.section_name, "")
+        if narrative:
+            story.narrative = narrative
+
+    return stories
+
+
+__all__ = ["rewrite_card_summaries", "rewrite_section_stories", "generate_performance_summary"]

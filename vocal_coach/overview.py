@@ -37,9 +37,11 @@ from vocal_coach.schemas import (
 
 
 # Mimic-score blend weights (must sum to 1.0).
-_W_PITCH = 0.60
+# Timing is de-emphasised so the headline score reflects pitch and expressiveness
+# rather than timing precision, which is less meaningful for recreational singers.
+_W_PITCH = 0.70
 _W_TECH = 0.25
-_W_ARRIVAL = 0.15
+_W_ARRIVAL = 0.05
 
 _EXPRESSIVE_TECHS = frozenset(
     ["vibrato", "glissando", "falsetto", "breathe", "pharyngeal", "mixed", "bubble", "weak", "strong"]

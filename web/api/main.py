@@ -49,8 +49,8 @@ from vocal_coach.align_v2 import (
     measure_song,
 )
 from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH
-from vocal_coach.feedback import generate_performance_summary, rewrite_card_summaries
-from vocal_coach.highlights import select_highlights
+from vocal_coach.feedback import generate_performance_summary, rewrite_card_summaries, rewrite_section_stories
+from vocal_coach.highlights import generate_section_stories, select_highlights
 from vocal_coach.llm import LLMClient
 from vocal_coach.loudness import compute_loudness, write_loudness_track
 from vocal_coach.overview import compute_overview
@@ -476,6 +476,7 @@ def _run_analysis_job(
             )
 
         section_trends = compute_section_trends(analysis_reference, notes, techniques)
+        section_stories = generate_section_stories(section_trends, notes, techniques, config=cfg)
 
         # Step 3 — Selecting coaching highlights
         _jobs[job_id]["step"] = 3
@@ -520,6 +521,14 @@ def _run_analysis_job(
                 song_title=manifest.title,
                 artist=manifest.artist,
                 max_tokens=cfg.llm.card_rewrite_max_tokens,
+            )
+            rewrite_section_stories(
+                section_stories,
+                highlights.moments,
+                llm=_llm_client,
+                vocal_profile=vocal_profile,
+                song_title=manifest.title,
+                artist=manifest.artist,
             )
             _perf_summary = generate_performance_summary(
                 highlights.moments,
@@ -566,6 +575,7 @@ def _run_analysis_job(
             techniques=techniques,
             highlights=highlights,
             sections=section_trends,
+            section_stories=section_stories,
             overview=overview,
             performance_summary=_perf_summary,
             segment_end_song_s=segment_end_song_s,
