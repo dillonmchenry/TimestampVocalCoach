@@ -81,6 +81,59 @@ class GlobalOffsetConfig:
     min_voiced_overlap_s: float = 1.0
     """Reject offsets that yield less than this much voiced overlap."""
 
+    # ------------------------------------------------------------------
+    # Build-time chart-vs-audio validation
+    # ------------------------------------------------------------------
+
+    chart_validation_range_s: float = 5.0
+    """Search +/- this many seconds when validating chart-vs-reference-audio
+    alignment at build time.  5 s covers most GAP errors from different
+    audio sources (encoder delay, trim differences)."""
+
+    chart_correction_threshold_s: float = 0.05
+    """Auto-correct chart note times if the detected chart-audio offset
+    exceeds this threshold (50 ms).  Below this the chart is considered
+    well-aligned and no correction is written."""
+
+    # ------------------------------------------------------------------
+    # Upload alignment (unknown start time)
+    # ------------------------------------------------------------------
+
+    upload_search_range_s: float = 15.0
+    """Search +/- this many seconds for uploads (unknown start time)."""
+
+    upload_voicing_refine_range_s: float = 2.0
+    """After the chroma pre-pass finds a coarse lag, refine with the
+    voicing grid within +/- this many seconds around that lag."""
+
+    chroma_hop_s: float = 0.1
+    """Hop size (seconds) for chroma feature extraction.  100 ms is fast
+    and sufficient for a coarse pitch-class lag estimate."""
+
+    chroma_n_chroma: int = 12
+    """Number of chroma bins (standard 12-bin pitch-class histogram)."""
+
+    chroma_low_confidence_threshold: float = 0.1
+    """Normalised chroma correlation peak below which we consider the
+    chroma pre-pass unreliable and fall back to wide voicing-only search."""
+
+    # ------------------------------------------------------------------
+    # Post-alignment sanity check
+    # ------------------------------------------------------------------
+
+    sanity_min_pct_in_tune: float = 0.15
+    """If mean pct_in_tune across scored notes is below this threshold
+    *and* voiced_coverage is above sanity_min_voiced_coverage, the
+    alignment is flagged as suspect."""
+
+    sanity_min_voiced_coverage: float = 0.25
+    """voiced_coverage must exceed this for a low pct_in_tune to trigger
+    the misalignment flag.  A user who barely sang should not be flagged."""
+
+    retry_on_sanity_fail: bool = True
+    """When True, automatically retry alignment with the chroma-assisted
+    wider search if the sanity check fails on the first attempt."""
+
 
 @dataclass
 class HighlightsConfig:

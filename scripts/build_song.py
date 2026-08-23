@@ -28,12 +28,14 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from vocal_coach.align_v2 import validate_chart_alignment  # noqa: E402
 from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH  # noqa: E402
 from vocal_coach.llm import LLMClient  # noqa: E402
 from vocal_coach.loudness import compute_loudness, write_loudness_track  # noqa: E402
 from vocal_coach.pitch import extract_f0, write_pitch_track  # noqa: E402
 from vocal_coach.reference import load_reference  # noqa: E402
-from vocal_coach.song import load_manifest, write_manifest  # noqa: E402
+from vocal_coach.schemas import PitchTrack  # noqa: E402
+from vocal_coach.song import load_manifest, write_manifest, write_reference_for_song  # noqa: E402
 from vocal_coach.stars_runner import (  # noqa: E402
     DEFAULT_STARS_DIR,
     STARS_PROFILE_FULL,
@@ -162,6 +164,61 @@ def main() -> int:
         pitch.sample_id = sample_id
         write_pitch_track(pitch, pitch_json)
         print(f"[build_song] pitch      : wrote {pitch_json} ({len(pitch.frames)} frames)")
+
+    # --- Chart-vs-audio alignment validation --------------------------------
+    # Run the same voicing-overlap estimator used for user alignment, but with
+    # the *reference* vocal's own pitch track.  If the chart's #GAP is correct
+    # for this audio file the detected offset will be ~0; a non-zero offset
+    # means the chart was authored against a different audio file and every note
+    # window is shifted.  We auto-correct reference_annotation.json (preserving
+    # the original .txt chart) when the offset exceeds the threshold.
+    config_path_for_build = args.config or (ROOT / DEFAULT_CONFIG_RELPATH)
+    coaching_cfg_early = CoachingConfig.load(config_path_for_build)
+
+    if pitch_json.is_file():
+        ref_pitch_track = PitchTrack.model_validate_json(
+            pitch_json.read_text(encoding="utf-8")
+        )
+        gap_offset, gap_score = validate_chart_alignment(
+            reference, ref_pitch_track, config=coaching_cfg_early
+        )
+        threshold = coaching_cfg_early.global_offset.chart_correction_threshold_s
+        if abs(gap_offset) > threshold:
+            print(
+                f"[build_song] chart-audio: WARNING — chart GAP appears off by "
+                f"{gap_offset * 1000:+.0f} ms (alignment score {gap_score:.2f})"
+            )
+            print(
+                f"[build_song] chart-audio: auto-correcting note times "
+                f"by {-gap_offset * 1000:+.0f} ms"
+            )
+            corrected_notes = [
+                n.model_copy(update={
+                    "start_s": n.start_s - gap_offset,
+                    "end_s": n.end_s - gap_offset,
+                })
+                for n in reference.notes
+            ]
+            corrected_sections = [
+                s.model_copy(update={
+                    "start_s": max(0.0, s.start_s - gap_offset),
+                    "end_s": s.end_s - gap_offset,
+                })
+                for s in reference.sections
+            ]
+            reference = reference.model_copy(update={
+                "notes": corrected_notes,
+                "sections": corrected_sections,
+            })
+            write_reference_for_song(song_dir, reference)
+            print("[build_song] chart-audio: re-wrote reference_annotation.json")
+        else:
+            print(
+                f"[build_song] chart-audio: OK — offset {gap_offset * 1000:+.0f} ms, "
+                f"score {gap_score:.2f}"
+            )
+    else:
+        print("[build_song] chart-audio: skipped (no pitch.json yet)")
 
     loud_json = ref_subdir / "loudness.json"
     if args.skip_loudness and loud_json.is_file():

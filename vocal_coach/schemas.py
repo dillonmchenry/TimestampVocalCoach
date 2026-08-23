@@ -846,6 +846,16 @@ class PerformanceOverview(BaseModel):
             'timing score.'
         ),
     )
+    alignment_warning: bool = Field(
+        False,
+        description=(
+            'True when the post-alignment sanity check detected likely '
+            'misalignment: the user sang (reasonable voiced_coverage) but '
+            'almost nothing was in tune (pct_in_tune below threshold). '
+            'Frontend should surface a warning banner and may suppress '
+            'detailed coaching cards.'
+        ),
+    )
 
 
 class PerformanceAnalysis(BaseModel):

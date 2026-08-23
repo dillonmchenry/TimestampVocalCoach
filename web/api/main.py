@@ -42,7 +42,12 @@ import time
 
 import numpy as np
 
-from vocal_coach.align_v2 import estimate_global_offset_s, measure_song
+from vocal_coach.align_v2 import (
+    alignment_sanity_check,
+    estimate_global_offset_s,
+    estimate_global_offset_upload,
+    measure_song,
+)
 from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH
 from vocal_coach.feedback import generate_performance_summary, rewrite_card_summaries
 from vocal_coach.highlights import select_highlights
@@ -374,6 +379,10 @@ def _run_analysis_job(
 
         cfg = CoachingConfig.load(CONFIG_PATH)
 
+        # Distinguish uploaded files from live karaoke recordings.
+        # The frontend sends recording_duration_s only for karaoke; uploads omit it.
+        is_upload = recording_duration_s is None
+
         # For karaoke partial recordings, estimate the global offset first so we
         # can convert recording_duration_s (user time) into song time and filter
         # the reference to only the notes the user actually sang.
@@ -396,16 +405,76 @@ def _run_analysis_job(
                     "sections": filtered_sections,
                 })
 
-        notes, techniques, offset, octave_shift = measure_song(
-            analysis_reference,
-            pitch_user=pitch_user,
-            pitch_ref=pitch_ref,
-            stars_ref=stars_ref,
-            stars_user=stars_user,
-            loudness_user=loudness_user,
-            loudness_ref=loudness_ref,
-            config=cfg,
-        )
+        ref_vocal_path = song_dir / manifest.reference_vocal_path
+
+        if is_upload:
+            # Uploads have an unknown start time — use the chroma-assisted wide search.
+            pre_offset = estimate_global_offset_upload(
+                analysis_reference,
+                pitch_user,
+                ref_audio_path=ref_vocal_path,
+                user_audio_path=user_audio,
+                config=cfg,
+            )
+            notes, techniques, offset, octave_shift = measure_song(
+                analysis_reference,
+                pitch_user=pitch_user,
+                pitch_ref=pitch_ref,
+                stars_ref=stars_ref,
+                stars_user=stars_user,
+                loudness_user=loudness_user,
+                loudness_ref=loudness_ref,
+                config=cfg,
+                global_offset_s=pre_offset,
+            )
+        else:
+            # Karaoke: use the existing fast voicing-only estimator (+/-1.5 s).
+            notes, techniques, offset, octave_shift = measure_song(
+                analysis_reference,
+                pitch_user=pitch_user,
+                pitch_ref=pitch_ref,
+                stars_ref=stars_ref,
+                stars_user=stars_user,
+                loudness_user=loudness_user,
+                loudness_ref=loudness_ref,
+                config=cfg,
+            )
+
+        # Post-alignment sanity check — detect and optionally retry misalignment.
+        alignment_ok = alignment_sanity_check(notes, config=cfg)
+        alignment_warning_flag = False
+
+        if not alignment_ok and cfg.global_offset.retry_on_sanity_fail:
+            # Retry with the chroma-assisted wider search regardless of source.
+            retry_offset = estimate_global_offset_upload(
+                analysis_reference,
+                pitch_user,
+                ref_audio_path=ref_vocal_path,
+                user_audio_path=user_audio,
+                config=cfg,
+            )
+            if not np.isclose(retry_offset, offset, atol=cfg.global_offset.step_s):
+                notes, techniques, offset, octave_shift = measure_song(
+                    analysis_reference,
+                    pitch_user=pitch_user,
+                    pitch_ref=pitch_ref,
+                    stars_ref=stars_ref,
+                    stars_user=stars_user,
+                    loudness_user=loudness_user,
+                    loudness_ref=loudness_ref,
+                    config=cfg,
+                    global_offset_s=retry_offset,
+                )
+                alignment_ok = alignment_sanity_check(notes, config=cfg)
+
+        if not alignment_ok:
+            alignment_warning_flag = True
+            logger.warning(
+                "[analyze] alignment_warning for perf_id=%s: "
+                "low pct_in_tune with reasonable voiced_coverage; offset=%.3fs",
+                perf_id, offset,
+            )
+
         section_trends = compute_section_trends(analysis_reference, notes, techniques)
 
         # Step 3 — Selecting coaching highlights
@@ -432,6 +501,7 @@ def _run_analysis_job(
             octave_shift_semitones=octave_shift,
             arrival_late_ms=cfg.highlights.overview_arrival_late_ms,
             arrival_edge_margin_ms=cfg.highlights.overview_arrival_edge_margin_ms,
+            alignment_warning=alignment_warning_flag,
         )
 
         # Sprint 3 Phase B: LLM feedback (card rewriting + performance summary)

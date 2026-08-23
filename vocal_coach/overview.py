@@ -84,6 +84,7 @@ def compute_overview(
     octave_shift_semitones: int = 0,
     arrival_late_ms: float = 150.0,
     arrival_edge_margin_ms: float = 20.0,
+    alignment_warning: bool = False,
 ) -> Optional[PerformanceOverview]:
     """Build a ``PerformanceOverview`` from note-level measurements.
 
@@ -203,6 +204,7 @@ def compute_overview(
         mimic_score=mimic_score,
         note_count=len(notes),
         strongest_section=strongest_section,
+        alignment_warning=alignment_warning,
     )
 
 

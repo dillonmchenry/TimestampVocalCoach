@@ -4,17 +4,21 @@ from __future__ import annotations
 
 from typing import Optional
 
+import numpy as np
 import pytest
 
 from vocal_coach.align_v2 import (
     PitchArrays,
+    alignment_sanity_check,
     core_window_s,
     estimate_global_offset_s,
     estimate_octave_shift_semitones,
     measure_song,
+    validate_chart_alignment,
 )
 from vocal_coach.coaching_config import CoachingConfig
 from vocal_coach.schemas import (
+    NoteMeasurementV2,
     PitchFrame,
     PitchTrack,
     ReferenceAnnotation,
@@ -270,3 +274,158 @@ def test_single_outlier_note_gets_octave_tag_without_shifting_global() -> None:
     for i in (0, 1, 3):
         assert notes[i].note_octave_offset == 0
         assert "octave above" not in notes[i].pitch_tags
+
+
+# ---------------------------------------------------------------------------
+# New tests: center_offset_s, alignment_sanity_check, validate_chart_alignment
+# ---------------------------------------------------------------------------
+
+
+def test_center_offset_shifts_grid_recovers_late_user() -> None:
+    """estimate_global_offset_s with center_offset_s finds users starting well
+    outside the default +/-1.5 s window."""
+    # Build a reference that has notes starting at 0, 0.5, 1.0 s in song time.
+    ref = _make_reference([(0.0, 0.5, 69, "a"), (0.5, 1.0, 71, "b"), (1.0, 1.5, 72, "c")])
+    # User starts 5 s late in user-time (song_time = user_time - 5.0).
+    pitch = _synthetic_pitch(ref, time_offset_s=5.0)
+    cfg = CoachingConfig()
+    # Default +/-1.5 s window centred on 0 should fail to find the offset.
+    offset_default = estimate_global_offset_s(ref, pitch, config=cfg)
+    assert abs(offset_default - 5.0) > 1.0, "Default window should not recover a 5 s shift"
+
+    # Using center_offset_s=5.0 with a narrow refine window should nail it.
+    offset_centred = estimate_global_offset_s(
+        ref, pitch, config=cfg,
+        search_range_s=1.0,
+        center_offset_s=5.0,
+    )
+    assert offset_centred == pytest.approx(5.0, abs=0.1)
+
+
+def test_estimate_global_offset_s_with_explicit_search_range() -> None:
+    """The search_range_s parameter overrides the config value."""
+    ref = _make_reference([(0.0, 0.5, 69, "a"), (0.5, 1.0, 71, "b"), (1.0, 1.5, 72, "c")])
+    # User is 3 s late — outside the default +/-1.5 s window, inside +/-5 s.
+    # Build a manually extended pitch track so voiced frames exist at user-time 3-4.5 s.
+    hop = 0.01
+    n = int(5.0 / hop) + 1
+    frames = []
+    for i in range(n):
+        t = i * hop
+        f0 = 0.0
+        v = 0.0
+        for note in ref.notes:
+            song_t = t - 3.0  # user vocal starts 3 s late
+            if note.start_s <= song_t < note.end_s:
+                f0 = 440.0 * (2 ** ((note.midi_pitch - 69) / 12.0))
+                v = 0.95
+                break
+        frames.append(PitchFrame(time=t, f0_hz=f0, voicing_confidence=v))
+    pitch = PitchTrack(sample_id="user", frames=frames, checkpoint="synthetic")
+    cfg = CoachingConfig()
+    offset = estimate_global_offset_s(ref, pitch, config=cfg, search_range_s=5.0)
+    assert offset == pytest.approx(3.0, abs=0.1)
+
+
+# ---------------------------------------------------------------------------
+# alignment_sanity_check
+# ---------------------------------------------------------------------------
+
+
+def _make_note_measurement(
+    *,
+    pct_in_tune: Optional[float],
+    voiced_coverage: float,
+) -> NoteMeasurementV2:
+    """Minimal NoteMeasurementV2 for sanity-check tests."""
+    return NoteMeasurementV2(
+        note_index=0,
+        start_s=0.0,
+        end_s=0.5,
+        midi_pitch=69,
+        note_name="A4",
+        lyric_word="a",
+        voiced_coverage=voiced_coverage,
+        pct_in_tune=pct_in_tune,
+    )
+
+
+def test_sanity_check_passes_good_alignment() -> None:
+    """Well-aligned performance (high pct_in_tune) should pass."""
+    notes = [_make_note_measurement(pct_in_tune=0.80, voiced_coverage=0.90)] * 10
+    assert alignment_sanity_check(notes) is True
+
+
+def test_sanity_check_flags_misalignment() -> None:
+    """Low pct_in_tune with reasonable voiced_coverage should be flagged."""
+    notes = [_make_note_measurement(pct_in_tune=0.05, voiced_coverage=0.80)] * 10
+    assert alignment_sanity_check(notes) is False
+
+
+def test_sanity_check_passes_silent_user() -> None:
+    """Low voiced_coverage should NOT trigger the flag (user barely sang)."""
+    notes = [_make_note_measurement(pct_in_tune=0.05, voiced_coverage=0.10)] * 10
+    assert alignment_sanity_check(notes) is True
+
+
+def test_sanity_check_passes_no_notes() -> None:
+    """Empty note list returns True (can't detect misalignment)."""
+    assert alignment_sanity_check([]) is True
+
+
+def test_sanity_check_passes_no_pct_in_tune() -> None:
+    """Notes with pct_in_tune=None (unscored) return True."""
+    notes = [_make_note_measurement(pct_in_tune=None, voiced_coverage=0.80)] * 5
+    assert alignment_sanity_check(notes) is True
+
+
+def test_sanity_check_passes_just_above_threshold() -> None:
+    """pct_in_tune clearly above sanity_min_pct_in_tune should pass."""
+    cfg = CoachingConfig()
+    threshold = cfg.global_offset.sanity_min_pct_in_tune  # 0.15
+    notes = [_make_note_measurement(pct_in_tune=threshold + 0.01, voiced_coverage=0.80)] * 10
+    assert alignment_sanity_check(notes, config=cfg) is True
+
+
+def test_sanity_check_fails_just_below_threshold() -> None:
+    """pct_in_tune clearly below sanity_min_pct_in_tune should be flagged."""
+    cfg = CoachingConfig()
+    threshold = cfg.global_offset.sanity_min_pct_in_tune
+    notes = [_make_note_measurement(pct_in_tune=threshold - 0.01, voiced_coverage=0.80)] * 10
+    assert alignment_sanity_check(notes, config=cfg) is False
+
+
+# ---------------------------------------------------------------------------
+# validate_chart_alignment
+# ---------------------------------------------------------------------------
+
+
+def test_validate_chart_alignment_well_aligned() -> None:
+    """Reference vocal perfectly in sync with chart should report near-zero offset."""
+    ref = _make_reference([(0.0, 0.5, 69, "a"), (0.5, 1.0, 71, "b"), (1.0, 1.5, 72, "c")])
+    # The synthetic pitch generator builds a track that IS in sync with ref.
+    pitch = _synthetic_pitch(ref, time_offset_s=0.0)
+    cfg = CoachingConfig()
+    offset, score = validate_chart_alignment(ref, pitch, config=cfg)
+    assert abs(offset) < 0.1, f"Well-aligned chart should have near-zero offset, got {offset}"
+    assert score > 0.0
+
+
+def test_validate_chart_alignment_detects_gap_error() -> None:
+    """A 400 ms GAP error in the chart should be detected."""
+    ref = _make_reference([(0.0, 0.5, 69, "a"), (0.5, 1.0, 71, "b"), (1.0, 1.5, 72, "c")])
+    # Simulate the audio starting 400 ms earlier than the chart thinks (GAP too large).
+    pitch = _synthetic_pitch(ref, time_offset_s=0.4)
+    cfg = CoachingConfig()
+    offset, score = validate_chart_alignment(ref, pitch, config=cfg)
+    # The detected offset should be approximately 0.4 s.
+    assert offset == pytest.approx(0.4, abs=0.08)
+
+
+def test_validate_chart_alignment_correction_below_threshold_no_action_needed() -> None:
+    """An offset below chart_correction_threshold_s should be within tolerance."""
+    ref = _make_reference([(0.0, 0.5, 69, "a"), (0.5, 1.0, 71, "b"), (1.0, 1.5, 72, "c")])
+    pitch = _synthetic_pitch(ref, time_offset_s=0.02)  # 20 ms — below 50 ms threshold
+    cfg = CoachingConfig()
+    offset, _score = validate_chart_alignment(ref, pitch, config=cfg)
+    assert abs(offset) < cfg.global_offset.chart_correction_threshold_s
