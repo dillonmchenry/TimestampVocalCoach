@@ -111,6 +111,7 @@ section {
   display: flex;
   gap: 14px;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -1077,7 +1078,7 @@ h3 {
   color: var(--fg);
 }
 
-.section-story-banner[hidden] { display: none; }
+.section-story-banner[hidden], .section-story-label[hidden] { display: none; }
 
 .section-story-banner .story-narrative {
   margin: 0;
@@ -1094,6 +1095,7 @@ h3 {
   align-items: flex-start;
   gap: 12px;
   overflow-x: auto;
+  overscroll-behavior-x: contain;
   scrollbar-width: thin;
   scrollbar-color: var(--border) transparent;
   min-height: 500px;

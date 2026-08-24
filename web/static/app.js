@@ -73,6 +73,9 @@ let activeAnalysisIdx = -1;
 
 const MIX_LAYER_VOLUME = 0.85;
 const MIX_SYNC_THRESHOLD_S = 0.08;
+// Marker pushed into history.state when at least one analysis result is visible.
+// The popstate listener uses this to intercept accidental Back navigations.
+const RESULTS_STATE = { secondpass: "results" };
 let currentReference = null;
 let currentReferenceSongId = null;
 
@@ -2223,6 +2226,12 @@ async function renderAnalysis(songId, analysis) {
   };
   analyses.push(blockState);
 
+  // Push a history entry the first time results appear so that a browser Back
+  // gesture is intercepted by the popstate listener instead of leaving the page.
+  if (!history.state?.secondpass) {
+    history.pushState(RESULTS_STATE, "");
+  }
+
   // --- 3. Append block and reveal results container ---
   resultsContainer.hidden = false;
   resultsContainer.appendChild(blockEl);
@@ -2442,7 +2451,7 @@ let karaokeLastScrollFocusIdx = -1; // tracks which line we last scrolled to
 
 // Reference vocal playback during karaoke.
 let karaokeRefVocalMedia = null;
-let karaokeRefVocalOn = false;
+let karaokeRefVocalOn = true;  // default ON per advisor feedback
 
 // Web Audio API handles for the live mic waveform.
 let karaokeAudioCtx = null;
@@ -2453,8 +2462,26 @@ let karaokeVizData = null;  // Uint8Array reused each frame
  * Encode collected PCM buffers into a 16-bit mono WAV Blob.
  * Runs entirely in the browser — the server receives a plain WAV file that
  * soundfile can open without any conversion or audioread fallback.
+ *
+ * A peak-scan pass normalizes the signal if any sample exceeds 1.0 to
+ * prevent hard digital clipping on hot mic inputs, while leaving the
+ * dynamics untouched for normal recordings.
  */
 function _wavEncode(buffers, sampleRate) {
+  // Scan for the true peak across all collected chunks.
+  let peak = 0;
+  for (const buf of buffers) {
+    for (let i = 0; i < buf.length; i++) {
+      const abs = Math.abs(buf[i]);
+      if (abs > peak) peak = abs;
+    }
+  }
+  // Only normalize when the signal actually clips; leave clean recordings as-is.
+  const gain = peak > 1.0 ? 1.0 / peak : 1.0;
+  if (peak > 1.0) {
+    console.warn(`[_wavEncode] peak=${peak.toFixed(3)}, auto-normalized to avoid clipping`);
+  }
+
   const totalSamples = buffers.reduce((s, b) => s + b.length, 0);
   const ab = new ArrayBuffer(44 + totalSamples * 2);
   const v = new DataView(ab);
@@ -2472,7 +2499,7 @@ function _wavEncode(buffers, sampleRate) {
   let off = 44;
   for (const buf of buffers) {
     for (let i = 0; i < buf.length; i++) {
-      const s = Math.max(-1, Math.min(1, buf[i]));
+      const s = Math.max(-1, Math.min(1, buf[i] * gain));
       v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
       off += 2;
     }
@@ -2773,14 +2800,14 @@ async function endKaraokeSession({ analyze }) {
   karaokeCancelBtn.disabled = true;
   cancelAnimationFrame(karaokeRafHandle);
 
-  // Stop reference vocal playback and reset toggle.
+  // Stop reference vocal playback and reset toggle to default ON for next take.
   if (karaokeRefVocalMedia) {
     karaokeRefVocalMedia.pause();
     karaokeRefVocalMedia = null;
   }
-  karaokeRefVocalOn = false;
-  karaokeRefVocalBtn.classList.remove("active");
-  karaokeRefVocalBtn.setAttribute("aria-pressed", "false");
+  karaokeRefVocalOn = true;
+  karaokeRefVocalBtn.classList.add("active");
+  karaokeRefVocalBtn.setAttribute("aria-pressed", "true");
 
   if (karaokeStream) {
     karaokeStream.getTracks().forEach((t) => t.stop());
@@ -2858,7 +2885,13 @@ karaokeRecordBtn.addEventListener("click", async () => {
     return;
   }
   try {
-    karaokeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    karaokeStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+      },
+    });
   } catch (e) {
     status.textContent = `Mic permission denied: ${e.message}`;
     status.classList.add("error");
@@ -2884,7 +2917,13 @@ karaokeRecordBtn.addEventListener("click", async () => {
     karaokePcmBuffers.push(new Float32Array(e.inputBuffer.getChannelData(0)));
   };
   micSrc.connect(karaokeScriptNode);
-  karaokeScriptNode.connect(karaokeAudioCtx.destination);
+  // Route through a zero-gain node so onaudioprocess fires reliably (it
+  // requires the node to be connected to the graph) but mic audio does not
+  // reach the speakers, preventing acoustic feedback and AEC interference.
+  const muteNode = karaokeAudioCtx.createGain();
+  muteNode.gain.value = 0;
+  karaokeScriptNode.connect(muteNode);
+  muteNode.connect(karaokeAudioCtx.destination);
   karaokeViz.hidden = false;
 
   // Play instrumental
@@ -2896,11 +2935,21 @@ karaokeRecordBtn.addEventListener("click", async () => {
     /* autoplay restrictions may block; the user can click the visible controls */
   });
 
-  // Preload reference vocal so the toggle can start it instantly.
+  // Load reference vocal and start it immediately (default ON).
   karaokeRefVocalMedia = new Audio();
   karaokeRefVocalMedia.preload = "auto";
   karaokeRefVocalMedia.src = apiUrl(`/api/songs/${encodeURIComponent(songId)}/audio/reference`);
   karaokeRefVocalMedia.volume = MIX_LAYER_VOLUME;
+
+  // Sync button UI to current state before potentially auto-playing.
+  karaokeRefVocalBtn.classList.toggle("active", karaokeRefVocalOn);
+  karaokeRefVocalBtn.setAttribute("aria-pressed", String(karaokeRefVocalOn));
+
+  if (karaokeRefVocalOn) {
+    // Start reference vocal in sync with the instrumental (same user gesture).
+    karaokeRefVocalMedia.currentTime = karaokeAudio.currentTime;
+    karaokeRefVocalMedia.play().catch(() => {});
+  }
 
   karaokeStartTs = performance.now();
   karaokeRecordBtn.disabled = true;
@@ -2928,6 +2977,23 @@ karaokeRefVocalBtn.addEventListener("click", () => {
   } else {
     karaokeRefVocalMedia.pause();
   }
+});
+
+// Intercept browser Back while analysis results are held in memory.
+// Without this, a horizontal overscroll that escapes the card list (or a
+// trackpad/swipe gesture starting at the viewport edge) would navigate away
+// and destroy the in-memory session.
+window.addEventListener("popstate", () => {
+  if (analyses.length > 0) {
+    // Re-push so consecutive Back presses are also intercepted.
+    history.pushState(RESULTS_STATE, "");
+    // Restore the results view in case it was hidden.
+    resultsContainer.hidden = false;
+    collapseUploadSection();
+    activateBlock(activeAnalysisIdx >= 0 ? activeAnalysisIdx : analyses.length - 1);
+  }
+  // If analyses is empty the event is not cancelled, letting the browser
+  // navigate away normally (e.g. to a previous site).
 });
 
 loadSongs();
