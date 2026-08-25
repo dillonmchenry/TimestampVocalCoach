@@ -1,15 +1,76 @@
 :root {
-  --bg:      #f7f3ee;
-  --panel:   #ffffff;
-  --panel-2: #f0ebe4;
-  --text:    #1c1917;
-  --muted:   #78716c;
-  --accent:  #3b6fd4;
-  --good:    #15803d;
-  --warn:    #b45309;
-  --bad:     #b91c1c;
-  --expr:    #7c3aed;
-  --border:  #e4ddd5;
+  --bg:         #f7f3ee;
+  --panel:      #ffffff;
+  --panel-2:    #f0ebe4;
+  --text:       #1c1917;
+  --muted:      #78716c;
+  --accent:     #3b6fd4;
+  --good:       #15803d;
+  --warn:       #b45309;
+  --bad:        #b91c1c;
+  --expr:       #7c3aed;
+  --border:     #e4ddd5;
+  --wave-color: #cec5bb;
+}
+
+/* ── Warm Charcoal theme ─────────────────────────────────────────────── */
+:root[data-theme="charcoal"] {
+  --bg:         #1e1e24;
+  --panel:      #2a2a32;
+  --panel-2:    #33333d;
+  --border:     #3e3e4a;
+  --text:       #e8e6e3;
+  --muted:      #9b97a0;
+  --wave-color: #9b97a0;
+}
+
+/* ── Midnight Purple theme ───────────────────────────────────────────── */
+:root[data-theme="midnight"] {
+  --bg:         #13101e;
+  --panel:      #1e1829;
+  --panel-2:    #271f36;
+  --border:     #362d4a;
+  --text:       #e8e4f2;
+  --muted:      #9b92b8;
+  --wave-color: #9b92b8;
+}
+
+/* ── Theme-aware body gradient overrides ─────────────────────────────── */
+html[data-theme="charcoal"] body { background: linear-gradient(180deg, #1a1a20 0%, #1e1e24 100%); }
+html[data-theme="midnight"] body { background: linear-gradient(180deg, #0f0c18 0%, #13101e 100%); }
+
+/* ── Theme-aware header background (dark themes need dark glass) ─────── */
+html[data-theme="charcoal"] header { background: rgba(42, 42, 50, 0.85); }
+html[data-theme="midnight"] header { background: rgba(30, 24, 41, 0.85); }
+
+/* ── Header theme swatch switcher ────────────────────────────────────── */
+.header-theme-switch {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.theme-swatch {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background-color: var(--swatch-bg);
+  cursor: pointer;
+  padding: 0;
+  outline: none;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.18);
+}
+
+.theme-swatch:hover {
+  transform: scale(1.25);
+}
+
+.theme-swatch--active {
+  box-shadow: 0 0 0 1.5px rgba(0, 0, 0, 0.18), 0 0 0 3.5px var(--accent);
 }
 
 * {
@@ -29,22 +90,48 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* ---------- Header ---------- */
+
 header {
-  padding: 32px 32px 16px;
+  padding: 20px 32px;
   background: rgba(255, 255, 255, 0.72);
   backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+
+.header-brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.header-logo {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  color: var(--accent);
+}
+
+.header-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 header h1 {
   margin: 0;
-  font-size: 26px;
-  font-weight: 600;
-  letter-spacing: -0.03em;
+  font-family: "Space Grotesk", "DM Sans", system-ui, sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
   color: var(--text);
+  line-height: 1.1;
 }
 
 .subtitle {
-  margin: 4px 0 0;
+  margin: 0;
   color: var(--muted);
   font-size: 13px;
   font-weight: 400;
@@ -414,12 +501,18 @@ section {
 }
 
 .drop-zone {
+  position: relative;
   border: 2px dashed var(--border);
   border-radius: 12px;
-  padding: 32px;
+  padding: 36px 32px;
   text-align: center;
   background: var(--panel-2);
   transition: border-color 0.15s ease, background 0.15s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 210px;
 }
 
 .drop-zone.dragover {
@@ -427,10 +520,93 @@ section {
   background: rgba(59, 111, 212, 0.04);
 }
 
+.drop-zone.has-file {
+  border-style: solid;
+  border-color: var(--accent);
+  background: rgba(59, 111, 212, 0.04);
+}
+
 .drop-zone .hint {
   color: var(--muted);
-  margin: 4px 0;
+  margin: 6px 0 10px;
   font-size: 12px;
+}
+
+/* Drop prompt: upload icon + text */
+.drop-prompt-icon {
+  display: block;
+  margin: 0 auto 12px;
+  color: var(--muted);
+  opacity: 0.6;
+}
+
+.drop-prompt-text {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text);
+}
+
+/* File preview state (shown after a file is selected) */
+.file-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+}
+
+/* Ensure the hidden attribute wins over display:flex */
+.file-preview[hidden] { display: none !important; }
+
+.file-preview-info {
+  min-width: 0;
+  max-width: 80%;
+  text-align: center;
+}
+
+.file-preview-name {
+  display: block;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-preview-size {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 3px;
+}
+
+/* X button anchors to the drop zone top-right corner */
+.file-remove-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: color 0.12s ease, background 0.12s ease, border-color 0.12s ease;
+  flex-shrink: 0;
+}
+
+.file-remove-btn:hover {
+  color: var(--bad);
+  border-color: var(--bad);
+  background: rgba(185, 28, 28, 0.06);
 }
 
 .browse {

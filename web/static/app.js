@@ -46,6 +46,11 @@ const pickerSection = document.querySelector("section.picker");
 let pendingFile = null;
 let analysisAbortController = null;
 let wavesurfer = null;
+
+/** Read a CSS custom property from the root element at call time. */
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
 let analysisGraph = null;
 let currentMedia = null;
 let currentDuration = 0;
@@ -695,10 +700,22 @@ analysisCancelBtn.addEventListener("click", () => {
 
 function setPendingFile(file) {
   pendingFile = file;
+  const dropPrompt   = document.getElementById("dropPrompt");
+  const filePreview  = document.getElementById("filePreview");
+  const previewName  = document.getElementById("filePreviewName");
+  const previewSize  = document.getElementById("filePreviewSize");
   if (file) {
-    status.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+    if (dropPrompt)  dropPrompt.hidden  = true;
+    if (filePreview) filePreview.hidden = false;
+    if (previewName) previewName.textContent = file.name;
+    if (previewSize) previewSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+    dropZone.classList.add("has-file");
+    status.textContent = "";
     status.classList.remove("error");
   } else {
+    if (dropPrompt)  dropPrompt.hidden  = false;
+    if (filePreview) filePreview.hidden = true;
+    dropZone.classList.remove("has-file");
     status.textContent = "";
   }
   setAnalyzeLoading(false);
@@ -718,6 +735,12 @@ dropZone.addEventListener("drop", (e) => {
 fileInput.addEventListener("change", (e) => {
   const file = e.target.files?.[0];
   if (file) setPendingFile(file);
+});
+
+document.getElementById("fileRemoveBtn")?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  setPendingFile(null);
+  fileInput.value = "";
 });
 
 analyzeButton.addEventListener("click", async () => {
@@ -1305,8 +1328,8 @@ function buildSectionWaveform(section) {
 
   wavesurfer = WaveSurfer.create({
     container:     waveformDiv,
-    waveColor:     "#cec5bb",
-    progressColor: "#3b6fd4",
+    waveColor:     cssVar("--wave-color"),
+    progressColor: cssVar("--accent"),
     height:        128,
     normalize:     true,
     media:         currentMedia,
@@ -1352,8 +1375,8 @@ function buildFullWaveform() {
 
   wavesurfer = WaveSurfer.create({
     container:     waveformDiv,
-    waveColor:     "#cec5bb",
-    progressColor: "#3b6fd4",
+    waveColor:     cssVar("--wave-color"),
+    progressColor: cssVar("--accent"),
     height:        128,
     normalize:     true,
     media:         currentMedia,
@@ -1628,9 +1651,14 @@ function collapseUploadSection() {
 function expandUploadSection() {
   uploadSection.classList.remove("upload--collapsed");
   if (pickerSection) pickerSection.hidden = false;
-  // Reset pending file so the user starts fresh
+  // Reset pending file and drop zone preview state
   pendingFile = null;
   if (fileInput) fileInput.value = "";
+  const dropPrompt  = document.getElementById("dropPrompt");
+  const filePreview = document.getElementById("filePreview");
+  if (dropPrompt)  dropPrompt.hidden  = false;
+  if (filePreview) filePreview.hidden = true;
+  dropZone?.classList.remove("has-file");
   status.textContent = "";
   setAnalyzeLoading(false);
 }
@@ -2298,8 +2326,8 @@ async function renderAnalysis(songId, analysis) {
   // --- 8. Create WaveSurfer for this block ---
   wavesurfer = WaveSurfer.create({
     container: waveformDiv,
-    waveColor: "#cec5bb",
-    progressColor: "#3b6fd4",
+    waveColor: cssVar("--wave-color"),
+    progressColor: cssVar("--accent"),
     height: 128,
     normalize: true,
     media: mediaEl,
@@ -2997,3 +3025,13 @@ window.addEventListener("popstate", () => {
 });
 
 loadSongs();
+
+// ── Header theme swatch switcher ──────────────────────────────────────────
+document.querySelectorAll(".theme-swatch").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const theme = btn.dataset.theme;
+    document.documentElement.setAttribute("data-theme", theme || "");
+    document.querySelectorAll(".theme-swatch").forEach((b) => b.classList.remove("theme-swatch--active"));
+    btn.classList.add("theme-swatch--active");
+  });
+});
