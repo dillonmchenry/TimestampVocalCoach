@@ -230,6 +230,7 @@
           <div class="mix-toggles" role="group" aria-label="Playback mix">
             <button data-role="mixRefVocal" type="button" class="mix-toggle" aria-pressed="false">Add original vocal</button>
             <button data-role="mixInstrumental" type="button" class="mix-toggle" aria-pressed="false">Add instrumental</button>
+            <button data-role="showLyrics" type="button" class="mix-toggle" aria-pressed="false" disabled>Add lyrics</button>
           </div>
         </div>
 
@@ -258,7 +259,15 @@
           </div>
           <div data-role="timeline" class="timeline"></div>
 
-          <!-- Row 5: section story (visible only when a section is focused) -->
+          <!-- Row 5: lyrics bar — toggled by "Add lyrics" button, hidden by default -->
+          <div data-role="lyricsLabel" class="tl-label" hidden>
+            <span class="tl-row-label">Lyrics</span>
+          </div>
+          <div data-role="resultsLyricsBar" class="results-lyrics-bar" hidden>
+            <div class="results-lyrics-phrase"></div>
+          </div>
+
+          <!-- Row 6: section story (visible only when a section is focused) -->
           <div class="tl-label section-story-label" hidden>
             <span class="tl-row-label">Section Story</span>
           </div>

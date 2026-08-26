@@ -789,6 +789,15 @@ h3 {
 .region.region-timing      { background: var(--accent); }
 .region.region-volume      { background: var(--warn); }
 
+/* Active selection glow — shared blue accent applied by selectMoment() */
+.region.active-glow {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+  box-shadow: 0 0 8px rgba(59, 111, 212, 0.45);
+  opacity: 1;
+  z-index: 2;
+}
+
 .caption {
   margin-top: 10px;
   color: var(--muted);
@@ -1260,6 +1269,59 @@ h3 {
   margin: 0;
 }
 
+/* ---------- Results lyrics bar ---------- */
+
+.results-lyrics-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 8px;
+  min-height: 32px;
+  background: var(--panel-2);
+  border-radius: 6px;
+}
+
+.results-lyrics-bar[hidden] {
+  display: none;
+}
+
+.results-lyrics-phrase {
+  display: flex;
+  gap: 16px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.results-word {
+  position: relative;
+  padding-bottom: 4px;
+  font-size: 15px;
+  color: var(--fg);
+  letter-spacing: 0.01em;
+  transition: color 0.12s ease;
+  white-space: nowrap;
+}
+
+.results-word--active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.results-word--active::after {
+  content: "";
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: var(--accent);
+  border-radius: 1px;
+}
+
+.results-word--sung {
+  color: var(--muted);
+}
+
 /* ---------- Rich coaching cards ---------- */
 
 .highlights {
@@ -1303,6 +1365,11 @@ h3 {
 .card:hover {
   transform: translateY(-2px);
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.09);
+}
+
+.card.active-glow {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(59, 111, 212, 0.3), 0 0 12px rgba(59, 111, 212, 0.15);
 }
 
 .card.scope-section {
