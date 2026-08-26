@@ -1195,7 +1195,7 @@ h3 {
 
 .summary-takeaways,
 .summary-trends {
-  margin-bottom: 2px;
+  margin-bottom: 14px;
 }
 
 /* ---------- Highlight category filters ---------- */
@@ -2116,6 +2116,10 @@ h3 {
 }
 
 /* Label cells (left column) */
+.tl-label[hidden] {
+  display: none;
+}
+
 .tl-label {
   display: flex;
   flex-direction: column;
