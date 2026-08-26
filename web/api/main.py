@@ -209,6 +209,10 @@ def list_songs():
     for song_dir in sorted(SONGS_ROOT.iterdir()):
         if not (song_dir / "manifest.json").is_file():
             continue
+        # Snippet bundles stay on disk for development but are omitted from
+        # the picker so the demo only lists full-length songs.
+        if song_dir.name.endswith("-snippet"):
+            continue
         try:
             manifest = load_manifest(song_dir)
         except Exception:
