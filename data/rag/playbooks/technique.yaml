@@ -19,9 +19,10 @@ entries:
       - "You matched the artist's breathy tone across 5 notes in the verse — exactly where the original uses it. That kind of stylistic awareness shows you're listening to more than just notes."
       - "Your vibrato on the held notes in the chorus mirrors the original's rate and extent closely. That's deliberate imitation at a technical level, not accident."
     practice_tip: >
-      To develop expression matching: listen to the reference phrase in isolation, then
-      immediately shadow it without accompaniment. The closer the shadow is temporally,
-      the more you're internalising the technique.
+      Loop the reference phrase three times with headphones, then immediately sing it
+      without accompaniment — your goal is to reproduce the technique before the sound
+      fades from your memory. Notice which physical element (breathiness, vibrato entry,
+      fold pressure) is hardest to hold and isolate that one element in your next repetition.
 
   - detector: expressive_moment
     pedagogy: >
@@ -36,9 +37,9 @@ entries:
       - "You added falsetto on a note where the original stays in full voice — it's a personal choice that works well in this context. That kind of stylistic ownership is worth developing."
       - "Your breathy tone on this phrase is something you brought — the original doesn't use it there. It suits the lyric well and gives the line more intimacy."
     practice_tip: >
-      Catalogue your expressive additions across takes. Which ones feel intentional vs.
-      accidental? Developing conscious control over technique additions is the difference
-      between a stylistic choice and a reflex.
+      Sing the phrase three times with the expressive addition deliberately amplified,
+      then once without it, then once with it back at the level you want. That on-off-on
+      sequence turns an instinctive reflex into a conscious choice you can reproduce at will.
 
   - detector: missed_expression
     pedagogy: >
@@ -54,8 +55,10 @@ entries:
       - "The original uses vibrato across 4 notes in the second verse — you sang those straight. The straight tone sounds clean, but adding vibrato there would bring you closer to the reference interpretation."
       - "The reference uses a glissando slide into the chorus — you didn't include it. That slide is a big part of the song's character. Try working it in on your next pass."
     practice_tip: >
-      Isolate the phrase and practice adding the missing technique in slow motion — exaggerated
-      and obvious. Once it's accessible at slow tempo, bring it back to performance speed.
+      Exaggerate the missing technique — louder, slower, more obvious — on the phrase in
+      isolation until you can produce it on demand. Once it's accessible at slow tempo,
+      bring it back to full performance speed and listen alongside the reference to confirm
+      the two are matching.
 
   - detector: vocal_texture
     pedagogy: >
@@ -72,9 +75,10 @@ entries:
       - "You're using a breathy tone across the opening verse — incomplete closure giving the tone that airy quality. The original uses it too in those phrases; you're capturing the intimate feel of the recording."
       - "Strong, full tone through the chorus — complete adduction making the voice ring out. That's the right texture for this section; the original uses the same approach."
     practice_tip: >
-      To develop texture control: alternate the same phrase between full tone and breathy
-      tone intentionally. Building the switch expands your texture vocabulary and makes
-      style choices more deliberate.
+      Sing the phrase once at your natural texture, then deliberately shift one step toward
+      the reference — if you're breathy, add a touch more firmness to the tone (less air
+      escaping); if you're full and pressed, soften slightly. That controlled shift builds
+      the texture range you need to match the original's choices on demand.
 
   - detector: vibrato_quality
     pedagogy: >
@@ -126,8 +130,8 @@ entries:
       - "The vibrato on sustained notes is 140 cents wide. That makes the pitch sound unstable rather than ornamental. Reducing jaw tension often brings extent into a more settled range."
     practice_tip: >
       Sustain a note on 'mm' (humming) and let vibrato naturally appear. Humming tends to
-      reduce laryngeal effort and usually produces a narrower, more natural extent. Carry
-      that sensation into the open vowel.
+      reduce jaw and throat tension and usually produces a narrower, more settled extent.
+      Carry that relaxed sensation into the open vowel.
 
   - detector: delayed_vibrato
     pedagogy: >
@@ -162,8 +166,8 @@ entries:
       - "Your straight tone through the verse perfectly matches the reference — the original deliberately avoids vibrato in these phrases to keep the texture intimate. You've captured that quality."
     practice_tip: >
       To build steady straight tone: sustain a note on 'mm' and actively resist any wobble.
-      Then open to 'ah' keeping that same stability. The physical sensation is a slight
-      increase in cord adduction relative to vibrato tone.
+      Then open to 'ah' keeping that same stability. The physical sensation is a slight added
+      firmness or "grip" on the tone compared to when vibrato is present.
 
   - detector: vibrato_with_support
     pedagogy: >
@@ -180,8 +184,8 @@ entries:
       - "Vibrato with steady support through the chorus. The volume doesn't waver with the pitch — that's exactly the free-tone quality that makes vibrato sound natural rather than forced."
     practice_tip: >
       To maintain this: practise sustained vibrato while monitoring volume on a meter or
-      DAW. If volume fluctuates with the vibrato rate, pressure pulsing is the source;
-      increase laryngeal relaxation.
+      DAW. If volume fluctuates with the vibrato rate, breath pulsing is the source — relax
+      your throat and jaw slightly to let the tone float more freely.
 
   - detector: technique_accuracy_tradeoff
     pedagogy: >
@@ -196,9 +200,10 @@ entries:
       - "In the sections where you're most expressive — matching the reference's techniques — your pitch accuracy drops from 68% to 41%. The techniques are pulling focus from intonation. That's a normal tradeoff that resolves as the techniques automate."
       - "High expression matching, lower pitch accuracy in the same windows. You're spending cognitive resources on stylistic execution right now; pitch will come back as the techniques become more automatic."
     practice_tip: >
-      Drill the expressive techniques separately, out of the song context, until they feel
-      effortless. When they stop requiring conscious attention, pitch accuracy will stop
-      suffering alongside them.
+      Sing the phrase twice back-to-back: first with no expression at all — just pitch and
+      rhythm — then immediately again adding the expressive technique back in. Comparing the
+      two passes helps you hear whether the technique is pulling your pitch, and trains you
+      to hold intonation even as expression comes back online.
 
   - detector: expressive_stability
     pedagogy: >

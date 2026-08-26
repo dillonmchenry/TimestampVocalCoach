@@ -144,7 +144,8 @@ entries:
     practice_tip: >
       Practise the crescendo note alone: sustain for 6 beats and consciously increase
       volume across the full duration. Monitor pitch with a tuner — crescendo often
-      sharpens pitch if subglottal pressure increase is not balanced by laryngeal relaxation.
+      sharpens pitch as you push; if that happens, ease off slightly and soften your jaw
+      and throat as the volume rises.
 
   - detector: note_swell
     pedagogy: >
@@ -177,11 +178,10 @@ entries:
       - "Your tone is fading within these notes — volume dropping about 4 dB/s during the sustain. That's mid-note support collapse, not a deliberate decrescendo. Keep the support muscles engaged through the whole note length."
       - "On these long notes the volume drops significantly after the attack settles. Breath pressure isn't being maintained through the sustain. Think of holding outward rib expansion all the way to the note's end."
     practice_tip: >
-      Hold a hand on your ribs during these notes. The ribs should stay expanded or
-      gently contract throughout the sustain — a sudden inward collapse means support
-      is cutting out. Develop the habit of gentle, sustained outward pressure. Also
-      practise messa di voce (soft-loud-soft) on the fading notes: the decrescendo half
-      trains exactly the controlled breath reduction needed to prevent an involuntary fade.
+      Before each note in the phrase, take a small top-up breath and actively engage your
+      core support as you begin the note — not after you start. The goal is to feel the
+      support already active on the very first frame of sound. Sing the phrase again and
+      notice whether the fade disappears when the support is pre-loaded rather than reactive.
 
   - detector: dynamic_sustain
     pedagogy: >
@@ -197,8 +197,8 @@ entries:
       - "Excellent dynamic sustain on the long notes — near-flat volume throughout. The tone holds its power without pushing or fading."
     practice_tip: >
       To extend this to more notes: practise sustains on all vowels ('ah', 'ee', 'oo', 'oh')
-      monitoring volume. Vowel shapes affect laryngeal posture and can introduce volume
-      variance — this exercise isolates the breath management variable.
+      monitoring volume. Different vowel shapes can subtly shift your tone placement and affect
+      how evenly you sustain — this exercise isolates the breath management variable.
 
   - detector: release_cutoff
     pedagogy: >
@@ -234,7 +234,8 @@ entries:
     practice_tip: >
       To reinforce this: practise phrase crescendos with a tuner running. The goal is
       to see the pitch needle stay centred as volume increases. If pitch sharpens, slow
-      the crescendo rate and relax the larynx during the build. The dedicated exercise
-      for this coordination is messa di voce: sustain a single pitch from pp to ff and back
-      to pp in one breath, keeping pitch locked throughout. The full soft-loud-soft arc
-      trains exactly the breath-pitch coupling that makes a crescendo phrase succeed.
+      the crescendo rate and relax your jaw and throat during the build. The dedicated
+      exercise for this coordination is a soft-loud-soft arc on a single comfortable pitch:
+      sing it quietly, gradually build to your loudest comfortable volume, then ease back
+      to quiet — all in one breath, keeping pitch steady throughout. That full dynamic arc
+      trains exactly the breath-pitch balance that makes a crescendo phrase succeed.

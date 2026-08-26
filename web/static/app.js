@@ -33,11 +33,24 @@ let mixRefVocalBtn = null;
 let mixInstrumentalBtn = null;
 let highlightList = null;
 let highlightFilters = null;
+let sectionStoryBanner = null;
 const basisFilters = document.getElementById("basisFilters");
 let overviewTiles = null;
 let overviewHeading = null;
 let segmentInfo = null;
 let backToFullSongBtn = null;
+let resultsLyricsBarEl = null;
+let resultsLyricsPhraseEl = null;
+let lyricsLabelEl = null;
+let showLyricsBtn = null;
+/** Lyrics lines for the active block: Array<{words, start_s, end_s}>. */
+let resultsLyricsLines = null;
+/** Index of the phrase line currently rendered in the lyrics bar; -1 = none. */
+let resultsLyricsLastPhraseIdx = -1;
+/** Whether the lyrics row is currently visible for the active block. */
+let lyricsOn = false;
+/** moment ID of the currently glow-highlighted region + card pair; null = none. */
+let activeGlowMomentId = null;
 const addPerformanceBar = document.getElementById("addPerformanceBar");
 const addPerformanceBtn = document.getElementById("addPerformanceBtn");
 const pickerSection = document.querySelector("section.picker");
@@ -45,6 +58,11 @@ const pickerSection = document.querySelector("section.picker");
 let pendingFile = null;
 let analysisAbortController = null;
 let wavesurfer = null;
+
+/** Read a CSS custom property from the root element at call time. */
+function cssVar(name) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
 let analysisGraph = null;
 let currentMedia = null;
 let currentDuration = 0;
@@ -72,6 +90,9 @@ let activeAnalysisIdx = -1;
 
 const MIX_LAYER_VOLUME = 0.85;
 const MIX_SYNC_THRESHOLD_S = 0.08;
+// Marker pushed into history.state when at least one analysis result is visible.
+// The popstate listener uses this to intercept accidental Back navigations.
+const RESULTS_STATE = { secondpass: "results" };
 let currentReference = null;
 let currentReferenceSongId = null;
 
@@ -691,10 +712,22 @@ analysisCancelBtn.addEventListener("click", () => {
 
 function setPendingFile(file) {
   pendingFile = file;
+  const dropPrompt   = document.getElementById("dropPrompt");
+  const filePreview  = document.getElementById("filePreview");
+  const previewName  = document.getElementById("filePreviewName");
+  const previewSize  = document.getElementById("filePreviewSize");
   if (file) {
-    status.textContent = `Selected: ${file.name} (${(file.size / 1024 / 1024).toFixed(2)} MB)`;
+    if (dropPrompt)  dropPrompt.hidden  = true;
+    if (filePreview) filePreview.hidden = false;
+    if (previewName) previewName.textContent = file.name;
+    if (previewSize) previewSize.textContent = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
+    dropZone.classList.add("has-file");
+    status.textContent = "";
     status.classList.remove("error");
   } else {
+    if (dropPrompt)  dropPrompt.hidden  = false;
+    if (filePreview) filePreview.hidden = true;
+    dropZone.classList.remove("has-file");
     status.textContent = "";
   }
   setAnalyzeLoading(false);
@@ -714,6 +747,12 @@ dropZone.addEventListener("drop", (e) => {
 fileInput.addEventListener("change", (e) => {
   const file = e.target.files?.[0];
   if (file) setPendingFile(file);
+});
+
+document.getElementById("fileRemoveBtn")?.addEventListener("click", (e) => {
+  e.stopPropagation();
+  setPendingFile(null);
+  fileInput.value = "";
 });
 
 analyzeButton.addEventListener("click", async () => {
@@ -1188,6 +1227,7 @@ function renderFullRegions() {
     region.addEventListener("click", () => {
       seekAndPlay(userStart);
       scrollToHighlightCard(region.dataset.momentId);
+      selectMoment(region.dataset.momentId);
     });
     timelineDiv.appendChild(region);
   }
@@ -1230,6 +1270,7 @@ function renderSectionRegions(section) {
     region.addEventListener("click", () => {
       seekAndPlay(userStart);
       scrollToHighlightCard(region.dataset.momentId);
+      selectMoment(region.dataset.momentId);
     });
     timelineDiv.appendChild(region);
   }
@@ -1301,8 +1342,8 @@ function buildSectionWaveform(section) {
 
   wavesurfer = WaveSurfer.create({
     container:     waveformDiv,
-    waveColor:     "#cec5bb",
-    progressColor: "#3b6fd4",
+    waveColor:     cssVar("--wave-color"),
+    progressColor: cssVar("--accent"),
     height:        128,
     normalize:     true,
     media:         currentMedia,
@@ -1348,8 +1389,8 @@ function buildFullWaveform() {
 
   wavesurfer = WaveSurfer.create({
     container:     waveformDiv,
-    waveColor:     "#cec5bb",
-    progressColor: "#3b6fd4",
+    waveColor:     cssVar("--wave-color"),
+    progressColor: cssVar("--accent"),
     height:        128,
     normalize:     true,
     media:         currentMedia,
@@ -1365,6 +1406,32 @@ function buildFullWaveform() {
   if (!fullPeaks && fullAudioUrl) wavesurfer.load(fullAudioUrl);
 
   attachPlaybackMixSync();
+}
+
+/**
+ * Show the section story banner for the given section name, or hide it.
+ * Stories come from analysis.section_stories (list of SectionStory objects).
+ */
+function updateSectionStoryBanner(sectionName) {
+  if (!sectionStoryBanner) return;
+  // The label cell is the previous sibling element inside the grid.
+  const labelCell = sectionStoryBanner.previousElementSibling;
+  const stories = currentAnalysis?.section_stories ?? [];
+  const story = stories.find(s => s.section_name === sectionName);
+  if (!story) {
+    sectionStoryBanner.hidden = true;
+    if (labelCell) labelCell.hidden = true;
+    return;
+  }
+  const narrative = story.narrative || story.deterministic_summary || "";
+  if (!narrative) {
+    sectionStoryBanner.hidden = true;
+    if (labelCell) labelCell.hidden = true;
+    return;
+  }
+  sectionStoryBanner.innerHTML = `<p class="story-narrative">${narrative}</p>`;
+  sectionStoryBanner.hidden = false;
+  if (labelCell) labelCell.hidden = false;
 }
 
 /**
@@ -1395,6 +1462,9 @@ async function setSectionFocus(section) {
   // 6. Filter coaching cards to section
   const reference = await getReferenceAnnotation(currentPlaybackSongId).catch(() => null);
   renderCoachingCards(reference ?? currentReference, currentAnalysis);
+
+  // 7. Show section story banner above cards
+  updateSectionStoryBanner(section.name);
 }
 
 /**
@@ -1423,6 +1493,13 @@ async function clearSectionFocus() {
   // Restore all coaching cards
   const reference = await getReferenceAnnotation(currentPlaybackSongId).catch(() => null);
   renderCoachingCards(reference ?? currentReference, currentAnalysis);
+
+  // Hide section story banner and its label cell
+  if (sectionStoryBanner) {
+    sectionStoryBanner.hidden = true;
+    const labelCell = sectionStoryBanner.previousElementSibling;
+    if (labelCell) labelCell.hidden = true;
+  }
 }
 
 // ---- End section focus helpers -------------------------------------------
@@ -1451,6 +1528,7 @@ function activateBlock(idx) {
     prev.focusedSection  = focusedSection;
     prev.mixRefVocalOn   = mixRefVocalOn;
     prev.mixInstrumentalOn = mixInstrumentalOn;
+    prev.lyricsOn        = lyricsOn;
   }
 
   // Detach playback sync from the old block before switching
@@ -1473,6 +1551,7 @@ function activateBlock(idx) {
   instrumentalMedia    = block.instrumentalMedia;
   mixRefVocalOn        = block.mixRefVocalOn;
   mixInstrumentalOn    = block.mixInstrumentalOn;
+  lyricsOn             = block.lyricsOn ?? false;
 
   // Update per-block DOM element references
   const container = block.container;
@@ -1482,6 +1561,7 @@ function activateBlock(idx) {
   overviewTiles      = container.querySelector('[data-role="overviewTiles"]');
   overviewHeading    = container.querySelector('[data-role="overviewHeading"]');
   highlightList      = container.querySelector('[data-role="highlightList"]');
+  sectionStoryBanner = container.querySelector('[data-role="sectionStoryBanner"]');
   segmentInfo        = container.querySelector('[data-role="segmentInfo"]');
   performanceSummaryEl = container.querySelector('[data-role="performanceSummary"]');
   // Playback bar buttons are now per-block (inside the template)
@@ -1490,6 +1570,12 @@ function activateBlock(idx) {
   mixInstrumentalBtn = container.querySelector('[data-role="mixInstrumental"]');
   backToFullSongBtn  = container.querySelector('[data-role="backToFullSong"]');
   highlightFilters   = container.querySelector('[data-role="highlightFilters"]');
+  resultsLyricsBarEl    = container.querySelector('[data-role="resultsLyricsBar"]');
+  resultsLyricsPhraseEl = resultsLyricsBarEl?.querySelector('.results-lyrics-phrase') ?? null;
+  lyricsLabelEl         = container.querySelector('[data-role="lyricsLabel"]');
+  showLyricsBtn         = container.querySelector('[data-role="showLyrics"]');
+  resultsLyricsLines    = block.lyricsLines ?? null;
+  resultsLyricsLastPhraseIdx = -1;
 
   // Wire click handlers to this block's playback bar
   wirePlaybackBarListeners();
@@ -1506,6 +1592,15 @@ function activateBlock(idx) {
     mixInstrumentalBtn.setAttribute("aria-pressed", String(mixInstrumentalOn));
   }
   if (backToFullSongBtn) backToFullSongBtn.hidden = (block.focusedSection == null);
+  // Sync lyrics toggle state for this block
+  if (showLyricsBtn) {
+    const hasLyrics = (block.lyricsLines?.length ?? 0) > 0;
+    showLyricsBtn.disabled = !hasLyrics;
+    showLyricsBtn.classList.toggle("active", lyricsOn);
+    showLyricsBtn.setAttribute("aria-pressed", String(lyricsOn));
+  }
+  if (resultsLyricsBarEl) resultsLyricsBarEl.hidden = !lyricsOn;
+  if (lyricsLabelEl) lyricsLabelEl.hidden = !lyricsOn;
 
   // Re-attach playback sync for the newly active block
   if (block.wavesurfer || block.mediaEl) {
@@ -1557,6 +1652,7 @@ function removeBlock(idx) {
     backToFullSongBtn    = null;
     highlightFilters     = null;
     highlightList        = null;
+    sectionStoryBanner   = null;
     overviewTiles        = null;
     overviewHeading      = null;
     segmentInfo          = null;
@@ -1586,9 +1682,14 @@ function collapseUploadSection() {
 function expandUploadSection() {
   uploadSection.classList.remove("upload--collapsed");
   if (pickerSection) pickerSection.hidden = false;
-  // Reset pending file so the user starts fresh
+  // Reset pending file and drop zone preview state
   pendingFile = null;
   if (fileInput) fileInput.value = "";
+  const dropPrompt  = document.getElementById("dropPrompt");
+  const filePreview = document.getElementById("filePreview");
+  if (dropPrompt)  dropPrompt.hidden  = false;
+  if (filePreview) filePreview.hidden = true;
+  dropZone?.classList.remove("has-file");
   status.textContent = "";
   setAnalyzeLoading(false);
 }
@@ -1708,6 +1809,41 @@ function scrollToHighlightCard(momentId) {
   const delta =
     cardRect.left + cardRect.width / 2 - (listRect.left + listRect.width / 2);
   highlightList.scrollBy({ left: delta, behavior: "smooth" });
+}
+
+/**
+ * Highlight the timeline region and coaching card that belong to `momentId`
+ * with a blue glow border, and clear any previous selection. Pass null to
+ * clear without setting a new selection.
+ */
+function selectMoment(momentId) {
+  activeGlowMomentId = momentId;
+  if (timelineDiv) {
+    for (const el of timelineDiv.querySelectorAll(".region.active-glow")) {
+      el.classList.remove("active-glow");
+    }
+    if (momentId) {
+      const safe = typeof CSS !== "undefined" && CSS.escape
+        ? CSS.escape(momentId)
+        : momentId.replace(/["\\]/g, "\\$&");
+      timelineDiv
+        .querySelector(`.region[data-moment-id="${safe}"]`)
+        ?.classList.add("active-glow");
+    }
+  }
+  if (highlightList) {
+    for (const el of highlightList.querySelectorAll(".card.active-glow")) {
+      el.classList.remove("active-glow");
+    }
+    if (momentId) {
+      const safe = typeof CSS !== "undefined" && CSS.escape
+        ? CSS.escape(momentId)
+        : momentId.replace(/["\\]/g, "\\$&");
+      highlightList
+        .querySelector(`.card[data-moment-id="${safe}"]`)
+        ?.classList.add("active-glow");
+    }
+  }
 }
 
 function renderCoachingCards(reference, analysis) {
@@ -1863,6 +1999,7 @@ function renderCoachingCards(reference, analysis) {
     card.addEventListener("click", () => {
       playRanged(userStart, userEnd);
       scrollToHighlightCard(card.dataset.momentId);
+      selectMoment(card.dataset.momentId);
     });
     highlightList.appendChild(card);
   }
@@ -2094,12 +2231,74 @@ function detachPlaybackMixSync() {
   playbackSyncAbort = null;
 }
 
+/**
+ * Update the results lyrics bar to show the phrase that is currently being
+ * sung and apply a blue underline to the active word.
+ *
+ * Timing is in song time (reference time), obtained by subtracting
+ * global_offset_s from the performance playback position.
+ */
+function updateResultsLyricsBar() {
+  if (!resultsLyricsBarEl || !resultsLyricsPhraseEl) return;
+  const lines = resultsLyricsLines;
+  if (!lines || !lines.length) return;
+
+  const userTime = getPerformanceTime();
+  const offset = currentAnalysis?.global_offset_s ?? 0;
+  const songTime = songTimeFromUser(userTime, offset);
+
+  // Find which phrase line is currently being sung.
+  let activeLineIdx = -1;
+  for (let i = 0; i < lines.length; i++) {
+    if (songTime >= lines[i].start_s && songTime < lines[i].end_s) {
+      activeLineIdx = i;
+      break;
+    }
+  }
+
+  // During gaps between lines fall back to the most recent completed line so
+  // the display doesn't go blank between phrases.
+  let displayLineIdx = activeLineIdx;
+  if (displayLineIdx === -1) {
+    for (let i = lines.length - 1; i >= 0; i--) {
+      if (lines[i].end_s <= songTime) { displayLineIdx = i; break; }
+    }
+    // Before the first sung word show the first line dimmed.
+    if (displayLineIdx === -1) displayLineIdx = 0;
+  }
+
+  // Rebuild phrase DOM only when the displayed line changes to avoid thrashing.
+  if (displayLineIdx !== resultsLyricsLastPhraseIdx) {
+    resultsLyricsLastPhraseIdx = displayLineIdx;
+    resultsLyricsPhraseEl.innerHTML = "";
+    for (const w of lines[displayLineIdx].words) {
+      const span = document.createElement("span");
+      span.className = "results-word";
+      span.textContent = w.word;
+      span.dataset.startS = w.start_s;
+      span.dataset.endS = w.end_s;
+      resultsLyricsPhraseEl.appendChild(span);
+    }
+  }
+
+  // Refresh active / sung classes on every sync call.
+  for (const span of resultsLyricsPhraseEl.querySelectorAll(".results-word")) {
+    const wStart = parseFloat(span.dataset.startS);
+    const wEnd   = parseFloat(span.dataset.endS);
+    const isActive = songTime >= wStart && songTime < wEnd;
+    const isSung   = !isActive && songTime >= wEnd;
+    span.classList.toggle("results-word--active", isActive);
+    span.classList.toggle("results-word--sung",   isSung);
+  }
+}
+
 function attachPlaybackMixSync() {
   detachPlaybackMixSync();
   playbackSyncAbort = new AbortController();
   const { signal } = playbackSyncAbort;
   const sync = () => {
     syncMixLayers(getPerformanceTime(), isPerformancePlaying());
+    updateResultsLyricsBar();
   };
   if (currentMedia) {
     for (const ev of ["play", "pause", "timeupdate", "seeked", "ended"]) {
@@ -2184,6 +2383,12 @@ async function renderAnalysis(songId, analysis) {
   };
   analyses.push(blockState);
 
+  // Push a history entry the first time results appear so that a browser Back
+  // gesture is intercepted by the popstate listener instead of leaving the page.
+  if (!history.state?.secondpass) {
+    history.pushState(RESULTS_STATE, "");
+  }
+
   // --- 3. Append block and reveal results container ---
   resultsContainer.hidden = false;
   resultsContainer.appendChild(blockEl);
@@ -2250,8 +2455,8 @@ async function renderAnalysis(songId, analysis) {
   // --- 8. Create WaveSurfer for this block ---
   wavesurfer = WaveSurfer.create({
     container: waveformDiv,
-    waveColor: "#cec5bb",
-    progressColor: "#3b6fd4",
+    waveColor: cssVar("--wave-color"),
+    progressColor: cssVar("--accent"),
     height: 128,
     normalize: true,
     media: mediaEl,
@@ -2304,6 +2509,18 @@ async function renderAnalysis(songId, analysis) {
 
   // Rich coaching cards.
   renderCoachingCards(sectionReference, analysis);
+
+  // Build results lyrics bar data from the reference word timing.
+  // The row stays hidden until the user enables "Add lyrics"; just enable
+  // the toggle button if timing data is available.
+  const lyricsLines = buildLyricsLines(sectionReference);
+  blockState.lyricsLines = lyricsLines;
+  blockState.lyricsOn = false;
+  resultsLyricsLines = lyricsLines;
+  resultsLyricsLastPhraseIdx = -1;
+  if (showLyricsBtn) {
+    showLyricsBtn.disabled = lyricsLines.length === 0;
+  }
 
   // --- 11. Make the block interactive: clicking it activates its playback ---
   // Use a live index lookup so this still works after earlier blocks are deleted.
@@ -2372,6 +2589,16 @@ function wirePlaybackBarListeners() {
   backToFullSongBtn?.addEventListener("click", () => {
     clearSectionFocus().catch(console.error);
   }, { signal });
+
+  showLyricsBtn?.addEventListener("click", () => {
+    lyricsOn = !lyricsOn;
+    const block = analyses[activeAnalysisIdx];
+    if (block) block.lyricsOn = lyricsOn;
+    showLyricsBtn.classList.toggle("active", lyricsOn);
+    showLyricsBtn.setAttribute("aria-pressed", String(lyricsOn));
+    if (resultsLyricsBarEl) resultsLyricsBarEl.hidden = !lyricsOn;
+    if (lyricsLabelEl) lyricsLabelEl.hidden = !lyricsOn;
+  }, { signal });
 }
 
 // ---------------------------------------------------------------------------
@@ -2403,7 +2630,7 @@ let karaokeLastScrollFocusIdx = -1; // tracks which line we last scrolled to
 
 // Reference vocal playback during karaoke.
 let karaokeRefVocalMedia = null;
-let karaokeRefVocalOn = false;
+let karaokeRefVocalOn = true;  // default ON per advisor feedback
 
 // Web Audio API handles for the live mic waveform.
 let karaokeAudioCtx = null;
@@ -2414,8 +2641,26 @@ let karaokeVizData = null;  // Uint8Array reused each frame
  * Encode collected PCM buffers into a 16-bit mono WAV Blob.
  * Runs entirely in the browser — the server receives a plain WAV file that
  * soundfile can open without any conversion or audioread fallback.
+ *
+ * A peak-scan pass normalizes the signal if any sample exceeds 1.0 to
+ * prevent hard digital clipping on hot mic inputs, while leaving the
+ * dynamics untouched for normal recordings.
  */
 function _wavEncode(buffers, sampleRate) {
+  // Scan for the true peak across all collected chunks.
+  let peak = 0;
+  for (const buf of buffers) {
+    for (let i = 0; i < buf.length; i++) {
+      const abs = Math.abs(buf[i]);
+      if (abs > peak) peak = abs;
+    }
+  }
+  // Only normalize when the signal actually clips; leave clean recordings as-is.
+  const gain = peak > 1.0 ? 1.0 / peak : 1.0;
+  if (peak > 1.0) {
+    console.warn(`[_wavEncode] peak=${peak.toFixed(3)}, auto-normalized to avoid clipping`);
+  }
+
   const totalSamples = buffers.reduce((s, b) => s + b.length, 0);
   const ab = new ArrayBuffer(44 + totalSamples * 2);
   const v = new DataView(ab);
@@ -2433,7 +2678,7 @@ function _wavEncode(buffers, sampleRate) {
   let off = 44;
   for (const buf of buffers) {
     for (let i = 0; i < buf.length; i++) {
-      const s = Math.max(-1, Math.min(1, buf[i]));
+      const s = Math.max(-1, Math.min(1, buf[i] * gain));
       v.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
       off += 2;
     }
@@ -2474,15 +2719,16 @@ modeKaraokeBtn.addEventListener("click", async () => {
   buildKaraokeLyrics(reference);
 });
 
-function buildKaraokeLyrics(reference) {
-  karaokeLyrics.innerHTML = "";
-  karaokeWordRows = [];
-  karaokeLinesArr = [];
-  karaokeLastScrollFocusIdx = -1;
-  if (!reference || !Array.isArray(reference.notes)) {
-    karaokeLyrics.innerHTML = `<p class="hint">Lyrics will appear here once a reference annotation is available.</p>`;
-    return;
-  }
+/**
+ * Convert a reference annotation into an array of lyric phrase lines, each
+ * containing its constituent words with timing data.
+ *
+ * Returns: Array<{ words: Array<{word, start_s, end_s}>, start_s, end_s }>
+ *
+ * Shared by the karaoke sing-along view and the results lyrics bar.
+ */
+function buildLyricsLines(reference) {
+  if (!reference || !Array.isArray(reference.notes)) return [];
 
   // Deduplicate notes into unique words by word_index.
   // phrase_break_before is True on the first note of each word that
@@ -2500,8 +2746,7 @@ function buildKaraokeLyrics(reference) {
         phrase_break_before: !!note.phrase_break_before,
       });
     } else {
-      const entry = wordsMap.get(wordIdx);
-      entry.end_s = Math.max(entry.end_s, note.end_s);
+      wordsMap.get(wordIdx).end_s = Math.max(wordsMap.get(wordIdx).end_s, note.end_s);
     }
   }
   const words = [...wordsMap.values()].filter((w) => w.word);
@@ -2541,6 +2786,25 @@ function buildKaraokeLyrics(reference) {
   }
   if (currentLine.length > 0) rawLines.push(currentLine);
 
+  return rawLines.map((lineWords) => ({
+    words: lineWords,
+    start_s: lineWords[0].start_s,
+    end_s: lineWords[lineWords.length - 1].end_s,
+  }));
+}
+
+function buildKaraokeLyrics(reference) {
+  karaokeLyrics.innerHTML = "";
+  karaokeWordRows = [];
+  karaokeLinesArr = [];
+  karaokeLastScrollFocusIdx = -1;
+  if (!reference || !Array.isArray(reference.notes)) {
+    karaokeLyrics.innerHTML = `<p class="hint">Lyrics will appear here once a reference annotation is available.</p>`;
+    return;
+  }
+
+  const lines = buildLyricsLines(reference);
+
   // Top spacer lets the first line scroll to the visual center of the container.
   const topSpacer = document.createElement("div");
   topSpacer.className = "karaoke-lyric-spacer";
@@ -2548,12 +2812,12 @@ function buildKaraokeLyrics(reference) {
   karaokeLyrics.appendChild(topSpacer);
 
   // Build DOM: one .karaoke-line per group.
-  for (const lineWords of rawLines) {
+  for (const line of lines) {
     const lineDiv = document.createElement("div");
     lineDiv.className = "karaoke-line upcoming";
 
     const wordItems = [];
-    for (const w of lineWords) {
+    for (const w of line.words) {
       const span = document.createElement("span");
       span.className = "karaoke-word";
       span.textContent = w.word + " ";
@@ -2567,8 +2831,8 @@ function buildKaraokeLyrics(reference) {
     karaokeLinesArr.push({
       div: lineDiv,
       words: wordItems,
-      start_s: lineWords[0].start_s,
-      end_s: lineWords[lineWords.length - 1].end_s,
+      start_s: line.start_s,
+      end_s: line.end_s,
     });
   }
 
@@ -2734,14 +2998,14 @@ async function endKaraokeSession({ analyze }) {
   karaokeCancelBtn.disabled = true;
   cancelAnimationFrame(karaokeRafHandle);
 
-  // Stop reference vocal playback and reset toggle.
+  // Stop reference vocal playback and reset toggle to default ON for next take.
   if (karaokeRefVocalMedia) {
     karaokeRefVocalMedia.pause();
     karaokeRefVocalMedia = null;
   }
-  karaokeRefVocalOn = false;
-  karaokeRefVocalBtn.classList.remove("active");
-  karaokeRefVocalBtn.setAttribute("aria-pressed", "false");
+  karaokeRefVocalOn = true;
+  karaokeRefVocalBtn.classList.add("active");
+  karaokeRefVocalBtn.setAttribute("aria-pressed", "true");
 
   if (karaokeStream) {
     karaokeStream.getTracks().forEach((t) => t.stop());
@@ -2819,7 +3083,13 @@ karaokeRecordBtn.addEventListener("click", async () => {
     return;
   }
   try {
-    karaokeStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    karaokeStream = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: false,
+        noiseSuppression: false,
+        autoGainControl: false,
+      },
+    });
   } catch (e) {
     status.textContent = `Mic permission denied: ${e.message}`;
     status.classList.add("error");
@@ -2845,7 +3115,13 @@ karaokeRecordBtn.addEventListener("click", async () => {
     karaokePcmBuffers.push(new Float32Array(e.inputBuffer.getChannelData(0)));
   };
   micSrc.connect(karaokeScriptNode);
-  karaokeScriptNode.connect(karaokeAudioCtx.destination);
+  // Route through a zero-gain node so onaudioprocess fires reliably (it
+  // requires the node to be connected to the graph) but mic audio does not
+  // reach the speakers, preventing acoustic feedback and AEC interference.
+  const muteNode = karaokeAudioCtx.createGain();
+  muteNode.gain.value = 0;
+  karaokeScriptNode.connect(muteNode);
+  muteNode.connect(karaokeAudioCtx.destination);
   karaokeViz.hidden = false;
 
   // Play instrumental
@@ -2857,11 +3133,21 @@ karaokeRecordBtn.addEventListener("click", async () => {
     /* autoplay restrictions may block; the user can click the visible controls */
   });
 
-  // Preload reference vocal so the toggle can start it instantly.
+  // Load reference vocal and start it immediately (default ON).
   karaokeRefVocalMedia = new Audio();
   karaokeRefVocalMedia.preload = "auto";
   karaokeRefVocalMedia.src = apiUrl(`/api/songs/${encodeURIComponent(songId)}/audio/reference`);
   karaokeRefVocalMedia.volume = MIX_LAYER_VOLUME;
+
+  // Sync button UI to current state before potentially auto-playing.
+  karaokeRefVocalBtn.classList.toggle("active", karaokeRefVocalOn);
+  karaokeRefVocalBtn.setAttribute("aria-pressed", String(karaokeRefVocalOn));
+
+  if (karaokeRefVocalOn) {
+    // Start reference vocal in sync with the instrumental (same user gesture).
+    karaokeRefVocalMedia.currentTime = karaokeAudio.currentTime;
+    karaokeRefVocalMedia.play().catch(() => {});
+  }
 
   karaokeStartTs = performance.now();
   karaokeRecordBtn.disabled = true;
@@ -2891,4 +3177,31 @@ karaokeRefVocalBtn.addEventListener("click", () => {
   }
 });
 
+// Intercept browser Back while analysis results are held in memory.
+// Without this, a horizontal overscroll that escapes the card list (or a
+// trackpad/swipe gesture starting at the viewport edge) would navigate away
+// and destroy the in-memory session.
+window.addEventListener("popstate", () => {
+  if (analyses.length > 0) {
+    // Re-push so consecutive Back presses are also intercepted.
+    history.pushState(RESULTS_STATE, "");
+    // Restore the results view in case it was hidden.
+    resultsContainer.hidden = false;
+    collapseUploadSection();
+    activateBlock(activeAnalysisIdx >= 0 ? activeAnalysisIdx : analyses.length - 1);
+  }
+  // If analyses is empty the event is not cancelled, letting the browser
+  // navigate away normally (e.g. to a previous site).
+});
+
 loadSongs();
+
+// ── Header theme swatch switcher ──────────────────────────────────────────
+document.querySelectorAll(".theme-swatch").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const theme = btn.dataset.theme;
+    document.documentElement.setAttribute("data-theme", theme || "");
+    document.querySelectorAll(".theme-swatch").forEach((b) => b.classList.remove("theme-swatch--active"));
+    btn.classList.add("theme-swatch--active");
+  });
+});

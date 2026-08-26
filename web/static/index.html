@@ -6,13 +6,30 @@
   <title>SecondPass</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=Space+Grotesk:wght@600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
 </head>
 <body>
   <header>
-    <h1>SecondPass</h1>
-    <p class="subtitle">An interpretable vocal coach with timestamped coaching cards</p>
+    <div class="header-brand">
+      <svg class="header-logo" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="2"  y="17" width="4" height="6"  rx="2" fill="currentColor" opacity="0.5"/>
+        <rect x="9"  y="12" width="4" height="16" rx="2" fill="currentColor" opacity="0.65"/>
+        <rect x="16" y="6"  width="4" height="28" rx="2" fill="currentColor"/>
+        <rect x="23" y="9"  width="4" height="22" rx="2" fill="currentColor" opacity="0.8"/>
+        <rect x="30" y="14" width="4" height="12" rx="2" fill="currentColor" opacity="0.55"/>
+        <rect x="37" y="18" width="3" height="5"  rx="1.5" fill="currentColor" opacity="0.35"/>
+      </svg>
+      <div class="header-text">
+        <h1>SecondPass</h1>
+        <p class="subtitle">An interpretable vocal coaching system providing timestamped feedback and targeted exercises</p>
+      </div>
+      <div class="header-theme-switch" role="group" aria-label="Color theme">
+        <button class="theme-swatch theme-swatch--active" data-theme=""          style="--swatch-bg: #f7f3ee" title="Original"       aria-label="Original theme"></button>
+        <button class="theme-swatch"                      data-theme="charcoal"  style="--swatch-bg: #2a2a32" title="Warm Charcoal"  aria-label="Warm Charcoal theme"></button>
+        <button class="theme-swatch"                      data-theme="midnight"  style="--swatch-bg: #6d28d9" title="Midnight Purple" aria-label="Midnight Purple theme"></button>
+      </div>
+    </div>
   </header>
 
   <main>
@@ -30,18 +47,36 @@
     <section class="upload">
       <div class="mode-toggle">
         <button id="modeUpload" class="mode-btn active" type="button">Upload a recording</button>
-        <button id="modeKaraoke" class="mode-btn" type="button">Sing along (karaoke)</button>
+        <button id="modeKaraoke" class="mode-btn" type="button">Karaoke Sing Along</button>
       </div>
 
 
       <div id="uploadPanel" class="mode-panel">
         <div id="dropZone" class="drop-zone">
-          <p>Drag &amp; drop your performance audio here</p>
-          <p class="hint">or</p>
-          <label class="browse">
-            Browse for a file
-            <input id="fileInput" type="file" accept="audio/*" />
-          </label>
+          <div id="dropPrompt">
+            <svg class="drop-prompt-icon" width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+              <path d="M12 16V8m0 0-3 3m3-3 3 3" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M6.5 18a4.5 4.5 0 0 1-.42-8.98A6 6 0 1 1 18 12.5a3.5 3.5 0 0 1-1.5 6.68" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            <p class="drop-prompt-text">Drag &amp; drop your performance audio here</p>
+            <p class="hint">or</p>
+            <label class="browse">
+              Browse for a file
+              <input id="fileInput" type="file" accept="audio/*" />
+            </label>
+          </div>
+          <div id="filePreview" class="file-preview" hidden>
+            <button id="fileRemoveBtn" class="file-remove-btn" type="button" aria-label="Remove file">
+              <svg width="10" height="10" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <line x1="1" y1="1" x2="9" y2="9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+                <line x1="9" y1="1" x2="1" y2="9" stroke="currentColor" stroke-width="1.75" stroke-linecap="round"/>
+              </svg>
+            </button>
+            <div class="file-preview-info">
+              <span id="filePreviewName" class="file-preview-name"></span>
+              <span id="filePreviewSize" class="file-preview-size"></span>
+            </div>
+          </div>
         </div>
         <button id="analyzeButton" type="button" disabled>
           <span class="analyze-btn-inner">
@@ -61,8 +96,8 @@
             <button
               id="karaokeRefVocal"
               type="button"
-              class="mix-toggle"
-              aria-pressed="false"
+              class="mix-toggle active"
+              aria-pressed="true"
               title="Play reference vocals alongside the instrumental"
             >
               Original vocal
@@ -70,8 +105,7 @@
           </div>
         </div>
         <p class="hint">
-          Plays the instrumental. Sing along — your mic is recorded and sent through the
-          same analysis pipeline as an upload.
+          Sing along to the instrumental karaoke-style. Your mic is recorded and sent through the analysis pipeline for feedback.
         </p>
         <canvas id="karaokeViz" class="karaoke-viz" hidden></canvas>
         <div id="karaokeLyrics" class="karaoke-lyrics"></div>
@@ -196,6 +230,7 @@
           <div class="mix-toggles" role="group" aria-label="Playback mix">
             <button data-role="mixRefVocal" type="button" class="mix-toggle" aria-pressed="false">Add original vocal</button>
             <button data-role="mixInstrumental" type="button" class="mix-toggle" aria-pressed="false">Add instrumental</button>
+            <button data-role="showLyrics" type="button" class="mix-toggle" aria-pressed="false" disabled>Add lyrics</button>
           </div>
         </div>
 
@@ -223,6 +258,20 @@
             <span class="tl-row-label">Highlights</span>
           </div>
           <div data-role="timeline" class="timeline"></div>
+
+          <!-- Row 5: lyrics bar — toggled by "Add lyrics" button, hidden by default -->
+          <div data-role="lyricsLabel" class="tl-label" hidden>
+            <span class="tl-row-label">Lyrics</span>
+          </div>
+          <div data-role="resultsLyricsBar" class="results-lyrics-bar" hidden>
+            <div class="results-lyrics-phrase"></div>
+          </div>
+
+          <!-- Row 6: section story (visible only when a section is focused) -->
+          <div class="tl-label section-story-label" hidden>
+            <span class="tl-row-label">Section Story</span>
+          </div>
+          <div data-role="sectionStoryBanner" class="section-story-banner" hidden></div>
         </div>
         <div data-role="highlightList" class="highlights"></div>
       </section>

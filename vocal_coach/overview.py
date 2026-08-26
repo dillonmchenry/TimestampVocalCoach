@@ -37,9 +37,11 @@ from vocal_coach.schemas import (
 
 
 # Mimic-score blend weights (must sum to 1.0).
-_W_PITCH = 0.60
+# Timing is de-emphasised so the headline score reflects pitch and expressiveness
+# rather than timing precision, which is less meaningful for recreational singers.
+_W_PITCH = 0.70
 _W_TECH = 0.25
-_W_ARRIVAL = 0.15
+_W_ARRIVAL = 0.05
 
 _EXPRESSIVE_TECHS = frozenset(
     ["vibrato", "glissando", "falsetto", "breathe", "pharyngeal", "mixed", "bubble", "weak", "strong"]
@@ -84,6 +86,7 @@ def compute_overview(
     octave_shift_semitones: int = 0,
     arrival_late_ms: float = 150.0,
     arrival_edge_margin_ms: float = 20.0,
+    alignment_warning: bool = False,
 ) -> Optional[PerformanceOverview]:
     """Build a ``PerformanceOverview`` from note-level measurements.
 
@@ -203,6 +206,7 @@ def compute_overview(
         mimic_score=mimic_score,
         note_count=len(notes),
         strongest_section=strongest_section,
+        alignment_warning=alignment_warning,
     )
 
 

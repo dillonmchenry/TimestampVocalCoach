@@ -39,8 +39,8 @@ if str(ROOT) not in sys.path:
 
 from vocal_coach.align_v2 import measure_song  # noqa: E402
 from vocal_coach.coaching_config import CoachingConfig, DEFAULT_CONFIG_RELPATH  # noqa: E402
-from vocal_coach.feedback import generate_performance_summary, rewrite_card_summaries  # noqa: E402
-from vocal_coach.highlights import select_highlights  # noqa: E402
+from vocal_coach.feedback import generate_performance_summary, rewrite_card_summaries, rewrite_section_stories  # noqa: E402
+from vocal_coach.highlights import generate_section_stories, select_highlights  # noqa: E402
 from vocal_coach.llm import LLMClient  # noqa: E402
 from vocal_coach.loudness import compute_loudness, write_loudness_track  # noqa: E402
 from vocal_coach.overview import compute_overview  # noqa: E402
@@ -296,6 +296,7 @@ def main() -> int:
         config=coaching_cfg,
     )
     section_trends = compute_section_trends(reference, notes, techniques)
+    section_stories = generate_section_stories(section_trends, notes, techniques, config=coaching_cfg)
 
     # Sprint 3: load vocal profile for emphasis weighting (optional — no-op if absent)
     vocal_profile_path = song_dir / (manifest.vocal_profile_path or "vocal_profile.json")
@@ -342,6 +343,16 @@ def main() -> int:
             max_tokens=coaching_cfg.llm.card_rewrite_max_tokens,
         )
 
+        print("[analyze] section stories : calling LLM…")
+        rewrite_section_stories(
+            section_stories,
+            highlights.moments,
+            llm=llm_client,
+            vocal_profile=vocal_profile,
+            song_title=manifest.title,
+            artist=manifest.artist,
+        )
+
         print("[analyze] perf summary    : calling LLM…")
         perf_summary = generate_performance_summary(
             highlights.moments,
@@ -385,6 +396,7 @@ def main() -> int:
         techniques=techniques,
         highlights=highlights,
         sections=section_trends,
+        section_stories=section_stories,
         overview=overview,
         performance_summary=perf_summary,
     )

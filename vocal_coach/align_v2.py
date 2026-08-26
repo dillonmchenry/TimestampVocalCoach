@@ -28,6 +28,7 @@ Pipeline:
 from __future__ import annotations
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Iterable, Optional
 
 import numpy as np
@@ -182,6 +183,8 @@ def estimate_global_offset_s(
     pitch_user: PitchTrack,
     *,
     config: Optional[CoachingConfig] = None,
+    search_range_s: Optional[float] = None,
+    center_offset_s: float = 0.0,
 ) -> float:
     """Estimate ``offset`` such that ``song_time = user_time - offset``.
 
@@ -189,25 +192,35 @@ def estimate_global_offset_s(
     against the user's NanoPitch voicing track on a discrete offset grid.
     The score is the count of frames where both expectations agree, with a
     small penalty per offset to break ties.
+
+    ``search_range_s`` overrides ``config.global_offset.search_range_s``
+    when provided (useful for the upload / chart-validation paths that need
+    a wider window without permanently changing the config).
+
+    ``center_offset_s`` shifts the entire search grid so the window is
+    centred on a known coarse estimate (e.g. from a chroma cross-correlation
+    pre-pass) rather than on zero.  The default of 0.0 preserves the
+    existing behaviour exactly.
     """
     cfg = (config or CoachingConfig()).global_offset
     user = PitchArrays.from_track(pitch_user)
     if user.times.size == 0:
-        return 0.0
+        return center_offset_s
     user_voiced = user.voicing >= cfg.voicing_threshold
     if not user_voiced.any():
-        return 0.0
+        return center_offset_s
 
     hop = max(user.hop_seconds, 1e-6)
-    search_steps = int(round(cfg.search_range_s / cfg.step_s))
-    offsets = np.arange(-search_steps, search_steps + 1, dtype=np.float64) * cfg.step_s
+    effective_range = search_range_s if search_range_s is not None else cfg.search_range_s
+    search_steps = int(round(effective_range / cfg.step_s))
+    offsets = center_offset_s + np.arange(-search_steps, search_steps + 1, dtype=np.float64) * cfg.step_s
     if offsets.size == 0:
-        return 0.0
+        return center_offset_s
 
     # Pre-compute per-frame song time for *zero* offset.
     song_times_zero = user.times.copy()
 
-    best_offset = 0.0
+    best_offset = center_offset_s
     best_score = -np.inf
     min_overlap_frames = int(round(cfg.min_voiced_overlap_s / hop))
 
@@ -218,7 +231,7 @@ def estimate_global_offset_s(
         if agree.sum() < min_overlap_frames:
             continue
         # Penalize larger offsets very slightly to prefer the closest match.
-        score = float(agree.sum()) - 0.05 * abs(off) / cfg.step_s
+        score = float(agree.sum()) - 0.05 * abs(off - center_offset_s) / cfg.step_s
         if score > best_score:
             best_score = score
             best_offset = float(off)
@@ -280,6 +293,220 @@ def estimate_octave_shift_semitones(
     steps = int(round(median_residual / 12.0))
     steps = max(-max_octaves, min(max_octaves, steps))
     return steps * 12
+
+
+def estimate_offset_via_chroma(
+    ref_audio_path: Path,
+    user_audio_path: Path,
+    *,
+    config: Optional[CoachingConfig] = None,
+    search_range_s: Optional[float] = None,
+) -> tuple[float, float]:
+    """Coarse pitch-class cross-correlation between reference and user audio.
+
+    Computes 12-bin chroma features for both files, then sweeps a lag grid
+    to find the offset that maximises the sum of per-frame dot products.
+    Returns ``(offset_s, confidence)`` where ``confidence`` is the normalised
+    peak of the correlation function (0 = no agreement, 1 = perfect).
+
+    The offset convention matches ``estimate_global_offset_s``:
+    ``song_time = user_time - offset``.  A positive value means the user
+    recording starts later in wall-clock time than the reference.
+
+    This function is octave-invariant (chroma folds all octaves into 12 bins)
+    and insensitive to loudness differences (frames are L2-normalised before
+    correlation).
+
+    ``librosa`` is already a project dependency; no new packages required.
+    """
+    import librosa  # lazy import – already required by pitch.py / loudness.py
+
+    cfg = (config or CoachingConfig()).global_offset
+    effective_range = search_range_s if search_range_s is not None else cfg.upload_search_range_s
+    hop_s = cfg.chroma_hop_s
+    n_chroma = cfg.chroma_n_chroma
+
+    sr = 22050  # sufficient for chroma; halves compute vs 44100
+    hop_length = max(1, int(round(hop_s * sr)))
+
+    ref_wav, _ = librosa.load(str(ref_audio_path), sr=sr, mono=True)
+    usr_wav, _ = librosa.load(str(user_audio_path), sr=sr, mono=True)
+
+    ref_chroma = librosa.feature.chroma_cqt(y=ref_wav, sr=sr, hop_length=hop_length, n_chroma=n_chroma)
+    usr_chroma = librosa.feature.chroma_cqt(y=usr_wav, sr=sr, hop_length=hop_length, n_chroma=n_chroma)
+
+    # L2-normalise each frame so loudness differences don't dominate.
+    def _l2_norm(C: np.ndarray) -> np.ndarray:
+        norms = np.linalg.norm(C, axis=0, keepdims=True)
+        return C / np.where(norms > 1e-8, norms, 1.0)
+
+    ref_chroma = _l2_norm(ref_chroma)  # (n_chroma, T_ref)
+    usr_chroma = _l2_norm(usr_chroma)  # (n_chroma, T_usr)
+
+    T_ref = ref_chroma.shape[1]
+    T_usr = usr_chroma.shape[1]
+
+    # Maximum lag in frames from the requested search range.
+    max_lag_frames = int(round(effective_range / hop_s))
+
+    # Slide the user chroma over the reference and sum per-frame dot products.
+    # lag > 0 means user starts later (offset > 0 in song_time convention).
+    lags = np.arange(-max_lag_frames, max_lag_frames + 1, dtype=np.int32)
+    scores = np.zeros(len(lags), dtype=np.float64)
+
+    for idx, lag in enumerate(lags):
+        # The user frame at position t corresponds to reference frame t + lag.
+        # Clamp to valid overlap region.
+        ref_start = max(0, lag)
+        usr_start = max(0, -lag)
+        length = min(T_ref - ref_start, T_usr - usr_start)
+        if length <= 0:
+            continue
+        scores[idx] = float(
+            np.sum(ref_chroma[:, ref_start:ref_start + length]
+                   * usr_chroma[:, usr_start:usr_start + length])
+        )
+
+    # Normalise so that the maximum possible score (perfect overlap) = 1.
+    max_possible = float(min(T_ref, T_usr))  # each frame has unit norm → dot ≤ 1
+    if max_possible > 0:
+        scores /= max_possible
+
+    best_idx = int(np.argmax(scores))
+    best_lag = int(lags[best_idx])
+    best_offset_s = float(best_lag * hop_s)
+    confidence = float(np.clip(scores[best_idx], 0.0, 1.0))
+
+    return best_offset_s, confidence
+
+
+def estimate_global_offset_upload(
+    reference: ReferenceAnnotation,
+    pitch_user: PitchTrack,
+    ref_audio_path: Path,
+    user_audio_path: Path,
+    *,
+    config: Optional[CoachingConfig] = None,
+) -> float:
+    """Upload-optimised alignment: chroma pre-pass then voicing refinement.
+
+    1. Run ``estimate_offset_via_chroma`` to get a coarse pitch-class lag.
+    2. If confidence is high enough, use that lag as the centre of a narrow
+       voicing grid search (``upload_voicing_refine_range_s``).
+    3. If confidence is too low, fall back to a wide voicing-only search
+       (``upload_search_range_s``) centred on zero.
+
+    Returns the refined ``offset_s`` (song_time = user_time - offset).
+    """
+    cfg = (config or CoachingConfig()).global_offset
+
+    coarse_offset, confidence = estimate_offset_via_chroma(
+        ref_audio_path,
+        user_audio_path,
+        config=config,
+        search_range_s=cfg.upload_search_range_s,
+    )
+
+    if confidence >= cfg.chroma_low_confidence_threshold:
+        # High-confidence coarse estimate: refine around it with a narrow window.
+        return estimate_global_offset_s(
+            reference,
+            pitch_user,
+            config=config,
+            search_range_s=cfg.upload_voicing_refine_range_s,
+            center_offset_s=coarse_offset,
+        )
+    else:
+        # Low-confidence: fall back to wide voicing-only search centred on zero.
+        return estimate_global_offset_s(
+            reference,
+            pitch_user,
+            config=config,
+            search_range_s=cfg.upload_search_range_s,
+        )
+
+
+def validate_chart_alignment(
+    reference: ReferenceAnnotation,
+    pitch_ref: PitchTrack,
+    *,
+    config: Optional[CoachingConfig] = None,
+) -> tuple[float, float]:
+    """Check how well the chart note grid aligns with the reference audio.
+
+    Runs ``estimate_global_offset_s`` with the *reference* vocal's own pitch
+    track against the chart note grid.  If the chart and audio are in sync
+    the detected offset is ~0; a non-zero value means the chart's ``#GAP``
+    field is calibrated for a different audio file.
+
+    Returns ``(offset_s, alignment_score)`` where ``alignment_score`` is
+    the fraction of voiced frames that agree with the chart's expected
+    voiced regions at the best offset (0 = no agreement, 1 = perfect).
+
+    Typical usage: ``build_song.py`` calls this right after computing the
+    reference pitch track and applies the correction to
+    ``reference_annotation.json`` when ``abs(offset_s)`` exceeds
+    ``config.global_offset.chart_correction_threshold_s``.
+    """
+    cfg = (config or CoachingConfig()).global_offset
+
+    offset_s = estimate_global_offset_s(
+        reference,
+        pitch_ref,
+        config=config,
+        search_range_s=cfg.chart_validation_range_s,
+    )
+
+    # Compute agreement score at the found offset.
+    user = PitchArrays.from_track(pitch_ref)
+    if user.times.size == 0:
+        return offset_s, 0.0
+
+    user_voiced = user.voicing >= cfg.voicing_threshold
+    song_times = user.times - offset_s
+    expected = _voiced_mask_song_time(reference, song_times)
+    agree = expected & user_voiced
+    total_voiced = int(user_voiced.sum())
+    score = float(agree.sum() / total_voiced) if total_voiced > 0 else 0.0
+
+    return offset_s, score
+
+
+def alignment_sanity_check(
+    notes: list[NoteMeasurementV2],
+    *,
+    config: Optional[CoachingConfig] = None,
+) -> bool:
+    """Return True if the alignment result looks plausible, False if suspect.
+
+    Suspect means: the user clearly sang (voiced_coverage is reasonable) but
+    almost nothing was in tune (pct_in_tune is very low).  This pattern is
+    consistent with a wrong-offset or wrong-verse false lock.
+
+    A genuinely poor singer can produce low pct_in_tune while still being
+    correctly aligned; the threshold is intentionally conservative to avoid
+    false positives on difficult performers.
+
+    A user who barely sang (low voiced_coverage) should not be flagged -- we
+    can't distinguish misalignment from genuine silence.
+    """
+    cfg = (config or CoachingConfig()).global_offset
+    if not notes:
+        return True  # no data → can't detect misalignment
+
+    pct_values = [n.pct_in_tune for n in notes if n.pct_in_tune is not None]
+    coverage_values = [n.voiced_coverage for n in notes]
+
+    if not pct_values:
+        return True  # no pitch scored → can't detect
+
+    mean_pct = float(np.mean(pct_values))
+    mean_coverage = float(np.mean(coverage_values))
+
+    if mean_pct < cfg.sanity_min_pct_in_tune and mean_coverage > cfg.sanity_min_voiced_coverage:
+        return False  # suspect misalignment
+
+    return True
 
 
 def shift_pitch_to_song_time(pitch: PitchArrays, offset_s: float) -> PitchArrays:
@@ -1212,14 +1439,18 @@ def measure_song(
 __all__ = [
     "LoudnessArrays",
     "PitchArrays",
+    "alignment_sanity_check",
     "compare_note_techniques",
     "core_window_s",
     "estimate_global_offset_s",
+    "estimate_global_offset_upload",
     "estimate_octave_shift_semitones",
+    "estimate_offset_via_chroma",
     "map_stars_phones_to_notes",
     "map_user_stars_to_song_time",
     "measure_note",
     "measure_song",
     "shift_pitch_to_song_time",
     "shift_stars_to_song_time",
+    "validate_chart_alignment",
 ]
