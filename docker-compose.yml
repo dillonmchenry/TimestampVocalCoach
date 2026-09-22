@@ -1,0 +1,55 @@
+# SecondPass — docker compose shortcuts
+#
+# Usage:
+#   GPU (requires NVIDIA container toolkit):
+#     docker compose --profile gpu up
+#
+#   CPU (slower, ~3-5x longer analysis; no special drivers needed):
+#     docker compose --profile cpu up
+#
+# On first run docker will build the image (~6-7 GB including the CUDA base).
+# Subsequent starts reuse the cached image.
+#
+# Environment / secrets:
+#   Copy .env.example to .env and add your OPENAI_API_KEY before starting.
+#   The key is optional — the full coaching pipeline still runs without it;
+#   only LLM-generated summaries and vocal profiles are skipped.
+#
+# User performance takes are written into ./data/songs/*/performances/ on the
+# host (bind-mounted) so they persist across container restarts.
+
+services:
+  secondpass-gpu:
+    profiles: ["gpu"]
+    build: .
+    image: secondpass:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - SECONDPASS_DEVICE=cuda
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./data/songs:/app/data/songs
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+  secondpass-cpu:
+    profiles: ["cpu"]
+    build: .
+    image: secondpass:latest
+    ports:
+      - "8000:8000"
+    environment:
+      - SECONDPASS_DEVICE=cpu
+    env_file:
+      - path: .env
+        required: false
+    volumes:
+      - ./data/songs:/app/data/songs

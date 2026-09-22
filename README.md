@@ -26,7 +26,7 @@ User performance
 
 | Layer | Role |
 | ----- | ---- |
-| **NanoPitch** | Continuous F0 and voicing every 10 ms ([separate repo](https://github.com/smuleinc/NanoPitch)) |
+| **NanoPitch** | Continuous F0 and voicing every 10 ms ([smulelabs/NanoPitch](https://github.com/smulelabs/NanoPitch)) |
 | **STARS** | Phoneme timings and vocal-technique flags (vibrato, breathy, glissando, falsetto, …) |
 | **STARS student (`fast`)** | Distilled in-process model for quicker interactive feedback; falls back to full STARS if the checkpoint is missing |
 | **`align_v2`** | Per-note pitch, timing, dynamics vs the chart; auto-detected octave transposition |
@@ -173,45 +173,40 @@ The UI supports **upload** and **sing-along (karaoke)** modes, optional **fast f
 
 ```
 SecondPass/
-├── rmvpe/                              # RMVPE weights (gitignored; setup links into STARS)
-├── stars_chinese_english_bilingual/    # STARS bilingual ckpt (gitignored)
-├── stars_student/                      # distilled student ckpt (gitignored; optional)
-├── third_party/stars/                  # clone gwx314/STARS + setup_stars_runtime.py
-├── config/coaching.yaml                # coaching thresholds
-├── config/local_demo.yaml.example      # optional demo replay config
+├── nanopitch/                          # vendored NanoPitch runtime (model.py + best.pth)
+├── third_party/stars/                  # vendored STARS source (phone set + inference code)
+├── data/
+│   ├── songs/<song_id>/                # karaoke song bundles (audio + precomputed refs)
+│   ├── student_v6/                     # distilled STARS student checkpoint (~7 MB)
+│   └── rag/                            # ChromaDB index + playbooks + pedagogy sources
 ├── vocal_coach/
 │   ├── schemas.py
-│   ├── reference.py                    # GTSinger -> ReferenceAnnotation (dev samples)
 │   ├── ultrastar.py                    # UltraStar .txt parser
 │   ├── song.py                         # UltraStar -> song bundle + manifest
 │   ├── pitch.py                        # NanoPitch wrapper
 │   ├── stars_runner.py                 # STARS subprocess + profile dispatch
-│   ├── student_runner.py               # in-process student model
+│   ├── student_runner.py               # in-process student model (fast profile)
 │   ├── loudness.py                     # RMS / dBFS
-│   ├── align.py                        # legacy single-note alignment (GTSinger)
 │   ├── align_v2.py                     # dual-track per-note measurements
 │   ├── trends.py                       # section-level aggregates
 │   ├── overview.py                     # song-wide summary stats
 │   ├── highlights.py                   # coaching-moment detectors
+│   ├── llm.py                          # OpenAI client (graceful no-op without key)
 │   └── coaching_config.py
 ├── web/
 │   ├── api/main.py
 │   └── static/{index.html,app.js,style.css}
 ├── scripts/
+│   ├── setup.py                        # one-shot install + wiring
+│   ├── doctor.py                       # preflight check
 │   ├── import_ultrastar.py
 │   ├── build_song.py
 │   ├── analyze_performance.py
-│   ├── setup_stars_runtime.py
-│   ├── build_reference.py              # GTSinger sample reference (dev)
-│   ├── run_pipeline.py
 │   └── ...
-├── notebooks/
-│   ├── sprint1_demo.ipynb
-│   └── sprint2_dual_track.ipynb
-├── docs/sprint2_stars_lite.md          # STARS student distillation notes
-├── data/
-│   ├── samples/<sample_id>/            # GTSinger dev fixtures (gitignored)
-│   └── songs/<song_id>/                # karaoke song bundles
+├── config/coaching.yaml                # coaching thresholds
+├── .env.example                        # copy to .env; add OPENAI_API_KEY (optional)
+├── docker-compose.yml
+├── Dockerfile
 └── requirements.txt
 ```
 
@@ -219,79 +214,79 @@ SecondPass/
 
 ## Run locally
 
-You need this repo plus two sibling projects and their checkpoints. Python **3.10+** and a **CUDA** GPU are strongly recommended for STARS and NanoPitch (CPU works but is slow).
+Python **3.10+** is required. A CUDA GPU is recommended (the student model and NanoPitch run
+on CPU too, just slower — expect 3–5× longer analysis on a full-length song).
 
-### External repos
+No sibling repositories are needed. `nanopitch/` and `third_party/stars/` are vendored in the
+repo. All bundled songs ship with precomputed `reference/pitch.json` and `reference/stars.json`
+so the web demo works on first launch with no GPU preprocessing step.
 
-| Repo | Clone into | Used for |
-| ---- | ---------- | -------- |
-| [smuleinc/NanoPitch](https://github.com/smuleinc/NanoPitch) | Sibling of this repo, e.g. `../NanoPitch` | F0 + voicing (`pitch.json`) |
-| [gwx314/STARS](https://github.com/gwx314/STARS) | `third_party/stars` inside this repo | Phoneme timings + technique flags (`stars.json`) |
+### Option A — Docker (fastest)
 
-SecondPass does **not** vendor NanoPitch; it imports `training/model.py` from your clone. STARS is cloned under `third_party/stars` and wired to local weight files by `scripts/setup_stars_runtime.py`.
+```bash
+# GPU (requires NVIDIA container toolkit on the host):
+docker compose --profile gpu up
 
-### Model weights (gitignored)
-
-Download from [verstar/STARS on Hugging Face](https://huggingface.co/verstar/STARS) and place:
-
-```
-SecondPass/
-  rmvpe/model.pt
-  stars_chinese_english_bilingual/model_ckpt_steps_300000.ckpt
+# CPU-only (slower, no special drivers):
+docker compose --profile cpu up
 ```
 
-NanoPitch needs its training checkpoint inside the NanoPitch clone (default path used by this repo):
+Or run the pre-built image directly (no clone required):
 
+```bash
+docker run --gpus all -p 8000:8000 ghcr.io/dillonmchenry/secondpass:latest
+# CPU:
+docker run -p 8000:8000 -e SECONDPASS_DEVICE=cpu ghcr.io/dillonmchenry/secondpass:latest
 ```
-NanoPitch/
-  training/runs/best_150+late_clean_112gru_model/checkpoints/best.pth
-```
 
-Optional — **fast feedback** in the UI uses a distilled student under `stars_student/` (see [`docs/sprint2_stars_lite.md`](docs/sprint2_stars_lite.md)). If missing, the app falls back to full STARS.
+Open **http://localhost:8000**.
 
-Bundled songs under `data/songs/` already include precomputed `reference/pitch.json` and `reference/stars.json`, so you can run the web demo without re-running `build_song.py` on first launch.
+### Option B — Source install
 
-### Setup commands
+```bash
+git clone https://github.com/dillonmchenry/TimestampVocalCoach.git
+cd TimestampVocalCoach
 
-From a shell in the SecondPass repo root:
+# Create and activate a virtual environment
+python -m venv .venv
+# Windows:  .venv\Scripts\Activate.ps1
+# macOS/Linux: source .venv/bin/activate
 
-```powershell
-# 1. Clone dependencies (adjust paths if you keep repos elsewhere)
-git clone https://github.com/smuleinc/NanoPitch.git ../NanoPitch
-git clone https://github.com/gwx314/STARS.git third_party/stars
+# Install everything (PyTorch + deps + STARS extras + NLTK corpora + phone-set wiring):
+python scripts/setup.py
 
-# 2. Point SecondPass at your NanoPitch clone (skip if it lives at ../NanoPitch)
-$env:NANOPITCH_DIR = "C:\path\to\NanoPitch"
+# Verify the environment (shows [OK] / [WARN] / [FAIL] per check):
+python scripts/doctor.py
 
-# 3. Install Python deps
-python -m pip install -r requirements.txt
-python -m pip install tensorboard mir_eval pyloudnorm scikit-image g2p_en `
-                      einops praat-parselmouth torchmetrics pyworld webrtcvad-wheels
-
-# 4. After weights are in rmvpe/ and stars_chinese_english_bilingual/, link them for STARS
-python scripts/setup_stars_runtime.py
-
-# 5. Start the demo (bundled songs are ready to analyze)
+# Start the server:
 python -m uvicorn web.api.main:app --host 127.0.0.1 --port 8000
 ```
 
-Open **http://127.0.0.1:8000**, pick a song (yesterday_user_vocal.wav in top  of repo), upload a vocal or use sing-along mode, and analyze.
+Open **http://127.0.0.1:8000**, pick a song, upload `yesterday_user_vocal.wav` (included at the
+repo root), and click Analyze.
 
-For a GPU-free demo that replays a cached analysis, copy `config/local_demo.yaml.example` to `config/local_demo.yaml` and tune `source_song_id` / `source_perf_id`.
+### LLM coaching (optional)
+
+Copy `.env.example` to `.env` and add your OpenAI API key.  Without it the full measurement and
+coaching pipeline still runs; only the LLM-written summaries and vocal-profile generation are
+skipped.  `doctor.py` will show a `[WARN]` rather than a `[FAIL]` if the key is absent.
 
 ### Analyze from the CLI
 
-```powershell
-python scripts/analyze_performance.py data/songs/losing-my-religion path\to\your_take.wav --stars-profile fast
+```bash
+python scripts/analyze_performance.py data/songs/losing-my-religion path/to/your_take.wav --stars-profile fast
 ```
 
-Use `--stars-profile full` for teacher STARS (slower, highest fidelity).
+`--stars-profile fast` uses the bundled student model (no extra downloads).
+`--stars-profile full` uses the teacher STARS model (slower, highest fidelity) and requires
+downloading the 700 MB bilingual checkpoint and `rmvpe/model.pt` from
+[verstar/STARS on Hugging Face](https://huggingface.co/verstar/STARS) into the repo root.
 
 ### Add a new song
 
 1. Obtain an UltraStar bundle (chart `.txt`, reference vocal, optional instrumental).
 2. `python scripts/import_ultrastar.py <folder> --song-id <id>`
-3. `python scripts/build_song.py data/songs/<id>` (GPU; several minutes for STARS on a full track)
+3. `python scripts/build_song.py data/songs/<id>` (GPU recommended; several minutes for STARS on a full track)
 4. Restart or refresh the web app — the new song appears in the picker.
 
 ---

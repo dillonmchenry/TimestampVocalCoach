@@ -188,6 +188,11 @@ def _resolve_torch_device(requested: str = "cuda") -> str:
         import torch
         if torch.cuda.is_available():
             return requested
+        logger.warning(
+            "CUDA requested but not available — falling back to CPU. "
+            "Analysis will be slower (~3–5× on a full-length song). "
+            "Pass device=cpu explicitly to suppress this warning."
+        )
     except ImportError:
         pass
     return "cpu"

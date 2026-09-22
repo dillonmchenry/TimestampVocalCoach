@@ -1,15 +1,26 @@
-# Vocal Coach — Sprint 1 dependencies
+# SecondPass — Python dependencies
 #
-# STARS itself targets Python 3.10 + PyTorch 2.4.0 + CUDA 12.4/12.8. If you're
-# running it through `vocal_coach.stars_runner.run_stars`, install STARS's own
-# requirements (third_party/stars/requirements.txt) into the same env as well.
+# Developed against Python 3.10–3.13, PyTorch 2.6.0, CUDA 12.4.
 #
-# Our wrapper code (vocal_coach/*) is intentionally version-loose so it can run
-# under whichever PyTorch the user already has.
+# PyTorch with CUDA (install BEFORE the rest):
+#   pip install torch==2.6.0 torchaudio==2.6.0 \
+#       --index-url https://download.pytorch.org/whl/cu124
+#
+# For CPU-only:
+#   pip install torch==2.6.0 torchaudio==2.6.0
+#
+# Then install the rest of this file:
+#   pip install -r requirements.txt
+#
+# Also install STARS's own extras (in the same env):
+#   pip install -r third_party/stars/requirements.txt
+#
+# Or use the automated setup script (handles the ordering for you):
+#   python scripts/setup.py
 
 # Core ML / audio
-torch>=2.0
-torchaudio>=2.0
+torch>=2.6.0
+torchaudio>=2.6.0
 numpy>=1.24,<3
 librosa>=0.10
 soundfile>=0.12
@@ -22,10 +33,6 @@ pyyaml>=6.0
 # CLI / progress
 tqdm>=4.66
 
-# Notebooks
-jupyter>=1.0
-ipywidgets>=8.1
-
 # Reference annotation parsing (GTSinger MIDI + TextGrid + json)
 pretty_midi>=0.2.10
 textgrid>=1.5
@@ -33,13 +40,13 @@ textgrid>=1.5
 # Dataset download (single GTSinger sample via huggingface_hub)
 huggingface_hub>=0.24
 
-# Sprint 2: UltraStar / G2P / FastAPI demo
+# UltraStar / G2P / FastAPI web server
 g2p_en>=2.1
 fastapi>=0.110
 uvicorn[standard]>=0.27
 python-multipart>=0.0.9
 
-# Sprint 3: LLM-powered coaching
+# LLM-powered coaching (OPENAI_API_KEY required; pipeline runs without it)
 openai>=1.30
 python-dotenv>=1.0
 chromadb>=0.5

@@ -1,9 +1,10 @@
 """NanoPitch wrapper: wav -> log-mel -> NanoPitch -> Viterbi -> PitchTrack.
 
-NanoPitch is implemented in a separate repo (default
-``C:/Users/dillo/Documents/GitHub/NanoPitch``). The model and decoders live
-in ``training/model.py``; this module imports them by appending the training
-directory to ``sys.path``.
+NanoPitch's ``training/model.py`` and the trained checkpoint are vendored into
+``nanopitch/`` at the repo root so no sibling repository is needed.  The
+default path resolves relative to this source file's location.  Override with
+the ``NANOPITCH_DIR`` environment variable if you want to point at a full
+NanoPitch clone instead (e.g. ``NANOPITCH_DIR=/path/to/NanoPitch``).
 
 The mel preprocessing constants are pinned by NanoPitch's C/WASM deployment
 (``deployment/wasm/nanopitch.h``):
@@ -50,9 +51,11 @@ NANOPITCH_FMIN = 0.0
 NANOPITCH_FMAX = 8000.0
 NANOPITCH_HOP_SECONDS = NANOPITCH_HOP_LENGTH / NANOPITCH_SAMPLE_RATE  # 0.01
 
-# Default location of NanoPitch on disk.  Override with the env var
-# NANOPITCH_DIR (project root) or by passing nanopitch_dir explicitly.
-DEFAULT_NANOPITCH_DIR = Path("C:/Users/dillo/Documents/GitHub/NanoPitch")
+# Default location of NanoPitch on disk.
+# Resolves to <repo_root>/nanopitch/ where model.py and best.pth are vendored.
+# Override with the NANOPITCH_DIR env var to point at a full NanoPitch clone.
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+DEFAULT_NANOPITCH_DIR = _REPO_ROOT / "nanopitch"
 DEFAULT_CHECKPOINT_RELPATH = "training/runs/best_150+late_clean_112gru_model/checkpoints/best.pth"
 
 
@@ -70,10 +73,16 @@ def _resolve_nanopitch_dir(nanopitch_dir: Optional[Path] = None) -> Path:
 def _ensure_nanopitch_on_path(nanopitch_dir: Path) -> None:
     """Insert NanoPitch's ``training/`` dir on sys.path so we can import model.py."""
     training_dir = (nanopitch_dir / "training").resolve()
+    ckpt = (nanopitch_dir / DEFAULT_CHECKPOINT_RELPATH).resolve()
     if not training_dir.is_dir():
         raise FileNotFoundError(
-            f"NanoPitch training directory not found at {training_dir}. "
-            "Set NANOPITCH_DIR or pass nanopitch_dir=... explicitly."
+            f"NanoPitch training directory not found at {training_dir}.\n"
+            f"Expected layout:\n"
+            f"  {nanopitch_dir}/training/model.py\n"
+            f"  {ckpt}\n"
+            "These files are vendored in nanopitch/ at the repo root. "
+            "If they are missing, re-run: git checkout nanopitch/\n"
+            "Or set NANOPITCH_DIR to a full NanoPitch clone."
         )
     p = str(training_dir)
     if p not in sys.path:

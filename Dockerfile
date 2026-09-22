@@ -1,24 +1,21 @@
 # SecondPass - Vocal Coaching Pipeline
 #
 # Base: pytorch/pytorch:2.6.0-cuda12.4-cudnn9-runtime
-#   - Matches local dev environment (PyTorch 2.6.0 + CUDA 12.4, RTX 3070 / sm_86)
+#   - Matches local dev environment (PyTorch 2.6.0 + CUDA 12.4)
 #   - "runtime" variant (~4.5 GB) vs "devel" (~9 GB) -- we don't need nvcc
 #
-# Build-time prerequisites (files that must exist before `docker build`):
-#   - data/student_v6/        (tracked in git, already present)
-#   - ../NanoPitch/           (sibling repo, cloned locally)
-#
-# Note: rmvpe/model.pt is no longer required -- the fast profile now reuses
-# the NanoPitch F0 already computed for pitch coaching.
-#
-# Build:
+# Build (from repo root):
 #   docker build -t secondpass:latest .
 #
 # Run locally (GPU):
 #   docker run --gpus all -p 8000:8000 --env-file .env secondpass:latest
 #
 # Run locally (CPU, slower):
-#   docker run -p 8000:8000 --env-file .env secondpass:latest
+#   docker run -p 8000:8000 -e SECONDPASS_DEVICE=cpu --env-file .env secondpass:latest
+#
+# Or use docker compose (see docker-compose.yml):
+#   docker compose --profile gpu up
+#   docker compose --profile cpu up
 
 FROM pytorch/pytorch:2.6.0-cuda12.4-cudnn9-runtime
 
@@ -28,7 +25,7 @@ WORKDIR /app
 # System dependencies
 # ---------------------------------------------------------------------------
 # libsndfile1  - soundfile / librosa WAV I/O
-# ffmpeg       - torchaudio backend for non-WAV formats
+# ffmpeg       - torchaudio backend for non-WAV formats (MP3 reference vocals)
 # git          - needed by some pip installs (e.g. g2p_en data download)
 # build-essential / swig - webrtcvad C extension
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -49,12 +46,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY third_party/stars/requirements.txt ./stars_requirements.txt
 RUN pip install --no-cache-dir -r stars_requirements.txt
 
-# Sprint 3 extras not in the above files
-RUN pip install --no-cache-dir \
-    chromadb \
-    openai \
-    python-dotenv
-
 # ---------------------------------------------------------------------------
 # Model weights (large, rarely change -- own layer for cache efficiency)
 # ---------------------------------------------------------------------------
@@ -62,11 +53,8 @@ RUN pip install --no-cache-dir \
 # STARS student checkpoint (~7 MB, tracked in git)
 COPY data/student_v6/ ./data/student_v6/
 
-# NanoPitch: only model.py (runtime import) + the best checkpoint (~1.7 MB)
-# We copy just the training/ source and the single best.pth to keep the layer small.
-COPY nanopitch/training/model.py ./nanopitch/training/model.py
-COPY nanopitch/training/runs/best_150+late_clean_112gru_model/checkpoints/best.pth \
-     ./nanopitch/training/runs/best_150+late_clean_112gru_model/checkpoints/best.pth
+# NanoPitch: vendored model.py + best.pth checkpoint (~1.7 MB, tracked in git)
+COPY nanopitch/ ./nanopitch/
 
 # ---------------------------------------------------------------------------
 # Application source code
@@ -79,12 +67,11 @@ COPY third_party/   ./third_party/
 
 # ---------------------------------------------------------------------------
 # Song bundles (audio + precomputed reference artifacts)
-# Note: ~1.5 GB -- keep this layer last so code changes don't invalidate it.
+# Note: ~525 MB -- keep this layer last so code changes don't invalidate it.
 # ---------------------------------------------------------------------------
 COPY data/songs/ ./data/songs/
 
 # RAG store: ChromaDB index + playbook YAMLs + pedagogy source Markdown.
-# Built by scripts/build_rag.py. Needed for Sprint 3 LLM coaching features.
 COPY data/rag/ ./data/rag/
 
 # ---------------------------------------------------------------------------
@@ -100,7 +87,7 @@ RUN mkdir -p third_party/stars/data/processed/bilingual \
 # ---------------------------------------------------------------------------
 # Environment
 # ---------------------------------------------------------------------------
-# Tell vocal_coach/pitch.py where NanoPitch lives
+# Tell vocal_coach/pitch.py where NanoPitch lives (vendored in /app/nanopitch)
 ENV NANOPITCH_DIR=/app/nanopitch
 
 # Prevents Python output buffering (shows uvicorn logs immediately)
@@ -114,8 +101,10 @@ ENV SECONDPASS_DEVICE=cuda
 # ---------------------------------------------------------------------------
 EXPOSE 8000
 
+HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
+    CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')" || exit 1
+
 # Bind to 0.0.0.0 so the container port is reachable from outside.
-# (The tunnel/cloud platform handles external TLS termination.)
 CMD ["python", "-m", "uvicorn", "web.api.main:app", \
      "--host", "0.0.0.0", "--port", "8000", \
      "--timeout-keep-alive", "120"]

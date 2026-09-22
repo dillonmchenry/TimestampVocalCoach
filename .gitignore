@@ -1,6 +1,3 @@
-# Docker build context staging (populated by scripts/prepare_docker_context.ps1)
-nanopitch/
-
 # Python
 __pycache__/
 *.py[cod]
@@ -17,6 +14,8 @@ data/cache/
 data/processed/
 # Sprint 3 distillation corpus (teacher labels + features)
 data/student_corpus/
+# User performance takes (created at runtime by the web API; never committed)
+data/songs/*/performances/
 
 # Teacher STARS weights (large; not needed for student-only demo with pre-built songs)
 stars_chinese/
@@ -26,8 +25,9 @@ stars_student/
 *.ckpt
 # RMVPE weights (~180 MB); download separately (HF verstar/STARS or setup script)
 rmvpe/
-# PyTorch weights — ignore by default; allow student checkpoint below
+# PyTorch weights — ignore by default; allow vendored NanoPitch + student checkpoints
 *.pt
+!nanopitch/training/runs/best_150+late_clean_112gru_model/checkpoints/best.pth
 !data/student_v6/
 !data/student_v6/**
 

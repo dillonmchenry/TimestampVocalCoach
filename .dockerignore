@@ -5,6 +5,7 @@
 # Version control
 .git/
 .gitignore
+.gitattributes
 
 # Python cache
 __pycache__/
@@ -19,10 +20,12 @@ env/
 
 # Secrets (injected at runtime via --env-file .env)
 .env
+.env.example
 
 # IDE / OS
 .vscode/
 .idea/
+.cursor/
 .DS_Store
 Thumbs.db
 
@@ -37,6 +40,9 @@ data/cache/
 data/processed/
 data/student_corpus/
 
+# User performance takes (written at runtime, never part of the image)
+data/songs/*/performances/
+
 # STARS teacher weights (~700 MB) - not needed for fast/student profile
 stars_chinese/
 stars_chinese_english_bilingual/
@@ -46,17 +52,12 @@ stars_chinese_english_bilingual/
 third_party/stars/checkpoints/
 third_party/stars/infer_out/
 
-# NanoPitch: exclude all epoch checkpoints - only best.pth is needed.
-# The prepare_docker_context.ps1 script copies just the required files
-# into nanopitch/ before the build, so nanopitch/ itself is NOT excluded.
+# NanoPitch: only the vendored best.pth is needed; exclude other epoch checkpoints
 nanopitch/training/runs/*/checkpoints/epoch_*.pth
 
-# pytest cache
+# pytest cache / tests
 .pytest_cache/
 tests/
 
-# Cursor / editor
-.cursor/
-
-# Scripts not needed in the image
-scripts/prepare_docker_context.ps1
+# Scripts only used for local development
+scripts/start_tunnel.ps1
