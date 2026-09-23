@@ -40,9 +40,10 @@ third_party/stars/infer_out/
 # Jupyter
 .ipynb_checkpoints/
 
-# IDE
+# IDE / editor
 .vscode/
 .idea/
+.cursor/
 
 # OS
 .DS_Store
